@@ -12,7 +12,6 @@ let package = Package(
         .library(name: "HomeFeature", targets: ["HomeFeature"]),
         .library(name: "Persistence", targets: ["Persistence"]),
         .library(name: "Purchases", targets: ["Purchases"]),
-        .library(name: "Shortcuts", targets: ["Shortcuts"]),
         .library(name: "MediaManager", targets: ["MediaManager"]),
         .library(name: "SettingsFeature", targets: ["SettingsFeature"]),
     ],
@@ -68,14 +67,6 @@ let package = Package(
             dependencies: [
                 "Persistence",
                 .product(name: "RevenueCat", package: "purchases-ios"),
-            ]
-        ),
-        .target(
-            name: "Shortcuts",
-            dependencies: [
-                "Persistence",
-                "MediaManager",
-                .product(name: "CollectionConcurrencyKit", package: "CollectionConcurrencyKit"),
             ]
         ),
         .target(

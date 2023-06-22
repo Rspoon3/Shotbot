@@ -1,6 +1,5 @@
 //
 //  CreateFramedScreenshotsIntent.swift
-//  Testing
 //
 //  Created by Richard Witherspoon on 4/19/23.
 //
@@ -43,7 +42,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         default: .original
     )
     var imageQuality: ImageQuality
-
+    
     static var parameterSummary: some ParameterSummary {
         Summary("Create screenshots from \(\.$images)") {
             \.$saveToFiles
@@ -51,6 +50,9 @@ struct CreateFramedScreenshotsIntent: AppIntent {
             \.$imageQuality
         }
     }
+    
+    
+    // MARK: - Functions
     
     func perform() async throws -> some IntentResult & ReturnsValue<[IntentFile]> {
         let persistenceManager = PersistenceManager.shared
@@ -91,7 +93,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         let temporaryDirectoryURL = URL.temporaryDirectory.appending(path: path)
         
         try data.write(to: temporaryDirectoryURL)
-                       
+        
         if saveToFiles {
             let destination = URL.documentsDirectory.appending(path: path)
             try FileManager.default.copyItem(at: temporaryDirectoryURL, to: destination)

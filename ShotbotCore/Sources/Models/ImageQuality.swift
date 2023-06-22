@@ -8,7 +8,7 @@
 import Foundation
 import AppIntents
 
-public enum ImageQuality: String, CaseIterable, Identifiable {
+public enum ImageQuality: String, CaseIterable, Identifiable, Sendable {
     case original = "Original"
     case high = "High"
     case medium = "Medium"
@@ -31,17 +31,4 @@ public enum ImageQuality: String, CaseIterable, Identifiable {
             return 0.2
         }
     }
-}
-
-extension ImageQuality: AppEnum {
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "ImageQuality")
-    public static var typeDisplayName: LocalizedStringResource = "Image Quality"
-    
-    public static var caseDisplayRepresentations: [ImageQuality: DisplayRepresentation] = [
-        .original: "Original",
-        .high: "High",
-        .medium: "Medium",
-        .low: "Low",
-        .poor: "Poor"
-    ]
 }

@@ -1,0 +1,62 @@
+[
+    {
+        "deviceFrame": "iPad Pro 2018 11 Inch Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2388, 1668],
+        "offSet": [120, 120],
+    },
+    {
+        "deviceFrame": "iPad Pro 2018 11 Inch Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1668, 2388],
+        "offSet": [120, 120],
+    },
+    {
+        "deviceFrame": "iPad Pro 2018 12.9 Inch Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2732, 2048],
+        "offSet": [120, 120],
+    },
+    {
+        "deviceFrame": "iPad Pro 2018 12.9 Inch Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2048, 2732],
+        "offSet": [120, 120],
+    },
+    {
+        "deviceFrame": "iPad Air 2020 Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2360, 1640],
+        "offSet": [140, 139],
+    },
+    {
+        "deviceFrame": "iPad Air 2020 Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1640, 2360],
+        "offSet": [139, 140],
+    },
+    {
+        "deviceFrame": "iPad 9th Generation Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2160, 1620],
+        "offSet": [250, 110],
+    },
+    {
+        "deviceFrame": "iPad 9th Generation Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1620, 2160],
+        "offSet": [110, 250],
+    },
+    {
+        "deviceFrame": "iPad Mini 6th Generation Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2266, 1488],
+        "offSet": [142, 146],
+    },
+    {
+        "deviceFrame": "iPad Mini 6th Generation Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1488, 2266],
+        "offSet": [146, 142],
+    }
+]

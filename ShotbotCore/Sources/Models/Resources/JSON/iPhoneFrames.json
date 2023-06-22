@@ -1,0 +1,118 @@
+[
+    {
+        "deviceFrame": "iPhone 8 and 2020 SE Portrait",
+        "mergeMethod": "singleOverlay",
+        "inputSize": [750, 1334],
+        "offSet": [125, 334]
+    },
+    {
+        "deviceFrame": "iPhone 8 Plus Portrait",
+        "mergeMethod": "singleOverlay",
+        "inputSize": [1242, 2208],
+        "scaledSize": [1080, 1920],
+        "offSet": [100, 310]
+    },
+    {
+        "deviceFrame": "iPhone 8 Plus Landscape",
+        "mergeMethod": "singleOverlay",
+        "inputSize": [2208, 1242],
+        "scaledSize": [1920, 1080],
+        "offSet": [310, 100]
+    },
+    {
+        "deviceFrame": "iPhone 11 Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [828, 1792],
+        "offSet": [86, 104]
+    },
+    {
+        "deviceFrame": "iPhone 11 Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1792, 828],
+        "offSet": [104, 86]
+    },
+    {
+        "deviceFrame": "iPhone 11 Pro Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1125, 2436],
+        "offSet": [238, 182]
+    },
+    {
+        "deviceFrame": "iPhone 11 Pro Max Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1242, 2688],
+        "offSet": [179, 155]
+    },
+    {
+        "deviceFrame": "iPhone 11 Pro Max Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2688, 1242],
+        "offSet": [155, 179]
+    },
+    {
+        "deviceFrame": "iPhone 12 Mini Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1080, 2340],
+        "offSet": [80, 80]
+    },
+    {
+        "deviceFrame": "iPhone 12 Mini Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2340, 1080],
+        "offSet": [80, 80]
+    },
+    {
+        "deviceFrame": "iPhone 12 Pro Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1170, 2532],
+        "offSet": [115, 84]
+    },
+    {
+        "deviceFrame": "iPhone 12 Pro Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2532, 1170],
+        "offSet": [84, 115]
+    },
+    {
+        "deviceFrame": "iPhone 12 Pro Max Portrait",
+        "mergeMethod": "doubleOverlay",
+        "clipEdgesAmount": 50,
+        "inputSize": [1284, 2778],
+        "offSet": [108, 111],
+    },
+    {
+        "deviceFrame": "iPhone 12 Pro Max Landscape",
+        "mergeMethod": "doubleOverlay",
+        "clipEdgesAmount": 50,
+        "inputSize": [2778, 1284],
+        "offSet": [111, 108],
+    },
+    {
+        "deviceFrame": "iPhone 14 Pro Portrait",
+        "mergeMethod": "islandOverlay",
+        "clipEdgesAmount": 75,
+        "inputSize": [1179, 2556],
+        "offSet": [80, 80],
+    },
+    {
+        "deviceFrame": "iPhone 14 Pro Landscape",
+        "mergeMethod": "islandOverlay",
+        "clipEdgesAmount": 75,
+        "inputSize": [2556, 1179],
+        "offSet": [80, 80],
+    },
+    {
+        "deviceFrame": "iPhone 14 Pro Max Portrait",
+        "mergeMethod": "islandOverlay",
+        "clipEdgesAmount": 75,
+        "inputSize": [1290, 2796],
+        "offSet": [80, 70],
+    },
+    {
+        "deviceFrame": "iPhone 14 Pro Max Landscape",
+        "mergeMethod": "islandOverlay",
+        "clipEdgesAmount": 75,
+        "inputSize": [2796, 1290],
+        "offSet": [70, 80],
+    }
+]

@@ -1,0 +1,40 @@
+[
+    {
+        "deviceFrame": "MacBook Pro 2021 16",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [3456, 2234],
+        "offSet": [442, 313],
+    },
+    {
+        "deviceFrame": "MacBook Pro 2021 14",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [3024, 1964],
+        "offSet": [460, 300],
+    },
+    {
+        "deviceFrame": "MacBook Pro 13",
+        "mergeMethod": "singleOverlay",
+        "inputSize": [2560, 1600],
+        "offSet": [620, 261],
+    },
+    {
+        "deviceFrame": "MacBook Air 2020",
+        "mergeMethod": "singleOverlay",
+        "inputSize": [2880, 1800],
+        "scaledSize": [2560, 1600],
+        "offSet": [620, 652],
+    },
+    {
+        "deviceFrame": "MacBook Air 2022 13",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2940, 1912],
+        "scaledSize": [2560, 1664],
+        "offSet": [330, 218],
+    },
+    {
+        "deviceFrame": "iMac 2021 24",
+        "mergeMethod": "singleOverlay",
+        "inputSize": [4480, 2520],
+        "offSet": [141, 161],
+    }
+]

@@ -57,6 +57,6 @@ public struct SettingsMadeBy: View {
 
 struct SettingsMadeBy_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsMadeBy(appID: 6448248011)
+        SettingsMadeBy(appID: 6450552843)
     }
 }

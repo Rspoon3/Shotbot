@@ -17,7 +17,7 @@ public struct SettingsView: View {
     @State private var showEmail = false
     @State private var showEmailAlert = false
     @State private var showEmailFailedAlert = false
-    private let appID = 6448248011
+    private let appID = 6450552843
     
     // MARK: - Initializer
     

@@ -316,8 +316,7 @@ import StoreKit
         try data.write(to: temporaryURL)
         
         if persistenceManager.autoSaveToFiles {
-            let destination = URL.documentsDirectory.appending(path: path)
-            try fileManager.copyItem(at: temporaryURL, to: destination)
+            try fileManager.copyToiCloudFiles(from: temporaryURL, using: path)
         }
         
         if persistenceManager.autoSaveToPhotos {

@@ -95,8 +95,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         try data.write(to: temporaryDirectoryURL)
         
         if saveToFiles {
-            let destination = URL.documentsDirectory.appending(path: path)
-            try FileManager.default.copyItem(at: temporaryDirectoryURL, to: destination)
+            try FileManager.default.copyToiCloudFiles(from: temporaryDirectoryURL, using: path)
         }
         
         if saveToPhotos {

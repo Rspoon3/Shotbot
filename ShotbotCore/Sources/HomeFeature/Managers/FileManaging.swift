@@ -8,7 +8,26 @@
 import Foundation
 
 public protocol FileManaging {
-    func copyItem(at srcURL: URL, to dstURL: URL) throws
+    func copyToiCloudFiles(from source: URL, using path: String) throws
 }
 
-extension FileManager: FileManaging {}
+extension FileManager: FileManaging {
+    public func copyToiCloudFiles(from source: URL, using path: String) throws {
+        guard let driveURL = url(forUbiquityContainerIdentifier: nil)?.appendingPathComponent("Documents/\(path)") else {
+            throw FileError.missingiCloudDirectory
+        }
+        
+        try copyItem(at: source, to: driveURL)
+    }
+}
+
+public enum FileError: LocalizedError {
+    case missingiCloudDirectory
+    
+    public var errorDescription: String? {
+        switch self {
+        case .missingiCloudDirectory:
+            return "The files directory could not be found."
+        }
+    }
+}

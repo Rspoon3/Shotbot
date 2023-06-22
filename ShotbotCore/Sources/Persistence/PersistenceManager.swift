@@ -66,6 +66,9 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
     @iCloudKeyValueStore("deviceFrameCreations")
     public var deviceFrameCreations: Int = 0
     
+    @iCloudKeyValueStore("lastReviewPromptDate")
+    public var lastReviewPromptDate: Date? = nil
+    
     
 #if DEBUG
     public enum SubscriptionOverrideMethod: String, CaseIterable, Identifiable {

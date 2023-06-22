@@ -20,4 +20,5 @@ public protocol PersistenceManaging {
     var deviceFrameCreations: Int  { get set }
     var imageSelectionType: ImageSelectionType  { get set }
     var imageQuality: ImageQuality  { get set }
+    var lastReviewPromptDate: Date? { get set }
 }

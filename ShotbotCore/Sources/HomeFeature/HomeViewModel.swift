@@ -12,9 +12,10 @@ import Persistence
 import Purchases
 import MediaManager
 import StoreKit
-
+import OSLog
 
 @MainActor public final class HomeViewModel: ObservableObject {
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "HomeViewModel")
     let alertTitle = "Something went wrong."
     let alertMessage = "Please make sure you are selecting a screenshot."
     private var persistenceManager: any PersistenceManaging
@@ -262,11 +263,21 @@ import StoreKit
     
     /// Asks the user for a review
     private func askForAReview() {
-        guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
+        guard
+            persistenceManager.deviceFrameCreations > 3 && persistenceManager.numberOfActivations > 3,
+            let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene
+        else {
             return
         }
-          
+        
+        if let date = persistenceManager.lastReviewPromptDate {
+            guard date >= Date.now.adding(days: 3) else { return }
+        }
+            
         SKStoreReviewController.requestReview(in: scene)
+        
+        persistenceManager.lastReviewPromptDate = .now
+        logger.log("Prompting the user for a review")
     }
     
     // MARK: - Public
@@ -374,5 +385,12 @@ import StoreKit
         
         try? await photoLibraryManager.save(image)
         showQuickSaveToast = true
+    }
+}
+
+
+extension Date {
+    func adding(days:Int) -> Date {
+        return Calendar.current.date(byAdding: .day, value: days, to: self)!
     }
 }

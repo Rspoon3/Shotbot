@@ -13,11 +13,13 @@ public protocol FileManaging {
 
 extension FileManager: FileManaging {
     public func copyToiCloudFiles(from source: URL, using path: String) throws {
-        guard let driveURL = url(forUbiquityContainerIdentifier: nil)?.appendingPathComponent("Documents/\(path)") else {
+        guard let driveURL = url(forUbiquityContainerIdentifier: nil)?.appendingPathComponent("Documents") else {
             throw FileError.missingiCloudDirectory
         }
         
-        try copyItem(at: source, to: driveURL)
+        let url = driveURL.appendingPathComponent(path)
+        
+        try? copyItem(at: source, to: url)
     }
 }
 

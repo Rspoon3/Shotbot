@@ -19,7 +19,7 @@ extension FileManager: FileManaging {
         
         let url = driveURL.appendingPathComponent(path)
         
-        try? copyItem(at: source, to: url)
+        try copyItem(at: source, to: url)
     }
 }
 

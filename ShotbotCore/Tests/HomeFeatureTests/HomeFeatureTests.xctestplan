@@ -1,0 +1,32 @@
+{
+  "configurations" : [
+    {
+      "id" : "50DDDBBF-A382-4B42-A1B6-6DEB750189FD",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "HomeFeature",
+          "name" : "HomeFeature"
+        }
+      ]
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "HomeFeatureTests",
+        "name" : "HomeFeatureTests"
+      }
+    }
+  ],
+  "version" : 1
+}

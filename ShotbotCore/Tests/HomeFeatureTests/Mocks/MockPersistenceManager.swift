@@ -10,6 +10,7 @@ import Persistence
 import Models
 
 class MockPersistenceManager: PersistenceManaging {
+    var lastReviewPromptDate: Date?
     var canSaveFramedScreenshot: Bool = false
     var isSubscribed: Bool = false
     var numberOfLaunches: Int = 0
@@ -23,6 +24,7 @@ class MockPersistenceManager: PersistenceManaging {
     var imageQuality: ImageQuality = .original
 
     func reset() {
+        lastReviewPromptDate = nil
         canSaveFramedScreenshot = false
         isSubscribed = false
         autoSaveToFiles = false

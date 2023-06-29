@@ -17,7 +17,6 @@ struct ShotbotApp: App {
     @UIApplicationDelegateAdaptor(AppDelegateAdaptor.self) private var appDelegate
     @StateObject private var persistenceManager = PersistenceManager.shared
     @StateObject private var purchaseManager = PurchaseManager.shared
-    @StateObject private var photoLibraryManager = PhotoLibraryManager.shared
     @Environment(\.scenePhase) private var scenePhase
     
     init() {
@@ -33,7 +32,6 @@ struct ShotbotApp: App {
             AppTabNavigation()
                 .environmentObject(persistenceManager)
                 .environmentObject(purchaseManager)
-                .environmentObject(photoLibraryManager)
                 .task {
                     await purchaseManager.fetchOfferings()
                 }

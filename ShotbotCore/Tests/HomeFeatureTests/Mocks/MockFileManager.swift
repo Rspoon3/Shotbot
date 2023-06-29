@@ -10,7 +10,7 @@ import HomeFeature
 
 class MockFileManager: FileManaging {
     var copyResult: Result<Void, Error>?
-    func copyItem(at srcURL: URL, to dstURL: URL) throws {
+    func copyToiCloudFiles(from source: URL, using path: String) throws {
         _ = try copyResult?.get()
     }
 }

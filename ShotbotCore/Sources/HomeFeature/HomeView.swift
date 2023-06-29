@@ -17,13 +17,15 @@ import MediaManager
 public struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject private var persistenceManager: PersistenceManager
-    @EnvironmentObject private var photoLibraryManager: PhotoLibraryManager
     @Environment(\.scenePhase) var scenePhase
+    private let photoLibraryManager: PhotoLibraryManager
 
     
     // MARK: - Initializer
     
-    public init() {} 
+    public init(photoLibraryManager: PhotoLibraryManager) {
+        self.photoLibraryManager = photoLibraryManager
+    }
     
     // MARK: - Body
     
@@ -276,10 +278,9 @@ public struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            HomeView()
+            HomeView(photoLibraryManager: .live)
                 .environmentObject(PersistenceManager.shared)
                 .environmentObject(PurchaseManager.shared)
-                .environmentObject(PhotoLibraryManager.shared)
         }
     }
 }

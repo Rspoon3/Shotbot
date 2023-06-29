@@ -19,7 +19,7 @@ import OSLog
     let alertTitle = "Something went wrong."
     let alertMessage = "Please make sure you are selecting a screenshot."
     private var persistenceManager: any PersistenceManaging
-    private let photoLibraryManager: any PhotoLibraryManaging
+    private let photoLibraryManager: PhotoLibraryManager
     private let purchaseManager: any PurchaseManaging
     private let fileManager: any FileManaging
     private var combinedImageTask: Task<Void, Never>?
@@ -59,7 +59,7 @@ import OSLog
     
     public init(
         persistenceManager: any PersistenceManaging = PersistenceManager.shared,
-        photoLibraryManager: any PhotoLibraryManaging = PhotoLibraryManager.shared,
+        photoLibraryManager: PhotoLibraryManager = .live,
         purchaseManager: any PurchaseManaging = PurchaseManager.shared,
         fileManager: any FileManaging = FileManager.default
     ) {
@@ -331,7 +331,7 @@ import OSLog
         }
         
         if persistenceManager.autoSaveToPhotos {
-            try await photoLibraryManager.savePhoto(at: temporaryURL)
+            try await photoLibraryManager.savePhoto(temporaryURL)
         }
         
         return ShareableImage(

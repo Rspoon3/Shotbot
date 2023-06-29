@@ -99,7 +99,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         }
         
         if saveToPhotos {
-            try await PhotoLibraryManager.shared.savePhoto(at: temporaryDirectoryURL)
+            try await PhotoLibraryManager.live.savePhoto(temporaryDirectoryURL)
         }
         
         return temporaryDirectoryURL

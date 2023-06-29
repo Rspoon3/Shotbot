@@ -10,10 +10,8 @@ import Photos
 
 
 extension PHAuthorizationStatus {
-    var title: String {
-        let status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
-        
-        switch status {
+    var title: String {        
+        switch self {
         case .notDetermined:
             return "Not Determined"
         case .restricted:

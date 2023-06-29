@@ -87,3 +87,21 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
         }
     }
 }
+
+
+#if DEBUG
+class MockPurchaseManager: ObservableObject, PurchaseManaging {
+    var offerings: RevenueCat.Offerings?
+    var paymentIsInProgress: Bool = false
+    
+    var didRestorePurchases = false
+    func restorePurchases() async throws {
+        didRestorePurchases = true
+    }
+    
+    var purchaseResult: Result<Void, Error>?
+    func purchase(_ package: Package) async throws {
+        _ = try purchaseResult?.get()
+    }
+}
+#endif

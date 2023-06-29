@@ -8,7 +8,7 @@
 import SwiftUI
 import Photos
 import PhotosUI
-
+import Models
 
 public struct PhotoLibraryManager {
     public let photoAdditionStatus: PHAuthorizationStatus
@@ -42,13 +42,21 @@ public extension PhotoLibraryManager {
                 await PHPhotoLibrary.requestAuthorization(for: .readWrite)
             },
             savePhoto: { url in
-                try await photoLibrary.performChanges {
-                    PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+                do {
+                    try await photoLibrary.performChanges {
+                        PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+                    }
+                } catch {
+                    throw SBError.insufficientPhotoAuthorization
                 }
             },
             save: { image in
-                try await photoLibrary.performChanges {
-                    PHAssetChangeRequest.creationRequestForAsset(from: image)
+                do {
+                    try await photoLibrary.performChanges {
+                        PHAssetChangeRequest.creationRequestForAsset(from: image)
+                    }
+                } catch {
+                    throw SBError.insufficientPhotoAuthorization
                 }
             },
             delete: { itemIdentifiers in

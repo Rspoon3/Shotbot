@@ -8,12 +8,13 @@
 import Foundation
 import RevenueCat
 import Persistence
+import Models
 
 @MainActor final class PurchaseViewModel: ObservableObject {
     private let purchaseManager: PurchaseManaging
     private let persistenceManager = PersistenceManager.shared
     @Published private(set) var userAction: UserAction?
-    @Published var showAlert = false
+    @Published var error: Error?
     
     enum UserAction {
         case purchasing
@@ -58,14 +59,14 @@ import Persistence
             do {
                 try await purchaseManager.restorePurchases()
             } catch {
-                showAlert = true
+                self.error = error
             }
         }
     }
     
     func purchase() {
         guard let annualPackage else {
-            showAlert = true
+            self.error = SBError.noAnnualPackage
             return
         }
         
@@ -76,7 +77,7 @@ import Persistence
             do {
                 try await purchaseManager.purchase(annualPackage)
             } catch {
-                showAlert = true
+                self.error = error
             }
         }
     }

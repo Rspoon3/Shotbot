@@ -30,7 +30,7 @@ import OSLog
     @Published public var showCopyToast = false
     @Published public var showQuickSaveToast = false
     @Published public var showPhotosPicker = false
-    @Published public var showAlert = false
+    @Published public var error: Error?
     @Published public var isLoading = false
     @Published public var imageSelections: [PhotosPickerItem] = []
     @Published public var viewState: ViewState = .individualPlaceholder
@@ -55,6 +55,10 @@ import OSLog
         }
     }
     
+    var photoFilter: PHPickerFilter {
+        persistenceManager.imageSelectionType.filter
+    }
+    
     // MARK: - Initializer
     
     public init(
@@ -72,7 +76,6 @@ import OSLog
     
     
     // MARK: - Private Helpers
-    
     /// Updates `viewState` when `imageType` changes.
     ///
     /// Will wait for `combinedImageTask` if needed.
@@ -97,7 +100,7 @@ import OSLog
                         let combined = imageResults.combined,
                         viewState == .combinedPlaceholder
                     else {
-                        throw SBError.noImage
+                        throw SBError.unsupportedImage
                     }
                     
                     viewState = .combinedImages(combined)
@@ -117,11 +120,26 @@ import OSLog
     /// Shows the `showAutoSaveToast` if the user has `autoSaveToFiles` or `autoSaveToPhotos` enabled
     ///
     /// Using a slight delay in order to make the UI less jarring
-    private func showAutoSaveToastIfNeeded() async {
+    private func autoSaveIfNeeded() async {
         guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
-        try? await Task.sleep(for: .seconds(0.75))
-        showAutoSaveToast = true
-        try? await Task.sleep(for: .seconds(0.75))
+        
+        for result in imageResults.individual {
+            do {
+                if persistenceManager.autoSaveToFiles {
+                    try fileManager.copyToiCloudFiles(from: result.url)
+                }
+                
+                if persistenceManager.autoSaveToPhotos {
+                    try await photoLibraryManager.savePhoto(result.url)
+                }
+                
+                try await Task.sleep(for: .seconds(0.75))
+                showAutoSaveToast = true
+                try await Task.sleep(for: .seconds(0.75))
+            } catch {
+                self.error = error
+            }
+        }
     }
     
     /// Cancels and nils out `combinedImageTask`
@@ -133,8 +151,6 @@ import OSLog
     /// Combines images Horizontally with scaling to keep consistent spacing
     ///
     /// nonisolated in order to run on a background thread and not disrupt the main thread
-    ///
-    // TODO: This can be refactored and moved to an extension
     nonisolated private func createCombinedImage(from images: [UIImage]) async throws {
         try await Task {
             let imagesWidth = images.map(\.size.width).reduce(0, +)
@@ -249,14 +265,14 @@ import OSLog
             await combinedImageTask?.value
             
             guard let combined = imageResults.combined else {
-                throw SBError.noImage
+                throw SBError.unsupportedImage
             }
             
             viewState = .combinedImages(combined)
         }
         
         // Post FramedScreenshot generation
-        await showAutoSaveToastIfNeeded()
+        await autoSaveIfNeeded()
         await autoDeleteScreenshotsIfNeeded()
         askForAReview()
     }
@@ -287,7 +303,7 @@ import OSLog
         do {
             try await processSelectedPhotos(resetView: false, source: .dropItems(items))
         } catch {
-            showAlert = true
+            self.error = error
         }
     }
     
@@ -297,7 +313,7 @@ import OSLog
         do {
             try await processSelectedPhotos(resetView: true, source: .photoPicker)
         } catch {
-            showAlert = true
+            self.error = error
         }
     }
     
@@ -325,14 +341,6 @@ import OSLog
         }
         
         try data.write(to: temporaryURL)
-        
-        if persistenceManager.autoSaveToFiles {
-            try fileManager.copyToiCloudFiles(from: temporaryURL, using: path)
-        }
-        
-        if persistenceManager.autoSaveToPhotos {
-            try await photoLibraryManager.savePhoto(temporaryURL)
-        }
         
         return ShareableImage(
             framedScreenshot: framedScreenshot,
@@ -383,14 +391,16 @@ import OSLog
             return
         }
         
-        try? await photoLibraryManager.save(image)
-        showQuickSaveToast = true
+        do {
+            try await photoLibraryManager.save(image)
+            showQuickSaveToast = true
+        } catch {
+            self.error = error
+        }
     }
-}
-
-
-extension Date {
-    func adding(days:Int) -> Date {
-        return Calendar.current.date(byAdding: .day, value: days, to: self)!
+    
+    /// Requests photo library addition authorization
+    public func requestPhotoLibraryAdditionAuthorization() async {
+        await photoLibraryManager.requestPhotoLibraryAdditionAuthorization()
     }
 }

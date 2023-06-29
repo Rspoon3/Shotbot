@@ -18,7 +18,7 @@ public extension Array where Element == PhotosPickerItem {
                 let data = try await $0.loadTransferable(type: Data.self),
                 let screenshot = UIImage(data: data)
             else {
-                throw SBError.noImage
+                throw SBError.unsupportedImage
             }
             
             return screenshot

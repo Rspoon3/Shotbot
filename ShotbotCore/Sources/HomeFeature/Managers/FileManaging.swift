@@ -6,30 +6,20 @@
 //
 
 import Foundation
+import Models
 
 public protocol FileManaging {
-    func copyToiCloudFiles(from source: URL, using path: String) throws
+    func copyToiCloudFiles(from source: URL) throws
 }
 
 extension FileManager: FileManaging {
-    public func copyToiCloudFiles(from source: URL, using path: String) throws {
+    public func copyToiCloudFiles(from source: URL) throws {
         guard let driveURL = url(forUbiquityContainerIdentifier: nil)?.appendingPathComponent("Documents") else {
-            throw FileError.missingiCloudDirectory
+            throw SBError.missingiCloudDirectory
         }
         
-        let url = driveURL.appendingPathComponent(path)
+        let url = driveURL.appendingPathComponent(source.lastPathComponent)
         
         try copyItem(at: source, to: url)
-    }
-}
-
-public enum FileError: LocalizedError {
-    case missingiCloudDirectory
-    
-    public var errorDescription: String? {
-        switch self {
-        case .missingiCloudDirectory:
-            return "The files directory could not be found."
-        }
     }
 }

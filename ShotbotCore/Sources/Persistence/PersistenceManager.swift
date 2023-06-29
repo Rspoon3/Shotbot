@@ -83,3 +83,35 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
     public var subscriptionOverride: SubscriptionOverrideMethod = .appStore
 #endif
 }
+
+public class MockPersistenceManager: PersistenceManaging {
+    public var lastReviewPromptDate: Date?
+    public var canSaveFramedScreenshot: Bool = false
+    public var isSubscribed: Bool = false
+    public var numberOfLaunches: Int = 0
+    public var numberOfActivations: Int = 0
+    public var deviceFrameCreations: Int = 0
+    public var autoSaveToFiles: Bool = false
+    public var autoSaveToPhotos: Bool = false
+    public var autoDeleteScreenshots: Bool = false
+    public var clearImagesOnAppBackground: Bool = false
+    public var imageSelectionType: ImageSelectionType = .all
+    public var imageQuality: ImageQuality = .original
+    
+    public init() {}
+
+    public func reset() {
+        lastReviewPromptDate = nil
+        canSaveFramedScreenshot = false
+        isSubscribed = false
+        autoSaveToFiles = false
+        autoSaveToPhotos = false
+        autoDeleteScreenshots = false
+        clearImagesOnAppBackground = false
+        numberOfLaunches = 0
+        numberOfActivations = 0
+        deviceFrameCreations = 0
+        imageSelectionType = .all
+        imageQuality = .original
+    }
+}

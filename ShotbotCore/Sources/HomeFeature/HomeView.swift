@@ -15,16 +15,14 @@ import MediaManager
 
 
 public struct HomeView: View {
-    @StateObject private var viewModel = HomeViewModel()
-    @EnvironmentObject private var persistenceManager: PersistenceManager
+    @ObservedObject var viewModel: HomeViewModel
     @Environment(\.scenePhase) var scenePhase
-    private let photoLibraryManager: PhotoLibraryManager
-
+    
     
     // MARK: - Initializer
     
-    public init(photoLibraryManager: PhotoLibraryManager) {
-        self.photoLibraryManager = photoLibraryManager
+    public init(viewModel: HomeViewModel) {
+        self.viewModel = viewModel
     }
     
     // MARK: - Body
@@ -40,7 +38,7 @@ public struct HomeView: View {
             .photosPicker(
                 isPresented: $viewModel.showPhotosPicker,
                 selection: $viewModel.imageSelections,
-                matching: persistenceManager.imageSelectionType.filter,
+                matching: viewModel.photoFilter,
                 photoLibrary: .shared()
             )
             .onChange(of: viewModel.imageSelections) { newValue in
@@ -54,12 +52,7 @@ public struct HomeView: View {
                 }
                 return true
             }
-            .alert(isPresented: $viewModel.showAlert) {
-                Alert(
-                    title: Text(viewModel.alertTitle),
-                    message: Text(viewModel.alertMessage)
-                )
-            }
+            .alert(error: $viewModel.error)
             .toast(isPresenting: $viewModel.showQuickSaveToast, duration: 2) {
                 AlertToast(
                     displayMode: .hud,
@@ -105,7 +98,7 @@ public struct HomeView: View {
                 }
             }
             .task {
-                await photoLibraryManager.requestPhotoLibraryAdditionAuthorization()
+                await viewModel.requestPhotoLibraryAdditionAuthorization()
             }
             .onChange(of: scenePhase) { newValue in
                 guard newValue == .background || newValue == .active else { return }
@@ -278,9 +271,12 @@ public struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            HomeView(photoLibraryManager: .live)
-                .environmentObject(PersistenceManager.shared)
-                .environmentObject(PurchaseManager.shared)
+            HomeView(
+                viewModel: HomeViewModel(
+                    photoLibraryManager: .empty(status: .authorized),
+                    purchaseManager: MockPurchaseManager()
+                )
+            )
         }
     }
 }

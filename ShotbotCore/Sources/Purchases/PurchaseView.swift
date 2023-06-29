@@ -39,9 +39,7 @@ public struct PurchaseView: View {
         }
         .navigationTitle("Shotbot Pro")
         .navigationBarTitleDisplayMode(.inline)
-        .alert(isPresented: $viewModel.showAlert) {
-            Alert(title: Text("Something went wrong."))
-        }
+        .alert(error: $viewModel.error)
         .overlay {
             if viewModel.userAction != nil {
                 ProgressView()

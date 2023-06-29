@@ -77,7 +77,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
     
     private func createDeviceFrame(using data: Data) async throws -> URL {
         guard let screenshot = UIImage(data: data) else {
-            throw SBError.noImage
+            throw SBError.unsupportedImage
         }
         guard let device = DeviceInfo.all().first(where: {$0.inputSize == screenshot.size}) else {
             throw SBError.unsupportedDevice
@@ -95,7 +95,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         try data.write(to: temporaryDirectoryURL)
         
         if saveToFiles {
-            try FileManager.default.copyToiCloudFiles(from: temporaryDirectoryURL, using: path)
+            try FileManager.default.copyToiCloudFiles(from: temporaryDirectoryURL)
         }
         
         if saveToPhotos {

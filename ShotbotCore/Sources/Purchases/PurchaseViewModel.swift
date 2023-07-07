@@ -9,10 +9,13 @@ import Foundation
 import RevenueCat
 import Persistence
 import Models
+import OSLog
 
 @MainActor final class PurchaseViewModel: ObservableObject {
     private let purchaseManager: PurchaseManaging
     private let persistenceManager = PersistenceManager.shared
+    private let logger = Logger(category: PurchaseViewModel.self)
+
     @Published private(set) var userAction: UserAction?
     @Published var error: Error?
     
@@ -66,6 +69,7 @@ import Models
     
     func purchase() {
         guard let annualPackage else {
+            logger.error("No annual package to purchase.")
             self.error = SBError.noAnnualPackage
             return
         }

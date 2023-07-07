@@ -10,11 +10,13 @@ import CollectionConcurrencyKit
 import Models
 import Persistence
 import MediaManager
+import OSLog
 
 struct CreateFramedScreenshotsIntent: AppIntent {
     static let intentClassName = "CreateFramedScreenshotsIntent"
     static var title: LocalizedStringResource = "Create Framed Screenshots"
     static var description = IntentDescription("Creates framed screenshots with a device frame using the images passed in.")
+    private let logger = Logger(category: CreateFramedScreenshotsIntent.self)
     
     @Parameter(
         title: "Images",
@@ -58,6 +60,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         let persistenceManager = PersistenceManager.shared
         
         guard persistenceManager.canSaveFramedScreenshot else {
+            logger.error("pro subscription required to save screenshot")
             throw SBError.proSubscriptionRequired
         }
         
@@ -72,20 +75,28 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         
         persistenceManager.deviceFrameCreations += screenshots.count
         
+        logger.debug("returning CreateFramedScreenshotsIntent result")
         return .result(value: screenshots)
     }
     
     private func createDeviceFrame(using data: Data) async throws -> URL {
         guard let screenshot = UIImage(data: data) else {
+            logger.error("Data could not be turned into a UIImage")
             throw SBError.unsupportedImage
         }
+        
         guard let device = DeviceInfo.all().first(where: {$0.inputSize == screenshot.size}) else {
+            logger.error("Could not find an image with width: \(screenshot.size.width) and height: \(screenshot.size.height).")
             throw SBError.unsupportedDevice
         }
+        
         guard let image = device.framed(using: screenshot)?.scaled(to: imageQuality.value) else {
+            logger.error("Could not frame image.")
             throw SBError.framing
         }
+        
         guard let data = image.pngData() else {
+            logger.error("PNG Data could not be obtained")
             throw SBError.noData
         }
         
@@ -93,13 +104,26 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         let temporaryDirectoryURL = URL.temporaryDirectory.appending(path: path)
         
         try data.write(to: temporaryDirectoryURL)
+        logger.info("Writing image data to \(path).")
         
         if saveToFiles {
-            try FileManager.default.copyToiCloudFiles(from: temporaryDirectoryURL)
+            do {
+                try FileManager.default.copyToiCloudFiles(from: temporaryDirectoryURL)
+                logger.info("Saving to iCloud.")
+            } catch {
+                logger.error("Error saving to iCloud: \(error.localizedDescription).")
+                throw error
+            }
         }
         
         if saveToPhotos {
-            try await PhotoLibraryManager.live.savePhoto(temporaryDirectoryURL)
+            do {
+                try await PhotoLibraryManager.live.savePhoto(temporaryDirectoryURL)
+                logger.info("Saving to Photo library.")
+            } catch {
+                logger.error("Error saving to photo library: \(error.localizedDescription).")
+                throw error
+            }
         }
         
         return temporaryDirectoryURL

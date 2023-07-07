@@ -10,6 +10,7 @@ import Persistence
 import MessageUI
 import Models
 import Purchases
+import OSLog
 
 public struct SettingsView: View {
     @Environment(\.openURL) var openURL
@@ -17,6 +18,7 @@ public struct SettingsView: View {
     @State private var showEmail = false
     @State private var showEmailAlert = false
     @State private var showEmailFailedAlert = false
+//    @State private var attachments: [MailView.Attachment]?
     private let appID = 6450552843
     
     // MARK: - Initializer
@@ -25,7 +27,7 @@ public struct SettingsView: View {
     
     // MARK: - Body
     
-    private func createFeedbackMessage()->MailView.Message{
+    private func createFeedbackMessage() -> MailView.Message{
         let systemVersion = UIDevice.current.systemVersion
         var message = "\n\n\n\n\n\n\n\n\n\nOS Version: \(systemVersion)"
         
@@ -35,6 +37,26 @@ public struct SettingsView: View {
         
         return .init(message: message, isHTML: false)
     }
+    
+//    func export() {
+//        do {
+//            let store = try OSLogStore(scope: .currentProcessIdentifier)
+//            let position = store.position(timeIntervalSinceLatestBoot: 1)
+//            let entries = try store
+//                .getEntries(at: position)
+//                .compactMap { $0 as? OSLogEntryLog }
+//                .filter { $0.subsystem == Bundle.main.bundleIdentifier! }
+//                .map { "[\($0.date.formatted())] [\($0.category)] [\($0.level.rawValue)] \($0.composedMessage)" }
+//
+//            let joined = entries.joined(separator: "\n")
+//            let data = joined.data(using: .utf8)!
+//
+//            attachments = [MailView.Attachment(data: data, mimeType: "text/plain", fileName: "logs.txt")]
+//            showEmail = true
+//        } catch {
+//
+//        }
+//    }
     
     public var body: some View {
         Form {

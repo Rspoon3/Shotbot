@@ -1,6 +1,6 @@
 # ShotBot
 
-
+[![Download on the App Store](Images/download_on_the_app_store.svg)](https://apps.apple.com/us/app/shotbot-framed-screenshots/id6450552843)
 
 ![Promo image](Images/promo.png)
 

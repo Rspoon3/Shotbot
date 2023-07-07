@@ -13,7 +13,6 @@ import Models
 import Purchases
 import MediaManager
 
-
 public struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel
     @Environment(\.scenePhase) var scenePhase

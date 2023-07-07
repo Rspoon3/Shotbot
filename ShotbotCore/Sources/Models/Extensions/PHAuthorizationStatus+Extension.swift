@@ -9,7 +9,7 @@ import Foundation
 import Photos
 
 
-extension PHAuthorizationStatus {
+public extension PHAuthorizationStatus {
     var title: String {        
         switch self {
         case .notDetermined:

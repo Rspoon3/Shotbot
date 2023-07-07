@@ -12,7 +12,7 @@ public extension URL {
     static let gitHub   = URL(string: "https://github.com/Rspoon3/Shotbot")!
     static let personal = URL(string: "https://www.rspoon3.com")!
     static let mastodon = URL(string: "https://mastodon.social/@rwitherspoon")!
-    static let termsAndConditions = URL(string: "https://github.com/Rspoon3/Shotbot/blob/dev/TERMS.MD")!
+    static let termsAndConditions = URL(string: "https://github.com/Rspoon3/Shotbot/blob/main/TERMS.MD")!
 
     static func twitter(username: String)-> URL {
         URL(string: "https://twitter.com/\(username)")!

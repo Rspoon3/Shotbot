@@ -8,5 +8,5 @@
 import Foundation
 
 public extension URL {
-    static let privacyPolicy = URL(string: "https://github.com/Rspoon3/Shotbot/blob/dev/PRIVACY.MD")!
+    static let privacyPolicy = URL(string: "https://github.com/Rspoon3/Shotbot/blob/main/PRIVACY.MD")!
 }

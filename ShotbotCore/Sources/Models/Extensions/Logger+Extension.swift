@@ -12,7 +12,7 @@ import OSLog
 ///
 /// Debug and Info are not persisted
 public extension Logger {
-    private static let subsystem = Bundle.main.bundleIdentifier ?? "com.rspoon3.ShotbotFrames"
+    static let subsystem = Bundle.main.bundleIdentifier ?? "com.rspoon3.ShotbotFrames"
     
     init(category: String) {
         self.init(

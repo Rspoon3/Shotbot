@@ -7,56 +7,19 @@
 
 import SwiftUI
 import Persistence
-import MessageUI
 import Models
 import Purchases
-import OSLog
 
 public struct SettingsView: View {
+    @StateObject private var viewModel = SettingsViewModel()
     @Environment(\.openURL) var openURL
     @EnvironmentObject private var persistenceManager: PersistenceManager
-    @State private var showEmail = false
-    @State private var showEmailAlert = false
-    @State private var showEmailFailedAlert = false
-//    @State private var attachments: [MailView.Attachment]?
-    private let appID = 6450552843
     
     // MARK: - Initializer
     
     public init() {}
     
     // MARK: - Body
-    
-    private func createFeedbackMessage() -> MailView.Message{
-        let systemVersion = UIDevice.current.systemVersion
-        var message = "\n\n\n\n\n\n\n\n\n\nOS Version: \(systemVersion)"
-        
-        if let version = Bundle.appVersion, let build = Bundle.appBuild {
-            message.append("\nApp Version: \(version) (\(build))")
-        }
-        
-        return .init(message: message, isHTML: false)
-    }
-    
-//    func export() {
-//        do {
-//            let store = try OSLogStore(scope: .currentProcessIdentifier)
-//            let position = store.position(timeIntervalSinceLatestBoot: 1)
-//            let entries = try store
-//                .getEntries(at: position)
-//                .compactMap { $0 as? OSLogEntryLog }
-//                .filter { $0.subsystem == Bundle.main.bundleIdentifier! }
-//                .map { "[\($0.date.formatted())] [\($0.category)] [\($0.level.rawValue)] \($0.composedMessage)" }
-//
-//            let joined = entries.joined(separator: "\n")
-//            let data = joined.data(using: .utf8)!
-//
-//            attachments = [MailView.Attachment(data: data, mimeType: "text/plain", fileName: "logs.txt")]
-//            showEmail = true
-//        } catch {
-//
-//        }
-//    }
     
     public var body: some View {
         Form {
@@ -100,42 +63,48 @@ public struct SettingsView: View {
                 }
                 
                 Button {
-                    if MFMailComposeViewController.canSendMail() {
-                        showEmail = true
-                    } else {
-                        showEmailAlert = true
-                    }
+                    viewModel.emailFeedbackButtonTapped()
                 } label: {
-                    Label("Email Feedback", systemImage: "envelope")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
+                    Label {
+                        Text(viewModel.emailButtonText)
+                    } icon: {
+                        if viewModel.isGeneratingLogs {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "envelope")
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
-                .alert(isPresented: $showEmailAlert) {
+                .disabled(viewModel.isGeneratingLogs)
+                .alert(isPresented: $viewModel.showEmailAlert) {
                     Alert(
                         title: Text("Email Error"),
                         message: Text("Email services are not available on this device")
                     )
                 }
-                .alert(isPresented: $showEmailFailedAlert) {
+                .alert(isPresented: $viewModel.showEmailFailedAlert) {
                     Alert(
                         title: Text("Email Error"),
                         message: Text("An error occurred sending your email")
                     )
                 }
-                .sheet(isPresented: $showEmail) {
+                .sheet(isPresented: $viewModel.showEmail) {
                     MailView(
                         recipients: ["richardwitherspoon3@gmail.com"],
                         subject: "Shot Bot Feedback",
-                        message: createFeedbackMessage(),
-                        attachments: nil) { result in
-                            if case .failure = result {
-                                showEmailFailedAlert = true
-                            }
+                        message: viewModel.createFeedbackMessage(),
+                        attachments: viewModel.attachments
+                    ) { result in
+                        if case .failure = result {
+                            viewModel.showEmailFailedAlert = true
                         }
+                    }
                 }
                 
                 Button {
-                    openURL(.appStore(appID: appID))
+                    openURL(.appStore(appID: viewModel.appID))
                 } label: {
                     Label("Leave a review", systemImage: "star")
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -218,7 +187,7 @@ public struct SettingsView: View {
             }
 #endif
             
-            SettingsMadeBy(appID: appID)
+            SettingsMadeBy(appID: viewModel.appID)
         }
         .navigationTitle("Settings")
         .buttonStyle(.plain)

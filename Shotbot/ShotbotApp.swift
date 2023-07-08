@@ -51,8 +51,14 @@ struct ShotbotApp: App {
         let systemVersion = UIDevice.current.systemVersion
         let version = Bundle.appVersion ?? "N/A"
         let build = Bundle.appBuild ?? "N/A"
+        let screenSize: CGRect = UIScreen.main.bounds
+        let screenWidth = screenSize.width.formatted()
+        let screenHeight = screenSize.height.formatted()
+        let name = UIDevice.current.name
         
         logger.notice("OS Version: \(systemVersion). App Version: \(version) (\(build)).")
+        logger.notice("Screen width: \(screenWidth). Screen height: \(screenHeight).")
+        logger.notice("Device name: \(name).")
     }
 }
 

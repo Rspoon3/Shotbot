@@ -29,7 +29,7 @@ public struct SettingsView: View {
                 Toggle("Automatically delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
                 Toggle("Clear Images On App Background", isOn: $persistenceManager.clearImagesOnAppBackground)
             }
-            
+
             Section() {
                 Picker("Image Selection Filter", selection: $persistenceManager.imageSelectionType) {
                     ForEach(ImageSelectionType.allCases) { type in
@@ -44,7 +44,7 @@ public struct SettingsView: View {
                     }
                 }
             }
-            
+
             Section("Feedback") {
                 Button {
                     openURL(.mastodon)
@@ -53,7 +53,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                
+
                 Button {
                     openURL(.twitter(username: "Rspoon3"))
                 } label: {
@@ -61,7 +61,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                
+
                 Button {
                     viewModel.emailFeedbackButtonTapped()
                 } label: {
@@ -102,7 +102,7 @@ public struct SettingsView: View {
                         }
                     }
                 }
-                
+
                 Button {
                     openURL(.appStore(appID: viewModel.appID))
                 } label: {
@@ -111,7 +111,7 @@ public struct SettingsView: View {
                         .contentShape(Rectangle())
                 }
             }
-            
+
             Section("Other") {
                 NavigationLink {
                     PurchaseView()
@@ -129,19 +129,19 @@ public struct SettingsView: View {
                         Image(systemName: "heart")
                     }
                 }
-                
+
                 NavigationLink {
                     SupportedDevicesView()
                 } label: {
                     Label("Supported Devices", systemImage: "macbook.and.iphone")
                 }
-                
+
                 NavigationLink {
                     AppPermissionsView()
                 } label: {
                     Label("App Permissions", systemImage: "lock.shield")
                 }
-                
+
                 Button {
                     openURL(.gitHub)
                 } label: {
@@ -149,7 +149,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                
+
                 Button {
                     openURL(.privacyPolicy)
                 } label: {
@@ -157,7 +157,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                
+
                 Button {
                     openURL(.termsAndConditions)
                 } label: {
@@ -166,7 +166,7 @@ public struct SettingsView: View {
                         .contentShape(Rectangle())
                 }
             }
-            
+
 #if DEBUG
             Section("Debug") {
                 Text("Number of launches")
@@ -177,7 +177,7 @@ public struct SettingsView: View {
                     .badge(persistenceManager.deviceFrameCreations)
                 Text("Is Subscribed")
                     .badge(persistenceManager.isSubscribed.description)
-                
+
                 Picker("Subscription Override", selection: $persistenceManager.subscriptionOverride) {
                     ForEach(PersistenceManager.SubscriptionOverrideMethod.allCases) { type in
                         Text(type.id)
@@ -186,7 +186,7 @@ public struct SettingsView: View {
                 }
             }
 #endif
-            
+
             SettingsMadeBy(appID: viewModel.appID)
         }
         .navigationTitle("Settings")

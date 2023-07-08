@@ -15,8 +15,6 @@ import StoreKit
 import OSLog
 
 @MainActor public final class HomeViewModel: ObservableObject {
-    let alertTitle = "Something went wrong."
-    let alertMessage = "Please make sure you are selecting a screenshot."
     private var persistenceManager: any PersistenceManaging
     private let photoLibraryManager: PhotoLibraryManager
     private let purchaseManager: any PurchaseManaging

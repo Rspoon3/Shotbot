@@ -125,7 +125,7 @@ import OSLog
         guard persistenceManager.autoDeleteScreenshots else { return }
         let ids = imageSelections.compactMap(\.itemIdentifier)
         try? await photoLibraryManager.delete(ids)
-        logger.notice("Deleting \(ids.count) images.")
+        logger.notice("Deleting \(ids.count, privacy: .public) images.")
     }
     
     /// Shows the `showAutoSaveToast` if the user has `autoSaveToFiles` or `autoSaveToPhotos` enabled
@@ -155,7 +155,7 @@ import OSLog
                 
                 try await Task.sleep(for: .seconds(0.75))
             } catch {
-                logger.info("An autosave error occurred: \(error.localizedDescription).")
+                logger.info("An autosave error occurred: \(error.localizedDescription, privacy: .public).")
                 self.error = error
             }
         }
@@ -231,10 +231,10 @@ import OSLog
             logger.info("Fetching images from the photos picker.")
             screenshots = try await imageSelections.loadUImages()
         case .dropItems(let items):
-            logger.info("Using dropped photos (\(items.count)).")
+            logger.info("Using dropped photos (\(items.count, privacy: .public)).")
             screenshots = items.compactMap { UIImage(data: $0) }
         case .existingScreenshots(let existing):
-            logger.info("Using existing screenshots (\(existing.count)).")
+            logger.info("Using existing screenshots (\(existing.count, privacy: .public)).")
             screenshots = existing
         }
         
@@ -252,7 +252,7 @@ import OSLog
             persistenceManager.deviceFrameCreations += 1
         }
         
-        logger.debug("Setting imageResults.individual with \(shareableImages.count) items.")
+        logger.debug("Setting imageResults.individual with \(shareableImages.count, privacy: .public) items.")
         imageResults.individual = shareableImages
     }
     
@@ -327,7 +327,7 @@ import OSLog
         let numberOfActivations = persistenceManager.numberOfActivations
 
         guard deviceFrameCreations > 3 && numberOfActivations > 3 else {
-            logger.debug("Review prompt criteria not met. DeviceFrameCreations: \(deviceFrameCreations), numberOfActivations: \(numberOfActivations).")
+            logger.debug("Review prompt criteria not met. DeviceFrameCreations: \(deviceFrameCreations, privacy: .public), numberOfActivations: \(numberOfActivations, privacy: .public).")
             return
         }
             
@@ -338,7 +338,7 @@ import OSLog
         
         if let date = persistenceManager.lastReviewPromptDate {
             guard date >= Date.now.adding(days: 3) else {
-                logger.debug("Last review prompt date to recent: \(date).")
+                logger.debug("Last review prompt date to recent: \(date, privacy: .public).")
                 return
             }
         }
@@ -399,7 +399,7 @@ import OSLog
         }
         
         try data.write(to: temporaryURL)
-        logger.info("Writing \(path) to temporary url.")
+        logger.info("Writing \(path, privacy: .public) to temporary url.")
         
         return ShareableImage(
             framedScreenshot: framedScreenshot,
@@ -460,7 +460,7 @@ import OSLog
             showQuickSaveToast = true
             logger.debug("Manually saving image.")
         } catch {
-            logger.error("Error manually saving image: \(error.localizedDescription).")
+            logger.error("Error manually saving image: \(error.localizedDescription, privacy: .public).")
             self.error = error
         }
     }
@@ -470,6 +470,6 @@ import OSLog
         await photoLibraryManager.requestPhotoLibraryAdditionAuthorization()
         
         let status = photoLibraryManager.photoAdditionStatus.title
-        logger.info("Finished requesting photo library addition authorization. Status: \(status).")
+        logger.info("Finished requesting photo library addition authorization. Status: \(status, privacy: .public).")
     }
 }

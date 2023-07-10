@@ -66,7 +66,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         
         let screenshots = try await images.asyncCompactMap { file -> IntentFile? in
             let url = try await createDeviceFrame(using: file.data)
-            
+                
             var file = IntentFile(fileURL: url, type: .image)
             file.removedOnCompletion = true
             
@@ -86,7 +86,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         }
         
         guard let device = DeviceInfo.all().first(where: {$0.inputSize == screenshot.size}) else {
-            logger.error("Could not find an image with width: \(screenshot.size.width) and height: \(screenshot.size.height).")
+            logger.error("Could not find an image with width: \(screenshot.size.width, privacy: .public) and height: \(screenshot.size.height, privacy: .public).")
             throw SBError.unsupportedDevice
         }
         
@@ -104,14 +104,14 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         let temporaryDirectoryURL = URL.temporaryDirectory.appending(path: path)
         
         try data.write(to: temporaryDirectoryURL)
-        logger.info("Writing image data to \(path).")
+        logger.info("Writing image data to \(path, privacy: .public).")
         
         if saveToFiles {
             do {
                 try FileManager.default.copyToiCloudFiles(from: temporaryDirectoryURL)
                 logger.info("Saving to iCloud.")
             } catch {
-                logger.error("Error saving to iCloud: \(error.localizedDescription).")
+                logger.error("Error saving to iCloud: \(error.localizedDescription, privacy: .public).")
                 throw error
             }
         }
@@ -121,7 +121,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
                 try await PhotoLibraryManager.live.savePhoto(temporaryDirectoryURL)
                 logger.info("Saving to Photo library.")
             } catch {
-                logger.error("Error saving to photo library: \(error.localizedDescription).")
+                logger.error("Error saving to photo library: \(error.localizedDescription, privacy: .public).")
                 throw error
             }
         }

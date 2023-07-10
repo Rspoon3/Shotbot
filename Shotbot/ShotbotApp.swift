@@ -56,9 +56,9 @@ struct ShotbotApp: App {
         let screenHeight = screenSize.height.formatted()
         let name = UIDevice.current.name
         
-        logger.notice("OS Version: \(systemVersion). App Version: \(version) (\(build)).")
-        logger.notice("Screen width: \(screenWidth). Screen height: \(screenHeight).")
-        logger.notice("Device name: \(name).")
+        logger.notice("OS Version: \(systemVersion, privacy: .public). App Version: \(version, privacy: .public) (\(build, privacy: .public)).")
+        logger.notice("Screen width: \(screenWidth, privacy: .public). Screen height: \(screenHeight, privacy: .public).")
+        logger.notice("Device name: \(name, privacy: .public).")
     }
 }
 

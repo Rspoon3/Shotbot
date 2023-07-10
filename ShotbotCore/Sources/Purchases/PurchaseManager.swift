@@ -44,7 +44,7 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
             offerings = try await purchases.offerings()
             logger.info("Fetched offers.")
         } catch {
-            logger.error("Error fetching offers: \(error.localizedDescription)")
+            logger.error("Error fetching offers: \(error.localizedDescription, privacy: .public)")
         }
     }
     
@@ -54,13 +54,13 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
             customerInfo = try await purchases.restorePurchases()
             logger.info("Restored purchases.")
         } catch {
-            logger.error("Error restoring purchases: \(error.localizedDescription)")
+            logger.error("Error restoring purchases: \(error.localizedDescription, privacy: .public)")
         }
     }
     
     @MainActor
     public func purchase(_ package: Package) async throws {
-        logger.info("Purchase: \(package.storeProduct.description).")
+        logger.info("Purchase: \(package.storeProduct.description, privacy: .public).")
         
         purchases.attribution.setAttributes(["numberOfLaunches": "\(persistenceManager.numberOfLaunches)"])
         purchases.attribution.setAttributes(["numberOfActivations": "\(persistenceManager.numberOfActivations)"])

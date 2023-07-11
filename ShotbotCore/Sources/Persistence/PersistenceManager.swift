@@ -43,7 +43,7 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
         max(0, (30 - deviceFrameCreations))
     }
     
-    @AppStorage("isSubscribed")
+    @AppStorage("isSubscribed", store: .shared)
     public var isSubscribed = false
     
     @AppStorage("autoSaveToFiles")

@@ -8,7 +8,6 @@
 import SwiftUI
 import Persistence
 
-
 final class ActionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,8 +23,7 @@ final class ActionViewController: UIViewController {
         
         let viewModel = ActionExtensionViewModel(
             attachments: attachments,
-            extensionContext: extensionContext,
-            canSaveFramedScreenshot: PersistenceManager.shared.canSaveFramedScreenshot
+            extensionContext: extensionContext
         )
         
         let swiftUIView = ActionExtensionView(viewModel: viewModel)

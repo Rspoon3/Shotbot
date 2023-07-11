@@ -7,11 +7,18 @@
 
 import SwiftUI
 import Models
+import OSLog
 
 public final class PersistenceManager: ObservableObject, PersistenceManaging {
     public static let shared = PersistenceManager()
-        
-    private init(){}
+    private let logger = Logger(category: PersistenceManager.self)
+
+    private init(){
+        logger.notice("isSubscribed: \(self.isSubscribed, privacy: .public)")
+        logger.notice("deviceFrameCreations: \(self.deviceFrameCreations.formatted(), privacy: .public)")
+        logger.notice("numberOfLaunches: \(self.numberOfLaunches.formatted(), privacy: .public)")
+        logger.notice("numberOfActivations: \(self.numberOfActivations.formatted(), privacy: .public)")
+    }
     
     private var canSaveFramedScreenshotAppStore: Bool {
         isSubscribed || deviceFrameCreations <= 30

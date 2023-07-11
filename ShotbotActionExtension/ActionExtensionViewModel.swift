@@ -11,9 +11,10 @@ import CollectionConcurrencyKit
 import UIKit
 import Models
 import Persistence
+import OSLog
 
 @MainActor final class ActionExtensionViewModel: ObservableObject {
-    let canSaveFramedScreenshot: Bool
+    private let logger = Logger(category: ActionExtensionViewModel.self)
     private let attachments: [NSItemProvider]
     private let extensionContext: NSExtensionContext
     private let imageTypeIdentifier = UTType.image.identifier
@@ -32,20 +33,25 @@ import Persistence
         }
     }
     
+    var canSaveFramedScreenshot : Bool {
+        persistenceManager.canSaveFramedScreenshot
+    }
+    
     // MARK: - Initializer
     
     init(
         attachments: [NSItemProvider],
         extensionContext: NSExtensionContext,
-        canSaveFramedScreenshot: Bool,
         persistenceManager: any PersistenceManaging = PersistenceManager.shared
     ) {
         self.attachments = attachments
         self.extensionContext = extensionContext
-        self.canSaveFramedScreenshot = canSaveFramedScreenshot
         self.persistenceManager = persistenceManager
         
-        guard canSaveFramedScreenshot else { return }
+        logger.notice("attachments: \(attachments.count.formatted(), privacy: .public)")
+        logger.notice("canSaveFramedScreenshot: \(persistenceManager.canSaveFramedScreenshot, privacy: .public)")
+
+        guard persistenceManager.canSaveFramedScreenshot else { return }
         
         loadAttachments()
     }

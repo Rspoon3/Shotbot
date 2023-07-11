@@ -24,7 +24,9 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
             Task {
                 await MainActor.run {
                     let pro = customerInfo?.entitlements["Pro"]
-                    persistenceManager.isSubscribed = pro?.isActive == true
+                    let isSubscribed = pro?.isActive == true
+                    persistenceManager.isSubscribed = isSubscribed
+                    logger.notice("Did update customer info. Is isSubscribed: \(isSubscribed, privacy: .public)")
                 }
             }
         }

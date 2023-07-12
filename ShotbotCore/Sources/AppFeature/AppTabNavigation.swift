@@ -13,15 +13,19 @@ public struct AppTabNavigation: View {
     @State private var tabSelection = Tab.home
     
     // MARK: - Initializer
-     
-     public init() {}
-     
-     // MARK: - Body
-
+    
+    public init() {}
+    
+    // MARK: - Body
+    
     public var body: some View {
         TabView(selection: $tabSelection) {
-            NavigationView{
-                HomeView()
+            NavigationView {
+                HomeView(
+                    viewModel: HomeViewModel(
+                        photoLibraryManager: .live
+                    )
+                )
             }
             .navigationViewStyle(.stack)
             .tabItem {
@@ -30,7 +34,7 @@ public struct AppTabNavigation: View {
             }
             .tag(Tab.home)
             
-            NavigationView{
+            NavigationView {
                 SettingsView()
             }
             .navigationViewStyle(.stack)

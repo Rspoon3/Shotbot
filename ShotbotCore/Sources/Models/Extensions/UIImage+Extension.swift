@@ -92,12 +92,13 @@ public extension UIImage {
         }
     }
     
+    /// Creates a framed screenshot based on the image quality passed in
     func framedScreenshot(quality: ImageQuality) throws -> UIFramedScreenshot {
         guard
             let device = DeviceInfo.all().first(where: {$0.inputSize == size}),
             let framedScreenshot = device.framed(using: self)?.scaled(to: quality.value)
         else {
-            throw SBError.noImage
+            throw SBError.unsupportedImage
         }
         
         return framedScreenshot

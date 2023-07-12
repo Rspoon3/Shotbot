@@ -7,17 +7,13 @@
 
 import SwiftUI
 import Persistence
-import MessageUI
 import Models
 import Purchases
 
 public struct SettingsView: View {
+    @StateObject private var viewModel = SettingsViewModel()
     @Environment(\.openURL) var openURL
     @EnvironmentObject private var persistenceManager: PersistenceManager
-    @State private var showEmail = false
-    @State private var showEmailAlert = false
-    @State private var showEmailFailedAlert = false
-    private let appID = 6450552843
     
     // MARK: - Initializer
     
@@ -25,26 +21,15 @@ public struct SettingsView: View {
     
     // MARK: - Body
     
-    private func createFeedbackMessage()->MailView.Message{
-        let systemVersion = UIDevice.current.systemVersion
-        var message = "\n\n\n\n\n\n\n\n\n\nOS Version: \(systemVersion)"
-        
-        if let version = Bundle.appVersion, let build = Bundle.appBuild {
-            message.append("\nApp Version: \(version) (\(build))")
-        }
-        
-        return .init(message: message, isHTML: false)
-    }
-    
     public var body: some View {
         Form {
             Section("App Settings") {
                 Toggle("Automatically save to files", isOn: $persistenceManager.autoSaveToFiles)
                 Toggle("Automatically save to photos", isOn: $persistenceManager.autoSaveToPhotos)
                 Toggle("Automatically delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
-                Toggle("Clear Images On App Background", isOn: $persistenceManager.clearImagesOnAppBackground)
+                Toggle("Clear images on app background", isOn: $persistenceManager.clearImagesOnAppBackground)
             }
-            
+
             Section() {
                 Picker("Image Selection Filter", selection: $persistenceManager.imageSelectionType) {
                     ForEach(ImageSelectionType.allCases) { type in
@@ -59,7 +44,7 @@ public struct SettingsView: View {
                     }
                 }
             }
-            
+
             Section("Feedback") {
                 Button {
                     openURL(.mastodon)
@@ -68,7 +53,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                
+
                 Button {
                     openURL(.twitter(username: "Rspoon3"))
                 } label: {
@@ -76,51 +61,57 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                
+
                 Button {
-                    if MFMailComposeViewController.canSendMail() {
-                        showEmail = true
-                    } else {
-                        showEmailAlert = true
-                    }
+                    viewModel.emailFeedbackButtonTapped()
                 } label: {
-                    Label("Email Feedback", systemImage: "envelope")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
+                    Label {
+                        Text(viewModel.emailButtonText)
+                    } icon: {
+                        if viewModel.isGeneratingLogs {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "envelope")
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
-                .alert(isPresented: $showEmailAlert) {
+                .disabled(viewModel.isGeneratingLogs)
+                .alert(isPresented: $viewModel.showEmailAlert) {
                     Alert(
                         title: Text("Email Error"),
                         message: Text("Email services are not available on this device")
                     )
                 }
-                .alert(isPresented: $showEmailFailedAlert) {
+                .alert(isPresented: $viewModel.showEmailFailedAlert) {
                     Alert(
                         title: Text("Email Error"),
                         message: Text("An error occurred sending your email")
                     )
                 }
-                .sheet(isPresented: $showEmail) {
+                .sheet(isPresented: $viewModel.showEmail) {
                     MailView(
                         recipients: ["richardwitherspoon3@gmail.com"],
                         subject: "Shot Bot Feedback",
-                        message: createFeedbackMessage(),
-                        attachments: nil) { result in
-                            if case .failure = result {
-                                showEmailFailedAlert = true
-                            }
+                        message: viewModel.createFeedbackMessage(),
+                        attachments: viewModel.attachments
+                    ) { result in
+                        if case .failure = result {
+                            viewModel.showEmailFailedAlert = true
                         }
+                    }
                 }
-                
+
                 Button {
-                    openURL(.appStore(appID: appID))
+                    openURL(.appStore(appID: viewModel.appID))
                 } label: {
                     Label("Leave a review", systemImage: "star")
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
             }
-            
+
             Section("Other") {
                 NavigationLink {
                     PurchaseView()
@@ -138,19 +129,19 @@ public struct SettingsView: View {
                         Image(systemName: "heart")
                     }
                 }
-                
+
                 NavigationLink {
                     SupportedDevicesView()
                 } label: {
                     Label("Supported Devices", systemImage: "macbook.and.iphone")
                 }
-                
+
                 NavigationLink {
                     AppPermissionsView()
                 } label: {
                     Label("App Permissions", systemImage: "lock.shield")
                 }
-                
+
                 Button {
                     openURL(.gitHub)
                 } label: {
@@ -158,7 +149,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                
+
                 Button {
                     openURL(.privacyPolicy)
                 } label: {
@@ -166,7 +157,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                
+
                 Button {
                     openURL(.termsAndConditions)
                 } label: {
@@ -175,7 +166,7 @@ public struct SettingsView: View {
                         .contentShape(Rectangle())
                 }
             }
-            
+
 #if DEBUG
             Section("Debug") {
                 Text("Number of launches")
@@ -186,7 +177,7 @@ public struct SettingsView: View {
                     .badge(persistenceManager.deviceFrameCreations)
                 Text("Is Subscribed")
                     .badge(persistenceManager.isSubscribed.description)
-                
+
                 Picker("Subscription Override", selection: $persistenceManager.subscriptionOverride) {
                     ForEach(PersistenceManager.SubscriptionOverrideMethod.allCases) { type in
                         Text(type.id)
@@ -195,8 +186,8 @@ public struct SettingsView: View {
                 }
             }
 #endif
-            
-            SettingsMadeBy(appID: appID)
+
+            SettingsMadeBy(appID: viewModel.appID)
         }
         .navigationTitle("Settings")
         .buttonStyle(.plain)

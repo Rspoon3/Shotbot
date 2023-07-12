@@ -8,8 +8,7 @@
 import SwiftUI
 
 public struct PurchaseView: View {
-    @StateObject private var viewModel = PurchaseViewModel()
-    @EnvironmentObject private var purchaseManager: PurchaseManager
+    @StateObject private var viewModel: PurchaseViewModel
     @Environment(\.openURL) var openURL
     @State var xOffset: CGFloat = 0
     private let aspectRatio = 300.0/609.0
@@ -23,7 +22,10 @@ public struct PurchaseView: View {
     
     // MARK: - Initializer
     
-    public init() {}
+    public init(purchaseManager: PurchaseManaging = PurchaseManager.shared) {
+        let vm = PurchaseViewModel(purchaseManager: purchaseManager)
+        _viewModel = StateObject(wrappedValue: vm)
+    }
     
     // MARK: - Body
     
@@ -37,9 +39,7 @@ public struct PurchaseView: View {
         }
         .navigationTitle("Shotbot Pro")
         .navigationBarTitleDisplayMode(.inline)
-        .alert(isPresented: $viewModel.showAlert) {
-            Alert(title: Text("Something went wrong."))
-        }
+        .alert(error: $viewModel.error)
         .overlay {
             if viewModel.userAction != nil {
                 ProgressView()
@@ -140,8 +140,7 @@ public struct PurchaseView: View {
 struct PurchaseView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            PurchaseView()
-                .environmentObject(PurchaseManager.shared)
+            PurchaseView(purchaseManager: MockPurchaseManager())
         }
     }
 }

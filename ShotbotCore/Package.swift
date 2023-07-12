@@ -34,7 +34,7 @@ let package = Package(
             name: "AppFeature",
             dependencies: [
                 "HomeFeature",
-                "SettingsFeature",
+                "SettingsFeature"
             ]
         ),
         .target(
@@ -82,6 +82,7 @@ let package = Package(
                 "Models",
                 "Persistence",
                 "Purchases",
+                "MediaManager"
             ]
         ),
     ]

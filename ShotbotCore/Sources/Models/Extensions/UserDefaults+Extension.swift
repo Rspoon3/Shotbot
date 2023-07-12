@@ -9,6 +9,6 @@ import Foundation
 
 extension UserDefaults {
     public static var shared: UserDefaults {
-        return UserDefaults(suiteName: "group.com.rspoon3.Shotbot")!
+        return UserDefaults(suiteName: "group.com.rspoon3.ShotbotFrames")!
     }
 }

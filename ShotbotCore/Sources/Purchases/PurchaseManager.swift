@@ -8,12 +8,15 @@
 import Foundation
 import RevenueCat
 import Persistence
+import OSLog
+import Models
 
 public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging, PurchasesDelegate {
     public static let shared = PurchaseManager()
     private let purchases = Purchases.shared
     private let persistenceManager = PersistenceManager.shared
-    
+    private let logger = Logger(category: PurchaseManager.self)
+
     @Published public var offerings: Offerings? = nil
     @Published public var paymentIsInProgress = false
     @Published var customerInfo: CustomerInfo? {
@@ -21,7 +24,9 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
             Task {
                 await MainActor.run {
                     let pro = customerInfo?.entitlements["Pro"]
-                    persistenceManager.isSubscribed = pro?.isActive == true
+                    let isSubscribed = pro?.isActive == true
+                    persistenceManager.isSubscribed = isSubscribed
+                    logger.notice("Did update customer info. Is isSubscribed: \(isSubscribed, privacy: .public)")
                 }
             }
         }
@@ -37,16 +42,28 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
     // MARK: - PurchaseManaging
     @MainActor
     public func fetchOfferings() async {
-        offerings = try? await purchases.offerings()
+        do {
+            offerings = try await purchases.offerings()
+            logger.info("Fetched offers.")
+        } catch {
+            logger.error("Error fetching offers: \(error.localizedDescription, privacy: .public)")
+        }
     }
     
     @MainActor
     public func restorePurchases() async throws {
-        customerInfo = try await purchases.restorePurchases()
+        do {
+            customerInfo = try await purchases.restorePurchases()
+            logger.info("Restored purchases.")
+        } catch {
+            logger.error("Error restoring purchases: \(error.localizedDescription, privacy: .public)")
+        }
     }
     
     @MainActor
     public func purchase(_ package: Package) async throws {
+        logger.info("Purchase: \(package.storeProduct.description, privacy: .public).")
+        
         purchases.attribution.setAttributes(["numberOfLaunches": "\(persistenceManager.numberOfLaunches)"])
         purchases.attribution.setAttributes(["numberOfActivations": "\(persistenceManager.numberOfActivations)"])
         purchases.attribution.setAttributes(["deviceFrameCreations": "\(persistenceManager.deviceFrameCreations)"])
@@ -87,3 +104,24 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
         }
     }
 }
+
+
+//#if DEBUG
+public class MockPurchaseManager: ObservableObject, PurchaseManaging {
+    public var offerings: RevenueCat.Offerings?
+    public var paymentIsInProgress: Bool = false
+    
+    public var didRestorePurchases = false
+    public func restorePurchases() async throws {
+        didRestorePurchases = true
+    }
+    
+    public var purchaseResult: Result<Void, Error>?
+    public func purchase(_ package: Package) async throws {
+        _ = try purchaseResult?.get()
+    }
+    
+    
+    public init() {}
+}
+//#endif

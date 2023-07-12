@@ -8,18 +8,26 @@
 import Foundation
 import RevenueCat
 import Persistence
+import Models
+import OSLog
 
 @MainActor final class PurchaseViewModel: ObservableObject {
-    private let purchaseManager = PurchaseManager.shared
+    private let purchaseManager: PurchaseManaging
     private let persistenceManager = PersistenceManager.shared
-    @Published private(set) var userAction: UserAction?
-    @Published var showAlert = false
+    private let logger = Logger(category: PurchaseViewModel.self)
 
+    @Published private(set) var userAction: UserAction?
+    @Published var error: Error?
+    
     enum UserAction {
         case purchasing
         case restoring
     }
-        
+    
+    init(purchaseManager: PurchaseManaging = PurchaseManager.shared) {
+        self.purchaseManager = purchaseManager
+    }
+    
     private var annualPackage: Package? {
         purchaseManager.offerings?.current?.annual
     }
@@ -43,9 +51,9 @@ import Persistence
     var isSubscribed: Bool {
         persistenceManager.isSubscribed
     }
-
+    
     // MARK: - Public Helpers
-
+    
     func restorePurchase() {
         userAction = .restoring
         defer { userAction = nil }
@@ -54,14 +62,15 @@ import Persistence
             do {
                 try await purchaseManager.restorePurchases()
             } catch {
-                showAlert = true
+                self.error = error
             }
         }
     }
     
     func purchase() {
         guard let annualPackage else {
-            showAlert = true
+            logger.error("No annual package to purchase.")
+            self.error = SBError.noAnnualPackage
             return
         }
         
@@ -72,7 +81,7 @@ import Persistence
             do {
                 try await purchaseManager.purchase(annualPackage)
             } catch {
-                showAlert = true
+                self.error = error
             }
         }
     }

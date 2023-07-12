@@ -115,7 +115,7 @@ public struct MailView: UIViewControllerRepresentable {
         }
         
         if let attachments {
-            for attachment in attachments{
+            for attachment in attachments {
                 vc.addAttachmentData(attachment.data,
                                      mimeType: attachment.mimeType,
                                      fileName: attachment.fileName)
@@ -128,7 +128,9 @@ public struct MailView: UIViewControllerRepresentable {
     public func updateUIViewController(
         _ uiViewController: MFMailComposeViewController,
         context: UIViewControllerRepresentableContext<MailView>
-    ) { }
+    ) {
+        
+    }
 }
 
 

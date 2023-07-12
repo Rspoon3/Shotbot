@@ -10,7 +10,11 @@ import MediaManager
 
 struct AppPermissionsView: View {
     @Environment(\.openURL) var openURL
-    @EnvironmentObject private var photoLibraryManager: PhotoLibraryManager
+    let photoLibraryManager: PhotoLibraryManager
+    
+    init(photoLibraryManager: PhotoLibraryManager = .live) {
+        self.photoLibraryManager = photoLibraryManager
+    }
     
     var body: some View {
         Form {
@@ -33,10 +37,25 @@ struct AppPermissionsView: View {
     }
 }
 
+#if DEBUG
+import Photos
+
 struct AppPermissionsView_Previews: PreviewProvider {
+    static let statuses : [PHAuthorizationStatus] = [
+        .authorized,
+        .denied,
+        .limited,
+        .notDetermined,
+        .restricted
+    ]
+    
     static var previews: some View {
-        NavigationView {
-            AppPermissionsView()
+        ForEach(statuses, id: \.title) { status in
+            NavigationView {
+                AppPermissionsView(photoLibraryManager: .empty(status: status))
+            }
+            .previewDisplayName(status.title)
         }
     }
 }
+#endif

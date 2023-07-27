@@ -88,6 +88,11 @@ let package = Package(
                 "SBFoundation"
             ]
         ),
-        .target(name: "SBFoundation")
+        .target(
+            name: "SBFoundation",
+            dependencies: [
+                "Models"
+            ]
+        )
     ]
 )

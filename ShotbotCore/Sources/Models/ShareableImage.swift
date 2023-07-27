@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct ShareableImage: Identifiable {
+public struct ShareableImage: Identifiable, Sendable {
     public let framedScreenshot: UIFramedScreenshot
     public let url: URL
     public let id = UUID()

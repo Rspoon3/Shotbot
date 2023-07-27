@@ -132,11 +132,11 @@ import SBFoundation
     /// Shows the `showAutoSaveToast` if the user has `autoSaveToFiles` or `autoSaveToPhotos` enabled
     ///
     /// Using a slight delay in order to make the UI less jarring
-    private func autoSaveIfNeeded() async {
+    private func autoSaveIndividualImagesIfNeeded() async {
         guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
         
-        for result in imageResults.individual {
-            do {
+        do {
+            for result in imageResults.individual {
                 if persistenceManager.autoSaveToFiles {
                     try fileManager.copyToiCloudFiles(from: result.url)
                     logger.info("Saving to iCloud.")
@@ -146,22 +146,43 @@ import SBFoundation
                     try await photoLibraryManager.savePhoto(result.url)
                     logger.info("Saving to Photo library.")
                 }
-                
-                try await Task.sleep(for: .seconds(0.75))
-                showAutoSaveToast = true
-                
-                if toastText == nil {
-                    logger.fault("Toast text returned nil.")
-                }
-                
-                try await Task.sleep(for: .seconds(0.75))
-            } catch {
-                logger.info("An autosave error occurred: \(error.localizedDescription, privacy: .public).")
-                self.error = error
             }
+            
+            try await Task.sleep(for: .seconds(0.75))
+            showAutoSaveToast = true
+            
+            if toastText == nil {
+                logger.fault("Toast text returned nil.")
+            }
+            
+            try await Task.sleep(for: .seconds(0.75))
+        } catch {
+            logger.info("An autosave error occurred: \(error.localizedDescription, privacy: .public).")
+            self.error = error
         }
     }
     
+    /// Autosaves the combined image to photos and iCloud if the user has `autoSaveToFiles` and/or `autoSaveToPhotos` enabled
+    private func autoSaveCombinedIfNeeded() async {
+        guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
+        guard let combinedURL = imageResults.combined?.url else { return } 
+        
+        do {
+            if persistenceManager.autoSaveToFiles {
+                try fileManager.copyToiCloudFiles(from: combinedURL)
+                logger.info("Saving combined image to iCloud.")
+            }
+            
+            if persistenceManager.autoSaveToPhotos {
+                try await photoLibraryManager.savePhoto(combinedURL)
+                logger.info("Saving combined image to Photo library.")
+            }
+        } catch {
+            logger.info("An autosave error occurred for the combined image: \(error.localizedDescription, privacy: .public).")
+            self.error = error
+        }
+    }
+
     /// Cancels and nils out `combinedImageTask`
     private func stopCombinedImageTask() {
         logger.debug("Stopping combined image task.")
@@ -170,57 +191,70 @@ import SBFoundation
     }
     
     /// Combines images Horizontally with scaling to keep consistent spacing
-    ///
-    /// nonisolated in order to run on a background thread and not disrupt the main thread
-    nonisolated private func createCombinedImage(from images: [UIImage]) async throws {
-        logger.info("Starting combined image task.")
-        
-        try await Task {
-            defer {
-                logger.info("Ending combined image task.")
+    private func createCombinedImage(from images: [UIImage]) async throws -> ShareableImage {
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+                guard let self else {
+                    continuation.resume(throwing: SBError.noSelf)
+                    return
+                }
+
+                self.logger.info("Starting combined image task.")
+
+                defer {
+                    self.logger.info("Ending combined image task.")
+                }
+
+                let imagesWidth = images.map(\.size.width).reduce(0, +)
+
+                let resizedImages = images.map { image in
+                    let scale = (image.size.width / imagesWidth)
+                    let size = CGSize(
+                        width: image.size.width * scale,
+                        height: image.size.height * scale
+                    )
+                    return image.resized(to: size)
+                }
+
+                let combined = resizedImages.combineHorizontally()
+
+                guard let data = combined.pngData() else {
+                    self.logger.error("No combined image png data")
+                    continuation.resume(throwing: SBError.noImageData)
+                    return
+                }
+
+                let temporaryURL = URL.temporaryDirectory.appending(path: "Combined \(UUID().uuidString).png")
+                
+                do {
+                    try data.write(to: temporaryURL)
+                    self.logger.info("Saving combined data to temporary url.")
+
+                    let image = ShareableImage(framedScreenshot: combined, url: temporaryURL)
+
+                    continuation.resume(returning: image)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
             }
-            
-            let imagesWidth = images.map(\.size.width).reduce(0, +)
-            
-            let resizedImages = images.map { image in
-                let scale = (image.size.width / imagesWidth)
-                let size = CGSize(
-                    width: image.size.width * scale,
-                    height: image.size.height * scale
-                )
-                return image.resized(to: size)
-            }
-            
-            let combined = resizedImages.combineHorizontally()
-            
-            guard let data = combined.pngData() else {
-                logger.error("No combined image png data")
-                throw SBError.noImageData
-            }
-            
-            let temporaryURL = URL.temporaryDirectory.appending(path: "combined.png")
-            
-            try data.write(to: temporaryURL)
-            logger.info("Saving combined data to temporary url.")
-            
-            await MainActor.run {
-                imageResults.combined = ShareableImage(framedScreenshot: combined, url: temporaryURL)
-            }
-        }.value
+        }
     }
     
     /// If their are multiple image results, it will start the process of combining them horizontally
-    private func combineDeviceFrames() {
+    private func combineDeviceFrames() async {
         guard imageResults.hasMultipleImages else { return }
         
         stopCombinedImageTask()
         
         combinedImageTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
-            try? await createCombinedImage(
+            
+            imageResults.combined =  try? await createCombinedImage(
                 from: imageResults.individual.map(\.framedScreenshot)
             )
         }
+        
+        await combinedImageTask?.value
     }
     
     /// Loads an array of `Screenshot`from different source types depending on the input `PhotoSource`
@@ -301,7 +335,10 @@ import SBFoundation
             return
         }
         
-        combineDeviceFrames()
+        Task(priority: .userInitiated) {
+            await combineDeviceFrames()
+            await autoSaveCombinedIfNeeded()
+        }
         
         if imageType == .combined {
             logger.debug("Processing selected photos waiting for combined image task value.")
@@ -317,7 +354,7 @@ import SBFoundation
         }
         
         // Post FramedScreenshot generation
-        await autoSaveIfNeeded()
+        await autoSaveIndividualImagesIfNeeded()
         await autoDeleteScreenshotsIfNeeded()
         askForAReview()
     }

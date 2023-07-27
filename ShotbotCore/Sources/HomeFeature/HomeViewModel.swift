@@ -450,7 +450,7 @@ import SBFoundation
     }
     
     /// Saves a framed screenshot to the users photo library
-    public func save(_ image: UIFramedScreenshot) async {
+    public func saveToPhotos(_ image: UIFramedScreenshot) async {
         guard persistenceManager.canSaveFramedScreenshot else {
             showPurchaseView = true
             return
@@ -459,9 +459,26 @@ import SBFoundation
         do {
             try await photoLibraryManager.save(image)
             showQuickSaveToast = true
-            logger.debug("Manually saving image.")
+            logger.debug("Manually saving image to photo library.")
         } catch {
-            logger.error("Error manually saving image: \(error.localizedDescription, privacy: .public).")
+            logger.error("Error manually saving image to photo library: \(error.localizedDescription, privacy: .public).")
+            self.error = error
+        }
+    }
+    
+    /// Saves a framed screenshot to iCloud using the url
+    public func saveToiCloud(_ url: URL) {
+        guard persistenceManager.canSaveFramedScreenshot else {
+            showPurchaseView = true
+            return
+        }
+        
+        do {
+            try fileManager.copyToiCloudFiles(from: url)
+            showQuickSaveToast = true
+            logger.debug("Manually saving image to iCloud.")
+        } catch {
+            logger.error("Error manually saving image to iCloud: \(error.localizedDescription, privacy: .public).")
             self.error = error
         }
     }

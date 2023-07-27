@@ -153,24 +153,7 @@ public struct HomeView: View {
                 .scaledToFit()
                 .draggable(Image(uiImage: shareableImage.framedScreenshot))
                 .contextMenu {
-                    Button {
-                        Task(priority: .userInitiated) {
-                            await viewModel.save(shareableImage.framedScreenshot)
-                        }
-                    } label: {
-                        Label("Save", systemImage: "square.and.arrow.down")
-                    }
-                    
-                    Button {
-                        viewModel.copy(shareableImage.framedScreenshot)
-                    } label: {
-                        Label("Copy", systemImage: "doc.on.doc")
-                    }
-                    
-                    PurchaseShareLink(
-                        items: [shareableImage.url],
-                        showPurchaseView: $viewModel.showPurchaseView
-                    )
+                    contextMenu(shareableImage: shareableImage)
                 }
                 .padding()
                 .id(UUID())
@@ -223,24 +206,7 @@ public struct HomeView: View {
                     .resizable()
                     .scaledToFit()
                     .contextMenu {
-                        Button {
-                            Task(priority: .userInitiated) {
-                                await viewModel.save(shareableImage.framedScreenshot)
-                            }
-                        } label: {
-                            Label("Save", systemImage: "square.and.arrow.down")
-                        }
-                        
-                        Button {
-                            viewModel.copy(shareableImage.framedScreenshot)
-                        } label: {
-                            Label("Copy", systemImage: "doc.on.doc")
-                        }
-                        
-                        PurchaseShareLink(
-                            items: [shareableImage.url],
-                            showPurchaseView: $viewModel.showPurchaseView
-                        )
+                        contextMenu(shareableImage: shareableImage)
                     }
                     .padding([.horizontal, .top])
                     .padding(.bottom, 40)
@@ -264,6 +230,34 @@ public struct HomeView: View {
             appearance.currentPageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.75)
             appearance.pageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.33)
         }
+    }
+    
+    @ViewBuilder
+    private func contextMenu(shareableImage: ShareableImage) -> some View {
+        Button {
+            Task(priority: .userInitiated) {
+                await viewModel.saveToPhotos(shareableImage.framedScreenshot)
+            }
+        } label: {
+            Label("Save To Photos", systemImage: "photo")
+        }
+        
+        Button {
+            viewModel.saveToiCloud(shareableImage.url)
+        } label: {
+            Label("Save To Files", systemImage: "icloud")
+        }
+        
+        Button {
+            viewModel.copy(shareableImage.framedScreenshot)
+        } label: {
+            Label("Copy", systemImage: "doc.on.doc")
+        }
+        
+        PurchaseShareLink(
+            items: [shareableImage.url],
+            showPurchaseView: $viewModel.showPurchaseView
+        )
     }
 }
 

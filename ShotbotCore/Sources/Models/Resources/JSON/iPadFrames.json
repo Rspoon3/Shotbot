@@ -6,9 +6,29 @@
         "offSet": [120, 120],
     },
     {
+        "deviceFrame": "iPad Pro 2018 11 Inch Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2388, 1668],
+        "offSet": [120, 120],
+    },
+    {
+        "deviceFrame": "iPad Pro 2018 11 Inch Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2778, 1940],
+        "scaledSize": [2388, 1668],
+        "offSet": [120, 120],
+    },
+    {
         "deviceFrame": "iPad Pro 2018 11 Inch Portrait",
         "mergeMethod": "doubleOverlay",
         "inputSize": [1668, 2388],
+        "offSet": [120, 120],
+    },
+    {
+        "deviceFrame": "iPad Pro 2018 11 Inch Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1940, 2778],
+        "scaledSize": [1668, 2388],
         "offSet": [120, 120],
     },
     {

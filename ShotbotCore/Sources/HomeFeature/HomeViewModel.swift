@@ -59,6 +59,10 @@ import SBFoundation
         persistenceManager.imageSelectionType.filter
     }
     
+    var canShowClearButton: Bool {
+        imageResults.hasImages
+    }
+    
     // MARK: - Initializer
     
     public init(
@@ -462,13 +466,19 @@ import SBFoundation
     /// Clears all images when the user backgrounds the app, if the setting is enabled.
     public func clearImagesOnAppBackground() {
         guard persistenceManager.clearImagesOnAppBackground else { return }
+        logger.info("Clearing images on app background")
+        
+        clearContent()
+    }
+    
+    public func clearContent() {
+        logger.info("Clearing all content")
         
         stopCombinedImageTask()
-        viewState = .individualPlaceholder
-        imageType = .individual
         imageResults.removeAll()
         imageSelections.removeAll()
-        logger.info("Clearing images on app background")
+        viewState = .individualPlaceholder
+        imageType = .individual
     }
     
     /// Checks if the users has changed image quality. If so, the original screenshots are rerun

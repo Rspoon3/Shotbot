@@ -12,6 +12,7 @@ import Purchases
 import Persistence
 import MediaManager
 import OSLog
+import AppIntents
 
 @main
 struct ShotbotApp: App {
@@ -59,6 +60,10 @@ struct ShotbotApp: App {
         logger.notice("OS Version: \(systemVersion, privacy: .public). App Version: \(version, privacy: .public) (\(build, privacy: .public)).")
         logger.notice("Screen width: \(screenWidth, privacy: .public). Screen height: \(screenHeight, privacy: .public).")
         logger.notice("Device name: \(name, privacy: .public).")
+        
+        
+        /// Debug, Info, Notice, Error, Fault
+
     }
 }
 
@@ -68,3 +73,10 @@ class AppDelegateAdaptor: NSObject, UIApplicationDelegate {
         return true
     }
 }
+
+////@available(iOS 17.0, *)
+//extension ShotbotApp: AppIntentsPackage {
+//    static var includedPackages: [AppIntentsPackage.Type] = [
+//        MyFrameworkPackage.self // Make child intents available here
+//    ]
+//}

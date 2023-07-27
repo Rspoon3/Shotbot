@@ -65,7 +65,7 @@ import MessageUI
                 .getEntries(at: twoHoursAgo)
                 .compactMap { $0 as? OSLogEntryLog }
                 .filter { $0.subsystem == Logger.subsystem }
-                .map { "[\($0.date.formatted())] [\($0.category)] [\($0.level.rawValue)] \($0.composedMessage)" }
+                .map { "[\($0.date.formatted())] [\($0.category)] [\($0.level.title)] \($0.composedMessage)" }
             
             let joined = entries.joined(separator: "\n")
             

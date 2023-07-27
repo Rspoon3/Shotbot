@@ -13,30 +13,31 @@ import MediaManager
 import OSLog
 
 struct CreateFramedScreenshotsIntent: AppIntent {
-    static let intentClassName = "CreateFramedScreenshotsIntent"
-    static var title: LocalizedStringResource = "Create Framed Screenshots"
-    static var description = IntentDescription("Creates framed screenshots with a device frame using the images passed in.")
+    public static let intentClassName = "CreateFramedScreenshotsIntent"
+    public static var title: LocalizedStringResource = "Create Framed Screenshots 2"
+    public static var description = IntentDescription("Creates framed screenshots with a device frame using the images passed in 2.")
     private let logger = Logger(category: CreateFramedScreenshotsIntent.self)
     
+        
     @Parameter(
         title: "Images",
         description: "The plain screenshots passed in that will be framed.",
         supportedTypeIdentifiers: ["public.image"],
         inputConnectionBehavior: .connectToPreviousIntentResult
     )
-    var images: [IntentFile]
+    public var images: [IntentFile]
     
     @Parameter(
         title: "Save to files",
         description: "Will automatically save each image to the files app."
     )
-    var saveToFiles: Bool
+    public var saveToFiles: Bool
     
     @Parameter(
         title: "Save to photos",
         description: "Will automatically save each image to your photo library."
     )
-    var saveToPhotos: Bool
+    public var saveToPhotos: Bool
     
     @Parameter(
         title: "Image Quality",
@@ -45,7 +46,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
     )
     var imageQuality: ImageQuality
     
-    static var parameterSummary: some ParameterSummary {
+    public static var parameterSummary: some ParameterSummary {
         Summary("Create screenshots from \(\.$images)") {
             \.$saveToFiles
             \.$saveToPhotos
@@ -56,7 +57,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
     
     // MARK: - Functions
     
-    func perform() async throws -> some IntentResult & ReturnsValue<[IntentFile]> {
+    public func perform() async throws -> some IntentResult & ReturnsValue<[IntentFile]> {
         let persistenceManager = PersistenceManager.shared
         
         guard persistenceManager.canSaveFramedScreenshot else {
@@ -129,3 +130,5 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         return temporaryDirectoryURL
     }
 }
+
+//public struct MyFrameworkPackage: AppIntentsPackage { }

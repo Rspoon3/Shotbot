@@ -13,6 +13,7 @@ import Purchases
 import MediaManager
 import StoreKit
 import OSLog
+import SBFoundation
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var persistenceManager: any PersistenceManaging
@@ -194,7 +195,7 @@ import OSLog
             
             guard let data = combined.pngData() else {
                 logger.error("No combined image png data")
-                throw SBError.noData
+                throw SBError.noImageData
             }
             
             let temporaryURL = URL.temporaryDirectory.appending(path: "combined.png")
@@ -395,7 +396,7 @@ import OSLog
         
         guard let data = framedScreenshot.pngData() else {
             logger.error("Could not get png data for framedScreenshot.")
-            throw SBError.noData
+            throw SBError.noImageData
         }
         
         try data.write(to: temporaryURL)

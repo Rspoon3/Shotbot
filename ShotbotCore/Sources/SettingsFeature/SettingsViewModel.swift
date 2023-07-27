@@ -9,6 +9,7 @@ import UIKit
 import OSLog
 import Models
 import MessageUI
+import SBFoundation
 
 @MainActor class SettingsViewModel: ObservableObject {
     let appID = 6450552843
@@ -22,7 +23,6 @@ import MessageUI
     var emailButtonText: String {
         isGeneratingLogs ? "Generating Logs..." : "Email Feedback"
     }
-    
     
     // MARK: - Public
     
@@ -38,49 +38,43 @@ import MessageUI
     }
     
     func emailFeedbackButtonTapped() {
-        if MFMailComposeViewController.canSendMail() {
-            logger.info("Generating logs.")
-            
-            Task(priority: .userInitiated) {
-                isGeneratingLogs = true
-                try? await generateLogAttachments()
-                isGeneratingLogs = false
-                showEmail = true
-                logger.info("Showing email sheet for feedback.")
-            }
-        } else {
+        guard MFMailComposeViewController.canSendMail() else {
             showEmailAlert = true
             logger.error("Email is not supported on this device.")
+            return
+        }
+        
+        logger.info("Generating logs.")
+        
+        Task(priority: .userInitiated) {
+            isGeneratingLogs = true
+            
+            let store = try OSLogStore(scope: .currentProcessIdentifier)
+            let twoHoursAgo = Date.now.subtracting(hours: 2)
+            let logs = try await store.generateLogAttachments(startDate: twoHoursAgo)
+            
+            try createCSVFile(from: logs)
+            isGeneratingLogs = false
+            showEmail = true
+            logger.info("Showing email sheet for feedback.")
         }
     }
     
-    // MARK: - Private
-    
-    nonisolated private func generateLogAttachments() async throws {
-        try await Task {
-            let store = try OSLogStore(scope: .currentProcessIdentifier)
-            let twoHoursAgo = store.position(date: Date.now.subtracting(hours: 2))
-            
-            let entries = try store
-                .getEntries(at: twoHoursAgo)
-                .compactMap { $0 as? OSLogEntryLog }
-                .filter { $0.subsystem == Logger.subsystem }
-                .map { "[\($0.date.formatted())] [\($0.category)] [\($0.level.rawValue)] \($0.composedMessage)" }
-            
-            let joined = entries.joined(separator: "\n")
-            
-            guard let data = joined.data(using: .utf8) else {
-                return
-            }
-            
-            await MainActor.run {
-                attachments = [
-                    MailView.Attachment(
-                        data: data, mimeType: "text/plain",
-                        fileName: "logs.txt"
-                    )
-                ]
-            }
-        }.value
+    private func createCSVFile(from logs: [SBLog]) throws {
+        let logMessages = logs.map(\.text).joined(separator: "\n")
+        let stringValue = "Date, Time, Category, Level, Message"
+            .appending("\n")
+            .appending(logMessages)
+        
+        guard let data = stringValue.data(using: .utf8) else {
+            throw SBError.noData
+        }
+
+        attachments = [
+            MailView.Attachment(
+                data: data, mimeType: "csv",
+                fileName: "DebugLog.csv"
+            )
+        ]
     }
 }

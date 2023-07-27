@@ -33,6 +33,7 @@ import SBFoundation
     @Published public var imageSelections: [PhotosPickerItem] = []
     @Published public var viewState: ViewState = .individualPlaceholder
     @Published public var error: Error?
+    @Published public var isImportingFile = false
     @Published public var imageType: ImageType = .individual {
         didSet {
             imageTypeDidToggle()
@@ -265,6 +266,19 @@ import SBFoundation
         case .photoPicker:
             logger.info("Fetching images from the photos picker.")
             screenshots = try await imageSelections.loadUImages()
+        case .filePicker(let urls):
+            screenshots = try urls.compactMap { url in
+                let accessing = url.startAccessingSecurityScopedResource()
+                let data = try Data(contentsOf: url)
+                let image = UIImage(data: data)
+                
+                if accessing {
+                    url.stopAccessingSecurityScopedResource()
+                }
+                
+                return image
+            }
+            logger.info("Using file picker images (\(screenshots.count, privacy: .public)).")
         case .dropItems(let items):
             logger.info("Using dropped photos (\(items.count, privacy: .public)).")
             screenshots = items.compactMap { UIImage(data: $0) }
@@ -526,5 +540,25 @@ import SBFoundation
         
         let status = photoLibraryManager.photoAdditionStatus.title
         logger.info("Finished requesting photo library addition authorization. Status: \(status, privacy: .public).")
+    }
+    
+    /// Starts the photo selection process using imported files from the Files app
+    public func fileImportCompletion(result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            Task {
+                do {
+                    try await processSelectedPhotos(
+                        resetView: true,
+                        source: .filePicker(urls)
+                    )
+                } catch {
+                    self.error = error
+                }
+            }
+        case .failure(let error):
+            logger.error("File import error: \(error.localizedDescription, privacy: .public).")
+            self.error = error
+        }
     }
 }

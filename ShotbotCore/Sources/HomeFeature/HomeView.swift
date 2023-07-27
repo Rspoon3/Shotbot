@@ -31,7 +31,7 @@ public struct HomeView: View {
             VStack(spacing: 0) {
                 picker
                 mainContent
-                photoButton
+                pickerMenu
             }
             .navigationTitle("Shotbot")
             .photosPicker(
@@ -120,6 +120,11 @@ public struct HomeView: View {
                         }
                 }
             }
+            .fileImporter(
+                isPresented: $viewModel.isImportingFile,
+                allowedContentTypes: [.image, .png, .jpeg],
+                allowsMultipleSelection: true
+            ) { viewModel.fileImportCompletion(result: $0) }
         }
     }
     
@@ -172,20 +177,27 @@ public struct HomeView: View {
         }
     }
     
+    private var importFileButton: some View {
+        Button {
+            viewModel.isImportingFile = true
+        } label: {
+            Label("Select From Files", systemImage: "doc")
+        }
+    }
+    
     private var placeholder: some View {
         Image(systemName: "photo")
             .resizable()
             .scaledToFit()
+            .contextMenu { importFileButton }
             .frame(maxWidth: 200)
             .padding()
             .foregroundColor(.secondary)
             .frame(maxHeight: .infinity)
-            .onTapGesture {
-                viewModel.selectPhotos()
-            }
+            .onTapGesture { viewModel.selectPhotos() }
     }
     
-    private var photoButton: some View {
+    private var pickerMenu: some View {
         Button {
             viewModel.selectPhotos()
         } label:{
@@ -196,6 +208,7 @@ public struct HomeView: View {
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .disabled(viewModel.isLoading)
+        .contextMenu { importFileButton }
         .padding([.bottom, .horizontal])
     }
     

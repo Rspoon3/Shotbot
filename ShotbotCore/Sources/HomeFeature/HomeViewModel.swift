@@ -471,6 +471,7 @@ import SBFoundation
         clearContent()
     }
     
+    /// Clears all images and reverts the viewState back to individual placeholder
     public func clearContent() {
         logger.info("Clearing all content")
         

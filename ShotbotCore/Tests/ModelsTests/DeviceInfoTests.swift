@@ -15,14 +15,8 @@ final class DeviceInfoTests: XCTestCase {
         XCTAssertEqual(inputSizes.count, set.count)
     }
     
-    func testAllDeviceFramesAreUnique() {
-        let deviceFrames = DeviceInfo.all().map(\.deviceFrame)
-        let frames = Set(deviceFrames)
-        XCTAssertEqual(deviceFrames.count, frames.count)
-    }
-    
     func testNumberOfDevices() {
-        XCTAssertEqual(DeviceInfo.all().count, 39)
+        XCTAssertEqual(DeviceInfo.all().count, 43)
     }
     
     func testAllDeviceFramesHaveAnAsset() {

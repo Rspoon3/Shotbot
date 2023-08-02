@@ -16,9 +16,14 @@ public struct SBError: LocalizedError {
         recoverySuggestion: "Please make sure you the image selected is a supported screenshot"
     )
     
-    public static let noData = Self(
+    public static let noImageData = Self(
         errorDescription: "No image data",
         recoverySuggestion: "The data for this image could not be fetched"
+    )
+    
+    public static let noData = Self(
+        errorDescription: "No data",
+        recoverySuggestion: "The data could not be generated"
     )
     
     public static let proSubscriptionRequired = Self(
@@ -49,5 +54,10 @@ public struct SBError: LocalizedError {
     public static let noAnnualPackage = Self(
         errorDescription: "Purchase Error",
         recoverySuggestion: "This purchase item could not be found"
+    )
+    
+    public static let noSelf = Self(
+        errorDescription: "Memory Issue",
+        recoverySuggestion: "A memory issue occured"
     )
 }

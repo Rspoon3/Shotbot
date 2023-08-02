@@ -13,6 +13,7 @@ import Purchases
 import MediaManager
 import StoreKit
 import OSLog
+import SBFoundation
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var persistenceManager: any PersistenceManaging
@@ -32,6 +33,7 @@ import OSLog
     @Published public var imageSelections: [PhotosPickerItem] = []
     @Published public var viewState: ViewState = .individualPlaceholder
     @Published public var error: Error?
+    @Published public var isImportingFile = false
     @Published public var imageType: ImageType = .individual {
         didSet {
             imageTypeDidToggle()
@@ -55,6 +57,10 @@ import OSLog
     
     var photoFilter: PHPickerFilter {
         persistenceManager.imageSelectionType.filter
+    }
+    
+    var canShowClearButton: Bool {
+        imageResults.hasImages
     }
     
     // MARK: - Initializer
@@ -131,11 +137,11 @@ import OSLog
     /// Shows the `showAutoSaveToast` if the user has `autoSaveToFiles` or `autoSaveToPhotos` enabled
     ///
     /// Using a slight delay in order to make the UI less jarring
-    private func autoSaveIfNeeded() async {
+    private func autoSaveIndividualImagesIfNeeded() async {
         guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
         
-        for result in imageResults.individual {
-            do {
+        do {
+            for result in imageResults.individual {
                 if persistenceManager.autoSaveToFiles {
                     try fileManager.copyToiCloudFiles(from: result.url)
                     logger.info("Saving to iCloud.")
@@ -145,22 +151,43 @@ import OSLog
                     try await photoLibraryManager.savePhoto(result.url)
                     logger.info("Saving to Photo library.")
                 }
-                
-                try await Task.sleep(for: .seconds(0.75))
-                showAutoSaveToast = true
-                
-                if toastText == nil {
-                    logger.fault("Toast text returned nil.")
-                }
-                
-                try await Task.sleep(for: .seconds(0.75))
-            } catch {
-                logger.info("An autosave error occurred: \(error.localizedDescription, privacy: .public).")
-                self.error = error
             }
+            
+            try await Task.sleep(for: .seconds(0.75))
+            showAutoSaveToast = true
+            
+            if toastText == nil {
+                logger.fault("Toast text returned nil.")
+            }
+            
+            try await Task.sleep(for: .seconds(0.75))
+        } catch {
+            logger.info("An autosave error occurred: \(error.localizedDescription, privacy: .public).")
+            self.error = error
         }
     }
     
+    /// Autosaves the combined image to photos and iCloud if the user has `autoSaveToFiles` and/or `autoSaveToPhotos` enabled
+    private func autoSaveCombinedIfNeeded() async {
+        guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
+        guard let combinedURL = imageResults.combined?.url else { return } 
+        
+        do {
+            if persistenceManager.autoSaveToFiles {
+                try fileManager.copyToiCloudFiles(from: combinedURL)
+                logger.info("Saving combined image to iCloud.")
+            }
+            
+            if persistenceManager.autoSaveToPhotos {
+                try await photoLibraryManager.savePhoto(combinedURL)
+                logger.info("Saving combined image to Photo library.")
+            }
+        } catch {
+            logger.info("An autosave error occurred for the combined image: \(error.localizedDescription, privacy: .public).")
+            self.error = error
+        }
+    }
+
     /// Cancels and nils out `combinedImageTask`
     private func stopCombinedImageTask() {
         logger.debug("Stopping combined image task.")
@@ -169,57 +196,70 @@ import OSLog
     }
     
     /// Combines images Horizontally with scaling to keep consistent spacing
-    ///
-    /// nonisolated in order to run on a background thread and not disrupt the main thread
-    nonisolated private func createCombinedImage(from images: [UIImage]) async throws {
-        logger.info("Starting combined image task.")
-        
-        try await Task {
-            defer {
-                logger.info("Ending combined image task.")
+    private func createCombinedImage(from images: [UIImage]) async throws -> ShareableImage {
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+                guard let self else {
+                    continuation.resume(throwing: SBError.noSelf)
+                    return
+                }
+
+                self.logger.info("Starting combined image task.")
+
+                defer {
+                    self.logger.info("Ending combined image task.")
+                }
+
+                let imagesWidth = images.map(\.size.width).reduce(0, +)
+
+                let resizedImages = images.map { image in
+                    let scale = (image.size.width / imagesWidth)
+                    let size = CGSize(
+                        width: image.size.width * scale,
+                        height: image.size.height * scale
+                    )
+                    return image.resized(to: size)
+                }
+
+                let combined = resizedImages.combineHorizontally()
+
+                guard let data = combined.pngData() else {
+                    self.logger.error("No combined image png data")
+                    continuation.resume(throwing: SBError.noImageData)
+                    return
+                }
+
+                let temporaryURL = URL.temporaryDirectory.appending(path: "Combined \(UUID().uuidString).png")
+                
+                do {
+                    try data.write(to: temporaryURL)
+                    self.logger.info("Saving combined data to temporary url.")
+
+                    let image = ShareableImage(framedScreenshot: combined, url: temporaryURL)
+
+                    continuation.resume(returning: image)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
             }
-            
-            let imagesWidth = images.map(\.size.width).reduce(0, +)
-            
-            let resizedImages = images.map { image in
-                let scale = (image.size.width / imagesWidth)
-                let size = CGSize(
-                    width: image.size.width * scale,
-                    height: image.size.height * scale
-                )
-                return image.resized(to: size)
-            }
-            
-            let combined = resizedImages.combineHorizontally()
-            
-            guard let data = combined.pngData() else {
-                logger.error("No combined image png data")
-                throw SBError.noData
-            }
-            
-            let temporaryURL = URL.temporaryDirectory.appending(path: "combined.png")
-            
-            try data.write(to: temporaryURL)
-            logger.info("Saving combined data to temporary url.")
-            
-            await MainActor.run {
-                imageResults.combined = ShareableImage(framedScreenshot: combined, url: temporaryURL)
-            }
-        }.value
+        }
     }
     
     /// If their are multiple image results, it will start the process of combining them horizontally
-    private func combineDeviceFrames() {
+    private func combineDeviceFrames() async {
         guard imageResults.hasMultipleImages else { return }
         
         stopCombinedImageTask()
         
         combinedImageTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
-            try? await createCombinedImage(
+            
+            imageResults.combined =  try? await createCombinedImage(
                 from: imageResults.individual.map(\.framedScreenshot)
             )
         }
+        
+        await combinedImageTask?.value
     }
     
     /// Loads an array of `Screenshot`from different source types depending on the input `PhotoSource`
@@ -230,6 +270,19 @@ import OSLog
         case .photoPicker:
             logger.info("Fetching images from the photos picker.")
             screenshots = try await imageSelections.loadUImages()
+        case .filePicker(let urls):
+            screenshots = try urls.compactMap { url in
+                let accessing = url.startAccessingSecurityScopedResource()
+                let data = try Data(contentsOf: url)
+                let image = UIImage(data: data)
+                
+                if accessing {
+                    url.stopAccessingSecurityScopedResource()
+                }
+                
+                return image
+            }
+            logger.info("Using file picker images (\(screenshots.count, privacy: .public)).")
         case .dropItems(let items):
             logger.info("Using dropped photos (\(items.count, privacy: .public)).")
             screenshots = items.compactMap { UIImage(data: $0) }
@@ -300,7 +353,10 @@ import OSLog
             return
         }
         
-        combineDeviceFrames()
+        Task(priority: .userInitiated) {
+            await combineDeviceFrames()
+            await autoSaveCombinedIfNeeded()
+        }
         
         if imageType == .combined {
             logger.debug("Processing selected photos waiting for combined image task value.")
@@ -316,7 +372,7 @@ import OSLog
         }
         
         // Post FramedScreenshot generation
-        await autoSaveIfNeeded()
+        await autoSaveIndividualImagesIfNeeded()
         await autoDeleteScreenshotsIfNeeded()
         askForAReview()
     }
@@ -395,7 +451,7 @@ import OSLog
         
         guard let data = framedScreenshot.pngData() else {
             logger.error("Could not get png data for framedScreenshot.")
-            throw SBError.noData
+            throw SBError.noImageData
         }
         
         try data.write(to: temporaryURL)
@@ -410,13 +466,20 @@ import OSLog
     /// Clears all images when the user backgrounds the app, if the setting is enabled.
     public func clearImagesOnAppBackground() {
         guard persistenceManager.clearImagesOnAppBackground else { return }
+        logger.info("Clearing images on app background")
+        
+        clearContent()
+    }
+    
+    /// Clears all images and reverts the viewState back to individual placeholder
+    public func clearContent() {
+        logger.info("Clearing all content")
         
         stopCombinedImageTask()
-        viewState = .individualPlaceholder
-        imageType = .individual
         imageResults.removeAll()
         imageSelections.removeAll()
-        logger.info("Clearing images on app background")
+        viewState = .individualPlaceholder
+        imageType = .individual
     }
     
     /// Checks if the users has changed image quality. If so, the original screenshots are rerun
@@ -449,7 +512,7 @@ import OSLog
     }
     
     /// Saves a framed screenshot to the users photo library
-    public func save(_ image: UIFramedScreenshot) async {
+    public func saveToPhotos(_ image: UIFramedScreenshot) async {
         guard persistenceManager.canSaveFramedScreenshot else {
             showPurchaseView = true
             return
@@ -458,9 +521,26 @@ import OSLog
         do {
             try await photoLibraryManager.save(image)
             showQuickSaveToast = true
-            logger.debug("Manually saving image.")
+            logger.debug("Manually saving image to photo library.")
         } catch {
-            logger.error("Error manually saving image: \(error.localizedDescription, privacy: .public).")
+            logger.error("Error manually saving image to photo library: \(error.localizedDescription, privacy: .public).")
+            self.error = error
+        }
+    }
+    
+    /// Saves a framed screenshot to iCloud using the url
+    public func saveToiCloud(_ url: URL) {
+        guard persistenceManager.canSaveFramedScreenshot else {
+            showPurchaseView = true
+            return
+        }
+        
+        do {
+            try fileManager.copyToiCloudFiles(from: url)
+            showQuickSaveToast = true
+            logger.debug("Manually saving image to iCloud.")
+        } catch {
+            logger.error("Error manually saving image to iCloud: \(error.localizedDescription, privacy: .public).")
             self.error = error
         }
     }
@@ -471,5 +551,25 @@ import OSLog
         
         let status = photoLibraryManager.photoAdditionStatus.title
         logger.info("Finished requesting photo library addition authorization. Status: \(status, privacy: .public).")
+    }
+    
+    /// Starts the photo selection process using imported files from the Files app
+    public func fileImportCompletion(result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            Task {
+                do {
+                    try await processSelectedPhotos(
+                        resetView: true,
+                        source: .filePicker(urls)
+                    )
+                } catch {
+                    self.error = error
+                }
+            }
+        case .failure(let error):
+            logger.error("File import error: \(error.localizedDescription, privacy: .public).")
+            self.error = error
+        }
     }
 }

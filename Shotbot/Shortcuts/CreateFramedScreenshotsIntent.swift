@@ -97,7 +97,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         
         guard let data = image.pngData() else {
             logger.error("PNG Data could not be obtained")
-            throw SBError.noData
+            throw SBError.noImageData
         }
         
         let path = "\(UUID().uuidString).png"

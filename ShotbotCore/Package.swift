@@ -14,6 +14,7 @@ let package = Package(
         .library(name: "Purchases", targets: ["Purchases"]),
         .library(name: "MediaManager", targets: ["MediaManager"]),
         .library(name: "SettingsFeature", targets: ["SettingsFeature"]),
+        .library(name: "SBFoundation", targets: ["SBFoundation"]),
     ],
     dependencies: [
         .package(
@@ -52,6 +53,7 @@ let package = Package(
                 "Persistence",
                 "Purchases",
                 "MediaManager",
+                "SBFoundation",
                 .product(name: "AlertToast", package: "AlertToast")
             ]
         ),
@@ -82,8 +84,15 @@ let package = Package(
                 "Models",
                 "Persistence",
                 "Purchases",
-                "MediaManager"
+                "MediaManager",
+                "SBFoundation"
             ]
         ),
+        .target(
+            name: "SBFoundation",
+            dependencies: [
+                "Models"
+            ]
+        )
     ]
 )

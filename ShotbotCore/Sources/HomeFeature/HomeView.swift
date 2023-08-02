@@ -31,7 +31,7 @@ public struct HomeView: View {
             VStack(spacing: 0) {
                 picker
                 mainContent
-                photoButton
+                pickerMenu
             }
             .navigationTitle("Shotbot")
             .photosPicker(
@@ -120,6 +120,20 @@ public struct HomeView: View {
                         }
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    if viewModel.canShowClearButton {
+                        Button("Clear", role: .destructive) {
+                            viewModel.clearContent()
+                        }.foregroundColor(.red)
+                    }
+                }
+            }
+            .fileImporter(
+                isPresented: $viewModel.isImportingFile,
+                allowedContentTypes: [.image, .png, .jpeg],
+                allowsMultipleSelection: true
+            ) { viewModel.fileImportCompletion(result: $0) }
         }
     }
     
@@ -153,24 +167,7 @@ public struct HomeView: View {
                 .scaledToFit()
                 .draggable(Image(uiImage: shareableImage.framedScreenshot))
                 .contextMenu {
-                    Button {
-                        Task(priority: .userInitiated) {
-                            await viewModel.save(shareableImage.framedScreenshot)
-                        }
-                    } label: {
-                        Label("Save", systemImage: "square.and.arrow.down")
-                    }
-                    
-                    Button {
-                        viewModel.copy(shareableImage.framedScreenshot)
-                    } label: {
-                        Label("Copy", systemImage: "doc.on.doc")
-                    }
-                    
-                    PurchaseShareLink(
-                        items: [shareableImage.url],
-                        showPurchaseView: $viewModel.showPurchaseView
-                    )
+                    contextMenu(shareableImage: shareableImage)
                 }
                 .padding()
                 .id(UUID())
@@ -189,20 +186,27 @@ public struct HomeView: View {
         }
     }
     
+    private var importFileButton: some View {
+        Button {
+            viewModel.isImportingFile = true
+        } label: {
+            Label("Select From Files", systemImage: "doc")
+        }
+    }
+    
     private var placeholder: some View {
         Image(systemName: "photo")
             .resizable()
             .scaledToFit()
+            .contextMenu { importFileButton }
             .frame(maxWidth: 200)
             .padding()
             .foregroundColor(.secondary)
             .frame(maxHeight: .infinity)
-            .onTapGesture {
-                viewModel.selectPhotos()
-            }
+            .onTapGesture { viewModel.selectPhotos() }
     }
     
-    private var photoButton: some View {
+    private var pickerMenu: some View {
         Button {
             viewModel.selectPhotos()
         } label:{
@@ -213,6 +217,7 @@ public struct HomeView: View {
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .disabled(viewModel.isLoading)
+        .contextMenu { importFileButton }
         .padding([.bottom, .horizontal])
     }
     
@@ -223,24 +228,7 @@ public struct HomeView: View {
                     .resizable()
                     .scaledToFit()
                     .contextMenu {
-                        Button {
-                            Task(priority: .userInitiated) {
-                                await viewModel.save(shareableImage.framedScreenshot)
-                            }
-                        } label: {
-                            Label("Save", systemImage: "square.and.arrow.down")
-                        }
-                        
-                        Button {
-                            viewModel.copy(shareableImage.framedScreenshot)
-                        } label: {
-                            Label("Copy", systemImage: "doc.on.doc")
-                        }
-                        
-                        PurchaseShareLink(
-                            items: [shareableImage.url],
-                            showPurchaseView: $viewModel.showPurchaseView
-                        )
+                        contextMenu(shareableImage: shareableImage)
                     }
                     .padding([.horizontal, .top])
                     .padding(.bottom, 40)
@@ -264,6 +252,34 @@ public struct HomeView: View {
             appearance.currentPageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.75)
             appearance.pageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.33)
         }
+    }
+    
+    @ViewBuilder
+    private func contextMenu(shareableImage: ShareableImage) -> some View {
+        Button {
+            Task(priority: .userInitiated) {
+                await viewModel.saveToPhotos(shareableImage.framedScreenshot)
+            }
+        } label: {
+            Label("Save To Photos", systemImage: "photo")
+        }
+        
+        Button {
+            viewModel.saveToiCloud(shareableImage.url)
+        } label: {
+            Label("Save To Files", systemImage: "icloud")
+        }
+        
+        Button {
+            viewModel.copy(shareableImage.framedScreenshot)
+        } label: {
+            Label("Copy", systemImage: "doc.on.doc")
+        }
+        
+        PurchaseShareLink(
+            items: [shareableImage.url],
+            showPurchaseView: $viewModel.showPurchaseView
+        )
     }
 }
 

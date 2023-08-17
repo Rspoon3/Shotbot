@@ -27,7 +27,7 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/RevenueCat/purchases-ios.git",
-            exact: .init("4.25.4")!
+            exact: .init("4.25.5")!
         )
     ],
     targets: [

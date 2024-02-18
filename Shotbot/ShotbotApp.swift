@@ -61,13 +61,21 @@ struct ShotbotApp: App {
         
         logger.notice("OS Version: \(systemVersion, privacy: .public). App Version: \(version, privacy: .public) (\(build, privacy: .public)).")
         logger.notice("Device name: \(name, privacy: .public).")
-
-        #if !os(visionOS)
-        let screenSize: CGRect = UIScreen.main.bounds
+        
+        var screenSize: CGRect?
+        
+#if os(visionOS)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            screenSize = windowScene.coordinateSpace.bounds
+        }
+#else
+        screenSize = UIScreen.main.bounds
+#endif
+        
+        guard let screenSize else { return }
         let screenWidth = screenSize.width.formatted()
         let screenHeight = screenSize.height.formatted()
         logger.notice("Screen width: \(screenWidth, privacy: .public). Screen height: \(screenHeight, privacy: .public).")
-        #endif
     }
 }
 

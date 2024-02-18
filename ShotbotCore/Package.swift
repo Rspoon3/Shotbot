@@ -22,7 +22,7 @@ let package = Package(
             exact: .init("0.2.0")!
         ),
         .package(
-            url: "https://github.com/GodL/AlertToast.git",
+            url: "https://github.com/nbapps/AlertToast.git",
             branch: "master"
         ),
         .package(

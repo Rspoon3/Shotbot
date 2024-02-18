@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "ShotbotCore",
     platforms: [
-        .iOS(.v17),
+        .iOS(.v16),
         .visionOS(.v1)
     ],
     products: [
@@ -17,8 +17,7 @@ let package = Package(
         .library(name: "Purchases", targets: ["Purchases"]),
         .library(name: "MediaManager", targets: ["MediaManager"]),
         .library(name: "SettingsFeature", targets: ["SettingsFeature"]),
-        .library(name: "SBFoundation", targets: ["SBFoundation"]),
-        .library(name: "Shortcuts", targets: ["Shortcuts"]),
+        .library(name: "SBFoundation", targets: ["SBFoundation"])
     ],
     dependencies: [
         .package(
@@ -39,8 +38,7 @@ let package = Package(
             name: "AppFeature",
             dependencies: [
                 "HomeFeature",
-                "SettingsFeature",
-                "Shortcuts"
+                "SettingsFeature"
             ]
         ),
         .target(
@@ -97,15 +95,6 @@ let package = Package(
             name: "SBFoundation",
             dependencies: [
                 "Models"
-            ]
-        ),
-        .target(
-            name: "Shortcuts",
-            dependencies: [
-                "Models",
-                "Persistence",
-                "MediaManager",
-                "SBFoundation"
             ]
         )
     ]

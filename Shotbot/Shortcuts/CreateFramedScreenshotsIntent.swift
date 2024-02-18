@@ -47,7 +47,7 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
         description: "The quality of the screenshot.",
         default: .original
     )
-    var imageQuality: ImageQuality
+    var imageQuality: ShortcutsImageQuality
     
     public static var parameterSummary: some ParameterSummary {
         Summary("Create screenshots from \(\.$images)") {
@@ -88,7 +88,7 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
             logger.error("Data could not be turned into a UIImage")
             throw SBError.unsupportedImage
         }
-        
+                
         guard let device = DeviceInfo.all().first(where: {$0.inputSize == screenshot.size}) else {
             logger.error("Could not find an image with width: \(screenshot.size.width, privacy: .public) and height: \(screenshot.size.height, privacy: .public).")
             throw SBError.unsupportedDevice

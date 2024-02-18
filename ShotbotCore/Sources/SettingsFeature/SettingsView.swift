@@ -29,6 +29,9 @@ public struct SettingsView: View {
                 Toggle("Automatically delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
                 Toggle("Clear images on app background", isOn: $persistenceManager.clearImagesOnAppBackground)
             }
+            #if os(visionOS)
+            .padding(.top, 40)
+            #endif
 
             Section() {
                 Picker("Image Selection Filter", selection: $persistenceManager.imageSelectionType) {
@@ -169,14 +172,28 @@ public struct SettingsView: View {
 
 #if DEBUG
             Section("Debug") {
-                Text("Number of launches")
-                    .badge(persistenceManager.numberOfLaunches)
-                Text("Number of activations")
-                    .badge(persistenceManager.numberOfActivations)
-                Text("Number of device frame creations")
-                    .badge(persistenceManager.deviceFrameCreations)
-                Text("Is Subscribed")
-                    .badge(persistenceManager.isSubscribed.description)
+                LabeledContent(
+                    "Number of launches",
+                    value: persistenceManager.numberOfLaunches,
+                    format: .number
+                )
+                
+                LabeledContent(
+                    "Number of activations",
+                    value: persistenceManager.numberOfActivations,
+                    format: .number
+                )
+                
+                LabeledContent(
+                    "Number of device frame creations",
+                    value: persistenceManager.deviceFrameCreations,
+                    format: .number
+                )
+                
+                LabeledContent(
+                    "Is Subscribed",
+                    value: persistenceManager.isSubscribed.description
+                )
 
                 Picker("Subscription Override", selection: $persistenceManager.subscriptionOverride) {
                     ForEach(PersistenceManager.SubscriptionOverrideMethod.allCases) { type in

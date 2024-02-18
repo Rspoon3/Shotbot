@@ -52,3 +52,13 @@ struct AppTabNavigation_Previews: PreviewProvider {
         AppTabNavigation()
     }
 }
+
+
+import AppIntents
+import Shortcuts
+
+public struct ShotbotAppIntentsPackage: AppIntentsPackage {
+    public static var includedPackages: [AppIntentsPackage.Type] = [
+        ShotBotAppIntents.self
+    ]
+}

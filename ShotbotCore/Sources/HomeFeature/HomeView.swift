@@ -42,7 +42,7 @@ public struct HomeView: View {
                 matching: viewModel.photoFilter,
                 photoLibrary: .shared()
             )
-            .onChange(of: viewModel.imageSelections) { newValue in
+            .onChange(of: viewModel.imageSelections) { _, newValue in
                 Task(priority: .userInitiated) {
                     await viewModel.imageSelectionsDidChange()
                 }
@@ -102,7 +102,7 @@ public struct HomeView: View {
             .task {
                 await viewModel.requestPhotoLibraryAdditionAuthorization()
             }
-            .onChange(of: scenePhase) { newValue in
+            .onChange(of: scenePhase) { _, newValue in
                 guard newValue == .background || newValue == .active else { return }
                 viewModel.clearImagesOnAppBackground()
             }

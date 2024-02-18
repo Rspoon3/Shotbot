@@ -1,11 +1,14 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "ShotbotCore",
-    platforms: [.iOS(.v16)],
+    platforms: [
+        .iOS(.v17),
+        .visionOS(.v1)
+    ],
     products: [
         .library(name: "AppFeature", targets: ["AppFeature"]),
         .library(name: "Models", targets: ["Models"]),
@@ -15,6 +18,7 @@ let package = Package(
         .library(name: "MediaManager", targets: ["MediaManager"]),
         .library(name: "SettingsFeature", targets: ["SettingsFeature"]),
         .library(name: "SBFoundation", targets: ["SBFoundation"]),
+        .library(name: "Shortcuts", targets: ["Shortcuts"]),
     ],
     dependencies: [
         .package(
@@ -35,7 +39,8 @@ let package = Package(
             name: "AppFeature",
             dependencies: [
                 "HomeFeature",
-                "SettingsFeature"
+                "SettingsFeature",
+                "Shortcuts"
             ]
         ),
         .target(
@@ -92,6 +97,15 @@ let package = Package(
             name: "SBFoundation",
             dependencies: [
                 "Models"
+            ]
+        ),
+        .target(
+            name: "Shortcuts",
+            dependencies: [
+                "Models",
+                "Persistence",
+                "MediaManager",
+                "SBFoundation"
             ]
         )
     ]

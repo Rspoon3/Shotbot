@@ -10,7 +10,7 @@ import Models
 import AppIntents
 
 extension ImageQuality: AppEnum {
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "ImageQuality")
+    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Image Quality")
     public static var typeDisplayName: LocalizedStringResource = "Image Quality"
     
     public static var caseDisplayRepresentations: [ImageQuality: DisplayRepresentation] = [

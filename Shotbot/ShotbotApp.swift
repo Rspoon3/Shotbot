@@ -41,24 +41,33 @@ struct ShotbotApp: App {
                     performLogging()
                 }
         }
-        .onChange(of: scenePhase) { phase in
+        .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             persistenceManager.numberOfActivations += 1
         }
+    #if os(visionOS)
+        .defaultSize(
+            width: 600,
+            height: 800
+        )
+    #endif
     }
     
     private func performLogging() {
         let systemVersion = UIDevice.current.systemVersion
         let version = Bundle.appVersion ?? "N/A"
         let build = Bundle.appBuild ?? "N/A"
-        let screenSize: CGRect = UIScreen.main.bounds
-        let screenWidth = screenSize.width.formatted()
-        let screenHeight = screenSize.height.formatted()
         let name = UIDevice.current.name
         
         logger.notice("OS Version: \(systemVersion, privacy: .public). App Version: \(version, privacy: .public) (\(build, privacy: .public)).")
-        logger.notice("Screen width: \(screenWidth, privacy: .public). Screen height: \(screenHeight, privacy: .public).")
         logger.notice("Device name: \(name, privacy: .public).")
+
+        #if !os(visionOS)
+        let screenSize: CGRect = UIScreen.main.bounds
+        let screenWidth = screenSize.width.formatted()
+        let screenHeight = screenSize.height.formatted()
+        logger.notice("Screen width: \(screenWidth, privacy: .public). Screen height: \(screenHeight, privacy: .public).")
+        #endif
     }
 }
 

@@ -22,12 +22,12 @@ let package = Package(
             exact: .init("0.2.0")!
         ),
         .package(
-            url: "https://github.com/elai950/AlertToast.git",
-            exact: .init("1.3.9")!
+            url: "https://github.com/GodL/AlertToast.git",
+            branch: "master"
         ),
         .package(
             url: "https://github.com/RevenueCat/purchases-ios.git",
-            exact: .init("4.25.5")!
+            exact: .init("4.36.3")!
         )
     ],
     targets: [

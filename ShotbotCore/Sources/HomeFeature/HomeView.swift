@@ -33,18 +33,21 @@ public struct HomeView: View {
                 mainContent
                 pickerMenu
             }
+            #if os(iOS)
             .navigationTitle("Shotbot")
+            #endif
             .photosPicker(
                 isPresented: $viewModel.showPhotosPicker,
                 selection: $viewModel.imageSelections,
                 matching: viewModel.photoFilter,
                 photoLibrary: .shared()
             )
-            .onChange(of: viewModel.imageSelections) { newValue in
+            .onChange(of: viewModel.imageSelections) { _, newValue in
                 Task(priority: .userInitiated) {
                     await viewModel.imageSelectionsDidChange()
                 }
             }
+            .contentShape(Rectangle())
             .dropDestination(for: Data.self) { items, location in
                 Task(priority: .userInitiated) {
                     await viewModel.didDropItem(items)
@@ -99,7 +102,7 @@ public struct HomeView: View {
             .task {
                 await viewModel.requestPhotoLibraryAdditionAuthorization()
             }
-            .onChange(of: scenePhase) { newValue in
+            .onChange(of: scenePhase) { _, newValue in
                 guard newValue == .background || newValue == .active else { return }
                 viewModel.clearImagesOnAppBackground()
             }
@@ -201,6 +204,14 @@ public struct HomeView: View {
             .contextMenu { importFileButton }
             .frame(maxWidth: 200)
             .padding()
+            .contentShape(
+                .hoverEffect,
+                .rect(
+                    cornerRadius: 14,
+                    style: .continuous
+                )
+            )
+            .hoverEffect()
             .foregroundColor(.secondary)
             .frame(maxHeight: .infinity)
             .onTapGesture { viewModel.selectPhotos() }

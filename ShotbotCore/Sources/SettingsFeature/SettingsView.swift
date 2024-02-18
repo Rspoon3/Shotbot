@@ -189,7 +189,9 @@ public struct SettingsView: View {
 
             SettingsMadeBy(appID: viewModel.appID)
         }
+        #if os(iOS)
         .navigationTitle("Settings")
+        #endif
         .buttonStyle(.plain)
     }
 }

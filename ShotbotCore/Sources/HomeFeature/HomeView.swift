@@ -14,14 +14,14 @@ import Purchases
 import MediaManager
 
 public struct HomeView: View {
-    @ObservedObject var viewModel: HomeViewModel
+    @StateObject var viewModel = HomeViewModel()
     @Environment(\.scenePhase) var scenePhase
     
     
     // MARK: - Initializer
     
     public init(viewModel: HomeViewModel) {
-        self.viewModel = viewModel
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     // MARK: - Body

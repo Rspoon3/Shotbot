@@ -2,6 +2,19 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>NSAppIconActionTintColorName</key>
+			<string>ShortcutsForeground</string>
+			<key>NSAppIconComplementingColorNames</key>
+			<array>
+				<string>ShortcutsBackground1</string>
+				<string>ShortcutsBackground2</string>
+			</array>
+		</dict>
+	</dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSUbiquitousContainers</key>

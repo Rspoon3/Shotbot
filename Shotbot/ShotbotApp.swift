@@ -11,6 +11,7 @@ import RevenueCat
 import Purchases
 import Persistence
 import MediaManager
+import AppIntents
 import OSLog
 
 @main

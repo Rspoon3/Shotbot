@@ -23,16 +23,18 @@ public struct SettingsView: View {
     
     public var body: some View {
         Form {
-            Section("App Settings") {
+            Section {
                 Toggle("Automatically save to files", isOn: $persistenceManager.autoSaveToFiles)
                 Toggle("Automatically save to photos", isOn: $persistenceManager.autoSaveToPhotos)
                 Toggle("Automatically delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
                 Toggle("Clear images on app background", isOn: $persistenceManager.clearImagesOnAppBackground)
+            } header: {
+                Text("App Settings")
+#if os(visionOS)
+                    .padding(.top, 40)
+#endif
             }
-            #if os(visionOS)
-            .padding(.top, 40)
-            #endif
-
+            
             Section() {
                 Picker("Image Selection Filter", selection: $persistenceManager.imageSelectionType) {
                     ForEach(ImageSelectionType.allCases) { type in

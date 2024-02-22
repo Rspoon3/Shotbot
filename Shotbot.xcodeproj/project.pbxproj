@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9436C9BB2A44EB2A004D996E /* CreateFramedScreenshotsIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9436C9BA2A44EA92004D996E /* CreateFramedScreenshotsIntent.swift */; };
-		9485F0EC2A44EFA3001D966E /* ImageQuality+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9485F0EB2A44EFA3001D966E /* ImageQuality+Extension.swift */; };
 		94BD65CA2A44B28700D0CE61 /* ShotbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */; };
 		94BD65CE2A44B28700D0CE61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65CD2A44B28700D0CE61 /* Assets.xcassets */; };
 		94BD65D12A44B28700D0CE61 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65D02A44B28700D0CE61 /* Preview Assets.xcassets */; };
@@ -21,6 +19,9 @@
 		94BD65FE2A44B67600D0CE61 /* ActionExtensionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BD65FB2A44B67600D0CE61 /* ActionExtensionViewModel.swift */; };
 		94BD66022A44B8CC00D0CE61 /* Persistence in Frameworks */ = {isa = PBXBuildFile; productRef = 94BD66012A44B8CC00D0CE61 /* Persistence */; };
 		94BD66042A44B8D000D0CE61 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 94BD66032A44B8D000D0CE61 /* Models */; };
+		94CA148C2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CA148B2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift */; };
+		94CA148E2B81C1CA009D956C /* ShortcutsImageQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CA148D2B81C1CA009D956C /* ShortcutsImageQuality.swift */; };
+		94CA14912B81C5C2009D956C /* ShotBotShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CA14902B81C5C2009D956C /* ShotBotShortcuts.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,8 +49,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		9436C9BA2A44EA92004D996E /* CreateFramedScreenshotsIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFramedScreenshotsIntent.swift; sourceTree = "<group>"; };
-		9485F0EB2A44EFA3001D966E /* ImageQuality+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageQuality+Extension.swift"; sourceTree = "<group>"; };
 		94BD65C62A44B28700D0CE61 /* Shotbot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shotbot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotbotApp.swift; sourceTree = "<group>"; };
 		94BD65CD2A44B28700D0CE61 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -65,6 +64,9 @@
 		94BD65FA2A44B67600D0CE61 /* ActionExtensionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionExtensionView.swift; sourceTree = "<group>"; };
 		94BD65FB2A44B67600D0CE61 /* ActionExtensionViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionExtensionViewModel.swift; sourceTree = "<group>"; };
 		94BD65FF2A44B77A00D0CE61 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		94CA148B2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFramedScreenshotsIntent.swift; sourceTree = "<group>"; };
+		94CA148D2B81C1CA009D956C /* ShortcutsImageQuality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsImageQuality.swift; sourceTree = "<group>"; };
+		94CA14902B81C5C2009D956C /* ShotBotShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotBotShortcuts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,15 +91,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		9485F0ED2A44EFB3001D966E /* Shortcuts */ = {
-			isa = PBXGroup;
-			children = (
-				9436C9BA2A44EA92004D996E /* CreateFramedScreenshotsIntent.swift */,
-				9485F0EB2A44EFA3001D966E /* ImageQuality+Extension.swift */,
-			);
-			path = Shortcuts;
-			sourceTree = "<group>";
-		};
 		94BD65BD2A44B28700D0CE61 = {
 			isa = PBXGroup;
 			children = (
@@ -123,7 +116,7 @@
 			children = (
 				94BD65DC2A44B3B900D0CE61 /* Shotbot.entitlements */,
 				94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */,
-				9485F0ED2A44EFB3001D966E /* Shortcuts */,
+				94CA148F2B81C1CD009D956C /* Shortcuts */,
 				94BD65FF2A44B77A00D0CE61 /* Info.plist */,
 				94BD65CD2A44B28700D0CE61 /* Assets.xcassets */,
 				94BD65CF2A44B28700D0CE61 /* Preview Content */,
@@ -158,6 +151,16 @@
 				94BD65F42A44B53200D0CE61 /* Assets.xcassets */,
 			);
 			path = ShotbotActionExtension;
+			sourceTree = "<group>";
+		};
+		94CA148F2B81C1CD009D956C /* Shortcuts */ = {
+			isa = PBXGroup;
+			children = (
+				94CA148B2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift */,
+				94CA148D2B81C1CA009D956C /* ShortcutsImageQuality.swift */,
+				94CA14902B81C5C2009D956C /* ShotBotShortcuts.swift */,
+			);
+			path = Shortcuts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,7 +217,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1430;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 1520;
 				TargetAttributes = {
 					94BD65C52A44B28700D0CE61 = {
 						CreatedOnToolsVersion = 14.3.1;
@@ -269,9 +272,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9485F0EC2A44EFA3001D966E /* ImageQuality+Extension.swift in Sources */,
-				9436C9BB2A44EB2A004D996E /* CreateFramedScreenshotsIntent.swift in Sources */,
+				94CA148C2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift in Sources */,
+				94CA148E2B81C1CA009D956C /* ShortcutsImageQuality.swift in Sources */,
 				94BD65CA2A44B28700D0CE61 /* ShotbotApp.swift in Sources */,
+				94CA14912B81C5C2009D956C /* ShotBotShortcuts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +304,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -333,6 +338,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -361,6 +367,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -394,6 +401,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -434,16 +442,20 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rspoon3.ShotbotFrames;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Debug;
 		};
@@ -469,16 +481,20 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rspoon3.ShotbotFrames;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Release;
 		};
@@ -501,14 +517,17 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rspoon3.ShotbotFrames.ShotbotActionExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Debug;
 		};
@@ -531,13 +550,16 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rspoon3.ShotbotFrames.ShotbotActionExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Release;
 		};

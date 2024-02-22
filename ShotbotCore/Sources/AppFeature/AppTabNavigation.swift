@@ -21,11 +21,7 @@ public struct AppTabNavigation: View {
     public var body: some View {
         TabView(selection: $tabSelection) {
             NavigationView {
-                HomeView(
-                    viewModel: HomeViewModel(
-                        photoLibraryManager: .live
-                    )
-                )
+                HomeView(viewModel: .init())
             }
             .navigationViewStyle(.stack)
             .tabItem {

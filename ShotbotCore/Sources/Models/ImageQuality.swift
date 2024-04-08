@@ -9,6 +9,7 @@ import Foundation
 import AppIntents
 
 public enum ImageQuality: String, CaseIterable, Identifiable, Sendable {
+    
     case original = "Original"
     case high = "High"
     case medium = "Medium"

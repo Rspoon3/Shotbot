@@ -11,12 +11,16 @@ import Models
 import Persistence
 import MediaManager
 import OSLog
+import SBFoundation
 
-struct CreateFramedScreenshotsIntent: AppIntent {
+public struct CreateFramedScreenshotsIntent: AppIntent {
     static let intentClassName = "CreateFramedScreenshotsIntent"
-    static var title: LocalizedStringResource = "Create Framed Screenshots"
+    public static var title: LocalizedStringResource = "Create Framed Screenshots"
     static var description = IntentDescription("Creates framed screenshots with a device frame using the images passed in.")
+    public static var isDiscoverable: Bool = true
     private let logger = Logger(category: CreateFramedScreenshotsIntent.self)
+    
+    public init() { }
     
     @Parameter(
         title: "Images",
@@ -43,9 +47,9 @@ struct CreateFramedScreenshotsIntent: AppIntent {
         description: "The quality of the screenshot.",
         default: .original
     )
-    var imageQuality: ImageQuality
+    var imageQuality: ShortcutsImageQuality
     
-    static var parameterSummary: some ParameterSummary {
+    public static var parameterSummary: some ParameterSummary {
         Summary("Create screenshots from \(\.$images)") {
             \.$saveToFiles
             \.$saveToPhotos
@@ -56,7 +60,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
     
     // MARK: - Functions
     
-    func perform() async throws -> some IntentResult & ReturnsValue<[IntentFile]> {
+    public func perform() async throws -> some IntentResult & ReturnsValue<[IntentFile]> {
         let persistenceManager = PersistenceManager.shared
         
         guard persistenceManager.canSaveFramedScreenshot else {
@@ -84,7 +88,7 @@ struct CreateFramedScreenshotsIntent: AppIntent {
             logger.error("Data could not be turned into a UIImage")
             throw SBError.unsupportedImage
         }
-        
+                
         guard let device = DeviceInfo.all().first(where: {$0.inputSize == screenshot.size}) else {
             logger.error("Could not find an image with width: \(screenshot.size.width, privacy: .public) and height: \(screenshot.size.height, privacy: .public).")
             throw SBError.unsupportedDevice

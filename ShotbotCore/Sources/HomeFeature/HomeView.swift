@@ -14,14 +14,14 @@ import Purchases
 import MediaManager
 
 public struct HomeView: View {
-    @ObservedObject var viewModel: HomeViewModel
+    @StateObject var viewModel = HomeViewModel()
     @Environment(\.scenePhase) var scenePhase
     
     
     // MARK: - Initializer
     
     public init(viewModel: HomeViewModel) {
-        self.viewModel = viewModel
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     // MARK: - Body
@@ -33,7 +33,9 @@ public struct HomeView: View {
                 mainContent
                 pickerMenu
             }
+            #if os(iOS)
             .navigationTitle("Shotbot")
+            #endif
             .photosPicker(
                 isPresented: $viewModel.showPhotosPicker,
                 selection: $viewModel.imageSelections,
@@ -45,6 +47,7 @@ public struct HomeView: View {
                     await viewModel.imageSelectionsDidChange()
                 }
             }
+            .contentShape(Rectangle())
             .dropDestination(for: Data.self) { items, location in
                 Task(priority: .userInitiated) {
                     await viewModel.didDropItem(items)
@@ -201,6 +204,14 @@ public struct HomeView: View {
             .contextMenu { importFileButton }
             .frame(maxWidth: 200)
             .padding()
+            .contentShape(
+                .hoverEffect,
+                .rect(
+                    cornerRadius: 14,
+                    style: .continuous
+                )
+            )
+            .hoverEffect()
             .foregroundColor(.secondary)
             .frame(maxHeight: .infinity)
             .onTapGesture { viewModel.selectPhotos() }

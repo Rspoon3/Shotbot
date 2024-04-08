@@ -1,11 +1,14 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "ShotbotCore",
-    platforms: [.iOS(.v16)],
+    platforms: [
+        .iOS(.v16),
+        .visionOS(.v1)
+    ],
     products: [
         .library(name: "AppFeature", targets: ["AppFeature"]),
         .library(name: "Models", targets: ["Models"]),
@@ -14,7 +17,7 @@ let package = Package(
         .library(name: "Purchases", targets: ["Purchases"]),
         .library(name: "MediaManager", targets: ["MediaManager"]),
         .library(name: "SettingsFeature", targets: ["SettingsFeature"]),
-        .library(name: "SBFoundation", targets: ["SBFoundation"]),
+        .library(name: "SBFoundation", targets: ["SBFoundation"])
     ],
     dependencies: [
         .package(
@@ -22,12 +25,12 @@ let package = Package(
             exact: .init("0.2.0")!
         ),
         .package(
-            url: "https://github.com/elai950/AlertToast.git",
-            exact: .init("1.3.9")!
+            url: "https://github.com/nbapps/AlertToast.git",
+            branch: "master"
         ),
         .package(
             url: "https://github.com/RevenueCat/purchases-ios.git",
-            from: .init(4, 0, 0)
+            exact: .init("4.36.3")!
         )
     ],
     targets: [

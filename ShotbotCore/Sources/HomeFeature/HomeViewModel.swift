@@ -197,7 +197,9 @@ import SBFoundation
     
     /// Combines images Horizontally with scaling to keep consistent spacing
     private func createCombinedImage(from images: [UIImage]) async throws -> ShareableImage {
-        try await withCheckedThrowingContinuation { continuation in
+        let imageQualityValue = imageQuality.value
+        
+        return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInteractive).async { [weak self] in
                 guard let self else {
                     continuation.resume(throwing: SBError.noSelf)
@@ -211,9 +213,9 @@ import SBFoundation
                 }
 
                 let imagesWidth = images.map(\.size.width).reduce(0, +)
-
                 let resizedImages = images.map { image in
-                    let scale = (image.size.width / imagesWidth)
+                    let widthScale = (image.size.width / imagesWidth)
+                    let scale = max(widthScale, imageQualityValue)
                     let size = CGSize(
                         width: image.size.width * scale,
                         height: image.size.height * scale
@@ -230,7 +232,7 @@ import SBFoundation
                 }
 
                 let temporaryURL = URL.temporaryDirectory.appending(path: "Combined \(UUID().uuidString).png")
-                
+
                 do {
                     try data.write(to: temporaryURL)
                     self.logger.info("Saving combined data to temporary url.")
@@ -254,7 +256,7 @@ import SBFoundation
         combinedImageTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
             
-            imageResults.combined =  try? await createCombinedImage(
+            imageResults.combined = try? await createCombinedImage(
                 from: imageResults.individual.map(\.framedScreenshot)
             )
         }
@@ -310,16 +312,16 @@ import SBFoundation
     }
     
     /// Starts the image pipeline using the passed in screenshots
-    private func processSelectedPhotos(
-        resetView: Bool,
-        source: PhotoSource
-    ) async throws {
+    private func processSelectedPhotos(source: PhotoSource) async throws {
         // Loading
         logger.info("Starting processing selected photos")
         isLoading = true
         defer {
             logger.info("Ending processing selected photos.")
-            isLoading = false
+            
+            if imageType == .individual {
+                isLoading = false
+            }
         }
        
         // Prep
@@ -329,20 +331,12 @@ import SBFoundation
         
         guard !screenshots.isEmpty else { return }
         
-        // Update view
-        if resetView {
-            logger.info("Resetting view state, imageType, and removing image results.")
-            viewState = .individualPlaceholder
-            imageType = .individual
-            imageResults.removeAll()
-        }
-        
         // ImageResults updating
         imageResults.originalScreenshots = screenshots
         try await updateImageResultsIndividualImages(using: screenshots)
         
         // Reset view
-        if resetView || imageType == .individual {
+        if imageType == .individual {
             logger.info("Setting viewState to individualImages and ending isLoading.")
             viewState = .individualImages(imageResults.individual)
             isLoading = false
@@ -356,25 +350,24 @@ import SBFoundation
         Task(priority: .userInitiated) {
             await combineDeviceFrames()
             await autoSaveCombinedIfNeeded()
-        }
-        
-        if imageType == .combined {
-            logger.debug("Processing selected photos waiting for combined image task value.")
-            await combinedImageTask?.value
             
-            guard let combined = imageResults.combined else {
-                logger.fault("Processing selected photos returning early because combined image results has no image.")
-                throw SBError.unsupportedImage
+            if imageType == .combined {
+                isLoading = false
+                
+                guard let combined = imageResults.combined else {
+                    logger.fault("Processing selected photos returning early because combined image results has no image.")
+                    throw SBError.unsupportedImage
+                }
+                
+                logger.fault("Setting viewState to combinedImages")
+                viewState = .combinedImages(combined)
             }
             
-            logger.fault("Setting viewState to combinedImages")
-            viewState = .combinedImages(combined)
+            // Post FramedScreenshot generation
+            await autoSaveIndividualImagesIfNeeded()
+            await autoDeleteScreenshotsIfNeeded()
+            askForAReview()
         }
-        
-        // Post FramedScreenshot generation
-        await autoSaveIndividualImagesIfNeeded()
-        await autoDeleteScreenshotsIfNeeded()
-        askForAReview()
     }
     
     /// Asks the user for a review
@@ -410,7 +403,7 @@ import SBFoundation
     /// Starts the image pipeline with `dropItems` as the photo source
     public func didDropItem(_ items: [Data]) async {
         do {
-            try await processSelectedPhotos(resetView: false, source: .dropItems(items))
+            try await processSelectedPhotos(source: .dropItems(items))
         } catch {
             self.error = error
         }
@@ -420,7 +413,7 @@ import SBFoundation
     /// using `photoPicker` as the image source
     public func imageSelectionsDidChange() async {
         do {
-            try await processSelectedPhotos(resetView: true, source: .photoPicker)
+            try await processSelectedPhotos(source: .photoPicker)
         } catch {
             self.error = error
         }
@@ -494,7 +487,6 @@ import SBFoundation
         await combinedImageTask?.value
         
         try? await processSelectedPhotos(
-            resetView: false,
             source: .existingScreenshots(imageResults.originalScreenshots)
         )
     }
@@ -560,7 +552,6 @@ import SBFoundation
             Task {
                 do {
                     try await processSelectedPhotos(
-                        resetView: true,
                         source: .filePicker(urls)
                     )
                 } catch {

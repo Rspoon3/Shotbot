@@ -173,7 +173,6 @@ public struct HomeView: View {
                     contextMenu(shareableImage: shareableImage)
                 }
                 .padding()
-                .id(UUID())
                 .frame(maxHeight: .infinity, alignment: .center)
                 .onTapGesture(count: 2) {
                     viewModel.copy(shareableImage.framedScreenshot)

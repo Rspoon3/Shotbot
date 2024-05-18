@@ -46,21 +46,26 @@ enum DeviceType: String, CaseIterable, Identifiable {
             ]
         case .iPad:
             return [
+                "iPad Pro 13-in. (M4)",
                 "iPad Pro 12.9-in. (6th generation)",
                 "iPad Pro 12.9-in. (5th generation)",
                 "iPad Pro 12.9-in. (4th generation)",
                 "iPad Pro 12.9-in. (3rd generation)",
                 "iPad Pro 12.9-in. (2nd generation)",
                 "iPad Pro 12.9-in. (1st generation)",
+                "iPad Pro 11-in. (M4)",
                 "iPad Pro 11-in. (3rd generation)",
                 "iPad Pro 11-in. (2nd generation)",
                 "iPad Pro 11-in. (1st generation)",
+                "iPad Air 13-in. (M2)",
+                "iPad Air 11-in. (M2)",
                 "iPad Air (5th generation)",
                 "iPad Air (4th generation)",
                 //"iPad Air (3rd generation)", Not supported
                 //"iPad Air (2nd generation)", Not supported
                 //"iPad Air (1st generation)", Not supported
 
+                "iPad (10th generation)",
                 "iPad (9th generation)",
                 "iPad (8th generation)",
                 "iPad (7th generation)",

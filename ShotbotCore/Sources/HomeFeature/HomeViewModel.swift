@@ -34,6 +34,7 @@ import SBFoundation
     @Published public var viewState: ViewState = .individualPlaceholder
     @Published public var error: Error?
     @Published public var isImportingFile = false
+    @Published public var showGridView: Bool
     @Published public var imageType: ImageType = .individual {
         didSet {
             imageTypeDidToggle()
@@ -67,6 +68,11 @@ import SBFoundation
         imageResults.hasImages
     }
     
+    var viewTypeImageName: String? {
+        guard imageResults.hasMultipleImages else { return nil }
+        return persistenceManager.defaultHomeView == .grid ? "ellipsis.rectangle" : "square.grid.2x2"
+    }
+    
     // MARK: - Initializer
     
     public init(
@@ -80,6 +86,7 @@ import SBFoundation
         self.purchaseManager = purchaseManager
         self.fileManager = fileManager
         self.imageQuality = persistenceManager.imageQuality
+        self.showGridView = persistenceManager.defaultHomeView == .grid
     }
     
     
@@ -313,6 +320,7 @@ import SBFoundation
         
         logger.debug("Setting imageResults.individual with \(shareableImages.count, privacy: .public) items.")
         imageResults.individual = shareableImages
+        showGridView = persistenceManager.defaultHomeView == .grid && imageResults.hasMultipleImages
     }
     
     /// Starts the image pipeline using the passed in screenshots
@@ -334,8 +342,8 @@ import SBFoundation
         let screenshots = try await getScreenshots(from: source)
         
         guard !screenshots.isEmpty else { return }
-        
-        if persistenceManager.autoSwitchToCombinedPhoto,
+                
+        if persistenceManager.defaultHomeTab == .combined,
            screenshots.count > 1,
            imageType == .individual {
             imageType = .combined
@@ -409,6 +417,19 @@ import SBFoundation
     }
     
     // MARK: - Public
+    
+    /// Updates the `defaultHomeView` in the persistence manger and then updates
+    /// `showGridView`.
+    public func toggleIndividualViewType() {
+        switch persistenceManager.defaultHomeView {
+        case .grid:
+            persistenceManager.defaultHomeView = .tabbed
+        case .tabbed:
+            persistenceManager.defaultHomeView = .grid
+        }
+        
+        showGridView = persistenceManager.defaultHomeView == .grid && imageResults.hasMultipleImages
+    }
     
     /// Starts the image pipeline with `dropItems` as the photo source
     public func didDropItem(_ items: [Data]) async {

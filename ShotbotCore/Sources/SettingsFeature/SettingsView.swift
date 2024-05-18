@@ -27,7 +27,6 @@ public struct SettingsView: View {
                 Toggle("Automatically save to files", isOn: $persistenceManager.autoSaveToFiles)
                 Toggle("Automatically save to photos", isOn: $persistenceManager.autoSaveToPhotos)
                 Toggle("Automatically delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
-                Toggle("Automatically switched to combined photo", isOn: $persistenceManager.autoSwitchToCombinedPhoto)
                 Toggle("Clear images on app background", isOn: $persistenceManager.clearImagesOnAppBackground)
             } header: {
                 Text("App Settings")
@@ -35,8 +34,14 @@ public struct SettingsView: View {
                     .padding(.top, 40)
 #endif
             }
-            
             Section() {
+                Picker("Default Home Tab", selection: $persistenceManager.defaultHomeTab) {
+                    ForEach(ImageType.allCases) { type in
+                        Text(type.rawValue)
+                            .tag(type)
+                    }
+                }
+
                 Picker("Image Selection Filter", selection: $persistenceManager.imageSelectionType) {
                     ForEach(ImageSelectionType.allCases) { type in
                         Text(type.title)

@@ -89,7 +89,7 @@ public struct HomeView: View {
                 )
             }
             .overlay {
-                if viewModel.isLoading {
+                if viewModel.showLoadingSpinner {
                     ProgressView()
                         .scaleEffect(1.5)
                         .padding(.all, 20)

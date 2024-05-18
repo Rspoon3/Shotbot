@@ -55,6 +55,9 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
     @AppStorage("autoDeleteScreenshots")
     public var autoDeleteScreenshots: Bool = false
     
+    @AppStorage("autoSwitchToCombinedPhoto")
+    public var autoSwitchToCombinedPhoto: Bool = false
+    
     @AppStorage("clearImagesOnAppBackground")
     public var clearImagesOnAppBackground: Bool = false
     
@@ -101,6 +104,7 @@ public class MockPersistenceManager: PersistenceManaging {
     public var autoSaveToFiles: Bool = false
     public var autoSaveToPhotos: Bool = false
     public var autoDeleteScreenshots: Bool = false
+    public var autoSwitchToCombinedPhoto: Bool = false
     public var clearImagesOnAppBackground: Bool = false
     public var imageSelectionType: ImageSelectionType = .all
     public var imageQuality: ImageQuality = .original
@@ -114,6 +118,7 @@ public class MockPersistenceManager: PersistenceManaging {
         autoSaveToFiles = false
         autoSaveToPhotos = false
         autoDeleteScreenshots = false
+        autoSwitchToCombinedPhoto = false
         clearImagesOnAppBackground = false
         numberOfLaunches = 0
         numberOfActivations = 0

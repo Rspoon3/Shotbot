@@ -40,6 +40,10 @@ import SBFoundation
         }
     }
     
+    var showLoadingSpinner: Bool {
+        isLoading && viewState != .combinedPlaceholder
+    }
+    
     var toastText: String? {
         let files = persistenceManager.autoSaveToFiles
         let photos = persistenceManager.autoSaveToPhotos
@@ -330,6 +334,12 @@ import SBFoundation
         let screenshots = try await getScreenshots(from: source)
         
         guard !screenshots.isEmpty else { return }
+        
+        if persistenceManager.autoSwitchToCombinedPhoto,
+           screenshots.count > 1,
+           imageType == .individual {
+            imageType = .combined
+        }
         
         // ImageResults updating
         imageResults.originalScreenshots = screenshots

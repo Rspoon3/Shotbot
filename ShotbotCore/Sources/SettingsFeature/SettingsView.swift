@@ -27,6 +27,7 @@ public struct SettingsView: View {
                 Toggle("Automatically save to files", isOn: $persistenceManager.autoSaveToFiles)
                 Toggle("Automatically save to photos", isOn: $persistenceManager.autoSaveToPhotos)
                 Toggle("Automatically delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
+                Toggle("Automatically switched to combined photo", isOn: $persistenceManager.autoSwitchToCombinedPhoto)
                 Toggle("Clear images on app background", isOn: $persistenceManager.clearImagesOnAppBackground)
             } header: {
                 Text("App Settings")

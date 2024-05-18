@@ -14,6 +14,7 @@ public protocol PersistenceManaging {
     var autoSaveToFiles: Bool { get set }
     var autoSaveToPhotos: Bool  { get set }
     var autoDeleteScreenshots: Bool  { get set }
+    var autoSwitchToCombinedPhoto: Bool { get set }
     var clearImagesOnAppBackground: Bool  { get set }
     var numberOfLaunches: Int  { get set }
     var numberOfActivations: Int  { get set }

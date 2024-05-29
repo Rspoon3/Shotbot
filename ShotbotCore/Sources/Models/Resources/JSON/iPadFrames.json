@@ -24,6 +24,15 @@
         "type": "default"
     },
     {
+        "device": "2024 iPad Pro 11-in. (M4)",
+        "deviceFrame": "iPad Pro 2018 11 Inch Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2816, 1940],
+        "scaledSize": [2388, 1668],
+        "offSet": [120, 120],
+        "type": "more space"
+    },
+    {
         "deviceFrame": "iPad Pro 2018 11 Inch Portrait",
         "mergeMethod": "doubleOverlay",
         "inputSize": [1668, 2388],
@@ -46,6 +55,15 @@
         "scaledSize": [1668, 2388],
         "offSet": [120, 120],
         "type": "default"
+    },
+    {
+        "device": "2024 iPad Pro 11-in. (M4)",
+        "deviceFrame": "iPad Pro 2018 11 Inch Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1940, 2816],
+        "scaledSize": [1668, 2388],
+        "offSet": [120, 120],
+        "type": "more space"
     },
     {
         "deviceFrame": "iPad Pro 2018 12.9 Inch Landscape",

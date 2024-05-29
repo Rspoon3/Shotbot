@@ -24,6 +24,15 @@
         "type": "default"
     },
     {
+        "device": "2024 iPad Pro 11-in. (M4)",
+        "deviceFrame": "iPad Pro 2018 11 Inch Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2816, 1940],
+        "scaledSize": [2388, 1668],
+        "offSet": [120, 120],
+        "type": "more space"
+    },
+    {
         "deviceFrame": "iPad Pro 2018 11 Inch Portrait",
         "mergeMethod": "doubleOverlay",
         "inputSize": [1668, 2388],
@@ -46,6 +55,15 @@
         "scaledSize": [1668, 2388],
         "offSet": [120, 120],
         "type": "default"
+    },
+    {
+        "device": "2024 iPad Pro 11-in. (M4)",
+        "deviceFrame": "iPad Pro 2018 11 Inch Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [1940, 2816],
+        "scaledSize": [1668, 2388],
+        "offSet": [120, 120],
+        "type": "more space"
     },
     {
         "deviceFrame": "iPad Pro 2018 12.9 Inch Landscape",
@@ -72,6 +90,15 @@
         "type": "default"
     },
     {
+        "device": "2024 iPad Pro 13-in. (M4)",
+        "deviceFrame": "iPad Pro 2018 12.9 Inch Landscape",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [3200, 2400],
+        "scaledSize": [2732, 2048],
+        "offSet": [120, 120],
+        "type": "more space"
+    },
+    {
         "deviceFrame": "iPad Pro 2018 12.9 Inch Portrait",
         "mergeMethod": "doubleOverlay",
         "inputSize": [2048, 2732],
@@ -82,6 +109,15 @@
         "deviceFrame": "iPad Pro 2018 12.9 Inch Portrait",
         "mergeMethod": "doubleOverlay",
         "inputSize": [2384, 3180],
+        "scaledSize": [2048, 2732],
+        "offSet": [120, 120],
+        "type": "more space"
+    },
+    {
+        "device": "2024 iPad Pro 13-in. (M4)",
+        "deviceFrame": "iPad Pro 2018 12.9 Inch Portrait",
+        "mergeMethod": "doubleOverlay",
+        "inputSize": [2400, 3200],
         "scaledSize": [2048, 2732],
         "offSet": [120, 120],
         "type": "more space"

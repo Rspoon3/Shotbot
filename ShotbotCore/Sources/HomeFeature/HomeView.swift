@@ -53,7 +53,9 @@ public struct HomeView: View {
                 }
                 return true
             }
-            .alert(error: $viewModel.error)
+            .alert(error: $viewModel.error) {
+                viewModel.clearContent()
+            }
             .toast(isPresenting: $viewModel.showQuickSaveToast, duration: 2) {
                 AlertToast(
                     displayMode: .hud,

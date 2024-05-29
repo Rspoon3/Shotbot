@@ -32,12 +32,17 @@ import SBFoundation
     @Published public var isLoading = false
     @Published public var imageSelections: [PhotosPickerItem] = []
     @Published public var viewState: ViewState = .individualPlaceholder
-    @Published public var error: Error?
     @Published public var isImportingFile = false
     @Published public var showGridView: Bool
     @Published public var imageType: ImageType = .individual {
         didSet {
             imageTypeDidToggle()
+        }
+    }
+    @Published public var error: Error? {
+        didSet {
+            guard error != nil else { return }
+            isLoading = false
         }
     }
     
@@ -120,7 +125,7 @@ import SBFoundation
                     await combinedImageTask?.value
                     
                     guard let combined = imageResults.combined else {
-                        logger.notice("ImageResults.combined is nil. ")
+                        logger.notice("ImageResults.combined is nil.")
                         throw SBError.unsupportedImage
                     }
                         

@@ -14,6 +14,7 @@ import MediaManager
 import StoreKit
 import OSLog
 import SBFoundation
+import Photos
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var persistenceManager: any PersistenceManaging
@@ -288,6 +289,52 @@ import SBFoundation
         case .photoPicker:
             logger.info("Fetching images from the photos picker.")
             screenshots = try await imageSelections.loadUImages()
+        case .photoAssetID(let url):
+            
+            guard
+                let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+                let assetID = components.queryItems?.first?.value
+            else {
+                fatalError()
+    //            throw DeepLinkManagerError.cantOpenWidget
+            }
+            
+            print(assetID)
+            
+            
+            let fetchOptions = PHFetchOptions()
+            fetchOptions.fetchLimit = 1
+            let result = PHAsset.fetchAssets(withLocalIdentifiers: [assetID], options: fetchOptions)
+            
+            let latestScreenshotAsset = result.firstObject
+
+            let requestOptions = PHImageRequestOptions()
+            requestOptions.version = .original
+            requestOptions.deliveryMode = .highQualityFormat
+            
+            var image: UIImage?
+            
+            if let latestScreenshotAsset {
+                image = await withCheckedContinuation { continuation in
+                    PHImageManager.default().requestImage(
+                        for: latestScreenshotAsset,
+                        targetSize: .init(
+                            width: latestScreenshotAsset.pixelWidth,
+                            height: latestScreenshotAsset.pixelHeight
+                        ),
+                        contentMode: .aspectFit,
+                        options: requestOptions
+                    ) { image, _ in
+                        continuation.resume(returning: image)
+                    }
+                }
+            }
+            
+            if let image {
+                screenshots = [image]
+            } else {
+                screenshots = []
+            }
         case .filePicker(let urls):
             screenshots = try urls.compactMap { url in
                 let accessing = url.startAccessingSecurityScopedResource()
@@ -442,6 +489,12 @@ import SBFoundation
             try await processSelectedPhotos(source: .dropItems(items))
         } catch {
             self.error = error
+        }
+    }
+    
+    public func didOpenViaDeepLink(_ url: URL) {
+        Task {
+            try await processSelectedPhotos(source: .photoAssetID(url))
         }
     }
     

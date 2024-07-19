@@ -12,6 +12,7 @@ import Purchases
 import Persistence
 import MediaManager
 import AppIntents
+import WidgetKit
 import OSLog
 
 @main
@@ -43,8 +44,14 @@ struct ShotbotApp: App {
                 }
         }
         .onChange(of: scenePhase) { phase in
-            guard phase == .active else { return }
-            persistenceManager.numberOfActivations += 1
+            switch phase {
+            case .active:
+                persistenceManager.numberOfActivations += 1
+            case .background:
+                WidgetCenter.shared.reloadAllTimelines()
+            default:
+                break
+            }
         }
     #if os(visionOS)
         .defaultSize(

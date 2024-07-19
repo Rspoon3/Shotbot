@@ -107,6 +107,9 @@ public struct HomeView: View {
                 guard newValue == .background || newValue == .active else { return }
                 viewModel.clearImagesOnAppBackground()
             }
+            .onOpenURL { url in
+                viewModel.didOpenViaDeepLink(url)
+            }
             .onAppear {
                 Task {
                     await viewModel.changeImageQualityIfNeeded()

@@ -26,6 +26,11 @@ public struct SBError: LocalizedError {
         recoverySuggestion: "The data could not be generated"
     )
     
+    public static let badDeeplinkURL = Self(
+        errorDescription: "Corrupt deeplink",
+        recoverySuggestion: "An issue occurred opening the deeplink"
+    )
+    
     public static let proSubscriptionRequired = Self(
         errorDescription: "Shotbot Pro Required",
         recoverySuggestion: "You've hit the free 30 framed screenshot limit. Please subscribe to Shotbot Pro to create unlimited screenshots"
@@ -58,6 +63,6 @@ public struct SBError: LocalizedError {
     
     public static let noSelf = Self(
         errorDescription: "Memory Issue",
-        recoverySuggestion: "A memory issue occured"
+        recoverySuggestion: "A memory issue occurred"
     )
 }

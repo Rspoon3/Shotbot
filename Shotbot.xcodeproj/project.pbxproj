@@ -10,8 +10,7 @@
 		94453E472C4AAD7900B15690 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94453E462C4AAD7800B15690 /* WidgetKit.framework */; };
 		94453E492C4AAD7900B15690 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94453E482C4AAD7900B15690 /* SwiftUI.framework */; };
 		94453E4C2C4AAD7900B15690 /* WidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */; };
-		94453E4E2C4AAD7900B15690 /* Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4D2C4AAD7900B15690 /* Widgets.swift */; };
-		94453E502C4AAD7900B15690 /* AppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4F2C4AAD7900B15690 /* AppIntent.swift */; };
+		94453E4E2C4AAD7900B15690 /* LatestScreenshotProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4D2C4AAD7900B15690 /* LatestScreenshotProvider.swift */; };
 		94453E522C4AAD7A00B15690 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94453E512C4AAD7A00B15690 /* Assets.xcassets */; };
 		94453E562C4AAD7A00B15690 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		94BD65CA2A44B28700D0CE61 /* ShotbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */; };
@@ -26,6 +25,11 @@
 		94BD65FE2A44B67600D0CE61 /* ActionExtensionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BD65FB2A44B67600D0CE61 /* ActionExtensionViewModel.swift */; };
 		94BD66022A44B8CC00D0CE61 /* Persistence in Frameworks */ = {isa = PBXBuildFile; productRef = 94BD66012A44B8CC00D0CE61 /* Persistence */; };
 		94BD66042A44B8D000D0CE61 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 94BD66032A44B8D000D0CE61 /* Models */; };
+		94C4E2682C4B06610017C18E /* LatestScreenshotEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94C4E2672C4B06610017C18E /* LatestScreenshotEntry.swift */; };
+		94C4E26A2C4B06850017C18E /* LatestScreenshotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94C4E2692C4B06850017C18E /* LatestScreenshotView.swift */; };
+		94C4E26C2C4B08580017C18E /* LatestScreenshotWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94C4E26B2C4B08580017C18E /* LatestScreenshotWidget.swift */; };
+		94C4E26E2C4B0EDF0017C18E /* MediaManager in Frameworks */ = {isa = PBXBuildFile; productRef = 94C4E26D2C4B0EDF0017C18E /* MediaManager */; };
+		94C4E26F2C4B23950017C18E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65CD2A44B28700D0CE61 /* Assets.xcassets */; };
 		94CA148C2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CA148B2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift */; };
 		94CA148E2B81C1CA009D956C /* ShortcutsImageQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CA148D2B81C1CA009D956C /* ShortcutsImageQuality.swift */; };
 		94CA14912B81C5C2009D956C /* ShotBotShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CA14902B81C5C2009D956C /* ShotBotShortcuts.swift */; };
@@ -70,8 +74,7 @@
 		94453E462C4AAD7800B15690 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		94453E482C4AAD7900B15690 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetsBundle.swift; sourceTree = "<group>"; };
-		94453E4D2C4AAD7900B15690 /* Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widgets.swift; sourceTree = "<group>"; };
-		94453E4F2C4AAD7900B15690 /* AppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntent.swift; sourceTree = "<group>"; };
+		94453E4D2C4AAD7900B15690 /* LatestScreenshotProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatestScreenshotProvider.swift; sourceTree = "<group>"; };
 		94453E512C4AAD7A00B15690 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		94453E532C4AAD7A00B15690 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		94BD65C62A44B28700D0CE61 /* Shotbot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shotbot.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +92,9 @@
 		94BD65FA2A44B67600D0CE61 /* ActionExtensionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionExtensionView.swift; sourceTree = "<group>"; };
 		94BD65FB2A44B67600D0CE61 /* ActionExtensionViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionExtensionViewModel.swift; sourceTree = "<group>"; };
 		94BD65FF2A44B77A00D0CE61 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		94C4E2672C4B06610017C18E /* LatestScreenshotEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatestScreenshotEntry.swift; sourceTree = "<group>"; };
+		94C4E2692C4B06850017C18E /* LatestScreenshotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatestScreenshotView.swift; sourceTree = "<group>"; };
+		94C4E26B2C4B08580017C18E /* LatestScreenshotWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatestScreenshotWidget.swift; sourceTree = "<group>"; };
 		94CA148B2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFramedScreenshotsIntent.swift; sourceTree = "<group>"; };
 		94CA148D2B81C1CA009D956C /* ShortcutsImageQuality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsImageQuality.swift; sourceTree = "<group>"; };
 		94CA14902B81C5C2009D956C /* ShotBotShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotBotShortcuts.swift; sourceTree = "<group>"; };
@@ -102,6 +108,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94453E492C4AAD7900B15690 /* SwiftUI.framework in Frameworks */,
+				94C4E26E2C4B0EDF0017C18E /* MediaManager in Frameworks */,
 				94453E472C4AAD7900B15690 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -131,10 +138,8 @@
 			isa = PBXGroup;
 			children = (
 				94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */,
-				94453E4D2C4AAD7900B15690 /* Widgets.swift */,
-				94E20BBC2C4ADDE000C11043 /* CGSize+Extension.swift */,
-				94E20BBA2C4ADDD800C11043 /* RefreshLatestScreenshotIntent.swift */,
-				94453E4F2C4AAD7900B15690 /* AppIntent.swift */,
+				94C4E2662C4B063D0017C18E /* LatestScreenshotWidget */,
+				94C4E2702C4B25810017C18E /* Extensions */,
 				94453E512C4AAD7A00B15690 /* Assets.xcassets */,
 				94453E532C4AAD7A00B15690 /* Info.plist */,
 			);
@@ -207,6 +212,26 @@
 			path = ShotbotActionExtension;
 			sourceTree = "<group>";
 		};
+		94C4E2662C4B063D0017C18E /* LatestScreenshotWidget */ = {
+			isa = PBXGroup;
+			children = (
+				94453E4D2C4AAD7900B15690 /* LatestScreenshotProvider.swift */,
+				94C4E2692C4B06850017C18E /* LatestScreenshotView.swift */,
+				94E20BBA2C4ADDD800C11043 /* RefreshLatestScreenshotIntent.swift */,
+				94C4E2672C4B06610017C18E /* LatestScreenshotEntry.swift */,
+				94C4E26B2C4B08580017C18E /* LatestScreenshotWidget.swift */,
+			);
+			path = LatestScreenshotWidget;
+			sourceTree = "<group>";
+		};
+		94C4E2702C4B25810017C18E /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				94E20BBC2C4ADDE000C11043 /* CGSize+Extension.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		94CA148F2B81C1CD009D956C /* Shortcuts */ = {
 			isa = PBXGroup;
 			children = (
@@ -234,6 +259,7 @@
 			);
 			name = WidgetsExtension;
 			packageProductDependencies = (
+				94C4E26D2C4B0EDF0017C18E /* MediaManager */,
 			);
 			productName = WidgetsExtension;
 			productReference = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */;
@@ -332,6 +358,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94C4E26F2C4B23950017C18E /* Assets.xcassets in Resources */,
 				94453E522C4AAD7A00B15690 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -362,9 +389,11 @@
 			files = (
 				94E20BBD2C4ADDE000C11043 /* CGSize+Extension.swift in Sources */,
 				94453E4C2C4AAD7900B15690 /* WidgetsBundle.swift in Sources */,
-				94453E4E2C4AAD7900B15690 /* Widgets.swift in Sources */,
+				94453E4E2C4AAD7900B15690 /* LatestScreenshotProvider.swift in Sources */,
+				94C4E26A2C4B06850017C18E /* LatestScreenshotView.swift in Sources */,
+				94C4E26C2C4B08580017C18E /* LatestScreenshotWidget.swift in Sources */,
 				94E20BBB2C4ADDD800C11043 /* RefreshLatestScreenshotIntent.swift in Sources */,
-				94453E502C4AAD7900B15690 /* AppIntent.swift in Sources */,
+				94C4E2682C4B06610017C18E /* LatestScreenshotEntry.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -790,6 +819,10 @@
 		94BD66032A44B8D000D0CE61 /* Models */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Models;
+		};
+		94C4E26D2C4B0EDF0017C18E /* MediaManager */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MediaManager;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

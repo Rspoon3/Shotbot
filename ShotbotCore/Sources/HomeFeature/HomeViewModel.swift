@@ -304,10 +304,14 @@ import Photos
             guard let latestScreenshotAsset = result.firstObject else {
                 throw SBError.noImageData
             }
-
+            
             let requestOptions = PHImageRequestOptions()
             requestOptions.version = .original
             requestOptions.deliveryMode = .highQualityFormat
+            requestOptions.isNetworkAccessAllowed = true
+            if #available(iOS 17, *) {
+                requestOptions.allowSecondaryDegradedImage = false
+            }
             
             let (image, _) = await PHImageManager.default().requestImage(
                 for: latestScreenshotAsset,

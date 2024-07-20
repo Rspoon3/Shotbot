@@ -47,7 +47,7 @@ struct LatestScreenshotProvider: TimelineProvider {
     
     private func timeline(in context: Context) async -> Timeline<LatestScreenshotEntry> {
         do {
-            let (image, assetID) = try await fetchLatestScreenshot(targetSize: context.displaySize)
+            let (image, assetID) = try await fetchLatestScreenshot(targetSize: context.displaySize * 3)
             
             let currentDate = Date()
             let entries = (0..<6).compactMap { hourOffset -> LatestScreenshotEntry? in
@@ -87,6 +87,8 @@ struct LatestScreenshotProvider: TimelineProvider {
         let requestOptions = PHImageRequestOptions()
         requestOptions.version = .original
         requestOptions.deliveryMode = .highQualityFormat
+        requestOptions.isNetworkAccessAllowed = true
+        requestOptions.allowSecondaryDegradedImage = false
         
         let (image, _) = await PHImageManager.default().requestImage(
             for: latestScreenshotAsset,

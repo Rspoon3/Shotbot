@@ -13,7 +13,7 @@ extension CGSize {
         return height / width
     }
     
-    var min: CGFloat {
-        Swift.min(width, height)
+    static func * (lhs: CGSize, scalar: CGFloat) -> CGSize {
+        return CGSize(width: lhs.width * scalar, height: lhs.height * scalar)
     }
 }

@@ -11,6 +11,20 @@ struct LatestScreenshotView : View {
     var entry: LatestScreenshotProvider.Entry
     @Environment(\.showsWidgetContainerBackground) private var showsWidgetContainerBackground
     
+    private func frame(for image: UIImage, using geoSize: CGSize) -> CGSize {
+        if image.size.height > image.size.width { // Tall
+            return .init(
+                width: geoSize.height / image.size.aspectRatio,
+                height: geoSize.height
+            )
+        } else { // Wide
+            return .init(
+                width: geoSize.width,
+                height: geoSize.width * image.size.aspectRatio
+            )
+        }
+    }
+    
     var body: some View {
         switch entry.viewState {
         case .screenshot(let image, _):
@@ -18,10 +32,7 @@ struct LatestScreenshotView : View {
                 GeometryReader { geo in
                     Image(uiImage: image)
                         .resizable()
-                        .frame(
-                            width: geo.size.min / image.size.aspectRatio,
-                            height: geo.size.min
-                        )
+                        .frame(size: frame(for: image, using: geo.size))
                         .containerRelativeOrRadius(cornerRadius: showsWidgetContainerBackground ? nil : 4)
                         .frame(maxWidth: .infinity)
                 }
@@ -70,5 +81,9 @@ private extension View {
         } else {
             AnyView(self.clipShape(.containerRelative))
         }
+    }
+    
+    func frame(size: CGSize, alignment: Alignment = .center) -> some View {
+        self.frame(width: size.width, height: size.height, alignment: alignment)
     }
 }

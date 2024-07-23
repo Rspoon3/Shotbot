@@ -14,6 +14,7 @@ import MediaManager
 import AppIntents
 import WidgetKit
 import OSLog
+import Photos
 
 @main
 struct ShotbotApp: App {

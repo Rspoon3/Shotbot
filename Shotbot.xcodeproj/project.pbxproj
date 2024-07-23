@@ -13,6 +13,13 @@
 		94453E4E2C4AAD7900B15690 /* LatestScreenshotProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4D2C4AAD7900B15690 /* LatestScreenshotProvider.swift */; };
 		94453E522C4AAD7A00B15690 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94453E512C4AAD7A00B15690 /* Assets.xcassets */; };
 		94453E562C4AAD7A00B15690 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9455F4DC2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455F4DB2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift */; };
+		946E7FC52C4C3341001E4C46 /* DurationScreenshotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC12C4C3341001E4C46 /* DurationScreenshotView.swift */; };
+		946E7FC62C4C3341001E4C46 /* DurationScreenshotWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC42C4C3341001E4C46 /* DurationScreenshotWidget.swift */; };
+		946E7FC72C4C3341001E4C46 /* DurationScreenshotEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC32C4C3341001E4C46 /* DurationScreenshotEntry.swift */; };
+		946E7FC92C4C3341001E4C46 /* DurationScreenshotProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC02C4C3341001E4C46 /* DurationScreenshotProvider.swift */; };
+		946E7FCB2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FCA2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift */; };
+		94BB6A2C2C4C3FA7009F31E7 /* DurationWidgetOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BB6A2B2C4C3FA7009F31E7 /* DurationWidgetOption.swift */; };
 		94BD65CA2A44B28700D0CE61 /* ShotbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */; };
 		94BD65CE2A44B28700D0CE61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65CD2A44B28700D0CE61 /* Assets.xcassets */; };
 		94BD65D12A44B28700D0CE61 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65D02A44B28700D0CE61 /* Preview Assets.xcassets */; };
@@ -77,6 +84,13 @@
 		94453E4D2C4AAD7900B15690 /* LatestScreenshotProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatestScreenshotProvider.swift; sourceTree = "<group>"; };
 		94453E512C4AAD7A00B15690 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		94453E532C4AAD7A00B15690 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9455F4DB2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLabelStyle.swift; sourceTree = "<group>"; };
+		946E7FC02C4C3341001E4C46 /* DurationScreenshotProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationScreenshotProvider.swift; sourceTree = "<group>"; };
+		946E7FC12C4C3341001E4C46 /* DurationScreenshotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationScreenshotView.swift; sourceTree = "<group>"; };
+		946E7FC32C4C3341001E4C46 /* DurationScreenshotEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationScreenshotEntry.swift; sourceTree = "<group>"; };
+		946E7FC42C4C3341001E4C46 /* DurationScreenshotWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationScreenshotWidget.swift; sourceTree = "<group>"; };
+		946E7FCA2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteLatestScreenshotIntent.swift; sourceTree = "<group>"; };
+		94BB6A2B2C4C3FA7009F31E7 /* DurationWidgetOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationWidgetOption.swift; sourceTree = "<group>"; };
 		94BD65C62A44B28700D0CE61 /* Shotbot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shotbot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotbotApp.swift; sourceTree = "<group>"; };
 		94BD65CD2A44B28700D0CE61 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -138,12 +152,34 @@
 			isa = PBXGroup;
 			children = (
 				94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */,
+				946E7FBF2C4C3333001E4C46 /* DurationScreenshotWidget */,
 				94C4E2662C4B063D0017C18E /* LatestScreenshotWidget */,
 				94C4E2702C4B25810017C18E /* Extensions */,
 				94453E512C4AAD7A00B15690 /* Assets.xcassets */,
 				94453E532C4AAD7A00B15690 /* Info.plist */,
 			);
 			path = Widgets;
+			sourceTree = "<group>";
+		};
+		9455F4DA2C4F2E85009D0707 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				946E7FCA2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift */,
+				94E20BBA2C4ADDD800C11043 /* RefreshLatestScreenshotIntent.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		946E7FBF2C4C3333001E4C46 /* DurationScreenshotWidget */ = {
+			isa = PBXGroup;
+			children = (
+				946E7FC02C4C3341001E4C46 /* DurationScreenshotProvider.swift */,
+				946E7FC12C4C3341001E4C46 /* DurationScreenshotView.swift */,
+				94BB6A2B2C4C3FA7009F31E7 /* DurationWidgetOption.swift */,
+				946E7FC32C4C3341001E4C46 /* DurationScreenshotEntry.swift */,
+				946E7FC42C4C3341001E4C46 /* DurationScreenshotWidget.swift */,
+			);
+			path = DurationScreenshotWidget;
 			sourceTree = "<group>";
 		};
 		94BD65BD2A44B28700D0CE61 = {
@@ -217,7 +253,8 @@
 			children = (
 				94453E4D2C4AAD7900B15690 /* LatestScreenshotProvider.swift */,
 				94C4E2692C4B06850017C18E /* LatestScreenshotView.swift */,
-				94E20BBA2C4ADDD800C11043 /* RefreshLatestScreenshotIntent.swift */,
+				9455F4DB2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift */,
+				9455F4DA2C4F2E85009D0707 /* Intents */,
 				94C4E2672C4B06610017C18E /* LatestScreenshotEntry.swift */,
 				94C4E26B2C4B08580017C18E /* LatestScreenshotWidget.swift */,
 			);
@@ -387,11 +424,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9455F4DC2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift in Sources */,
 				94E20BBD2C4ADDE000C11043 /* CGSize+Extension.swift in Sources */,
 				94453E4C2C4AAD7900B15690 /* WidgetsBundle.swift in Sources */,
 				94453E4E2C4AAD7900B15690 /* LatestScreenshotProvider.swift in Sources */,
 				94C4E26A2C4B06850017C18E /* LatestScreenshotView.swift in Sources */,
 				94C4E26C2C4B08580017C18E /* LatestScreenshotWidget.swift in Sources */,
+				946E7FCB2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift in Sources */,
+				946E7FC52C4C3341001E4C46 /* DurationScreenshotView.swift in Sources */,
+				946E7FC62C4C3341001E4C46 /* DurationScreenshotWidget.swift in Sources */,
+				94BB6A2C2C4C3FA7009F31E7 /* DurationWidgetOption.swift in Sources */,
+				946E7FC72C4C3341001E4C46 /* DurationScreenshotEntry.swift in Sources */,
+				946E7FC92C4C3341001E4C46 /* DurationScreenshotProvider.swift in Sources */,
 				94E20BBB2C4ADDD800C11043 /* RefreshLatestScreenshotIntent.swift in Sources */,
 				94C4E2682C4B06610017C18E /* LatestScreenshotEntry.swift in Sources */,
 			);

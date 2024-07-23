@@ -10,7 +10,8 @@ import SwiftUI
 struct LatestScreenshotView : View {
     var entry: LatestScreenshotProvider.Entry
     @Environment(\.showsWidgetContainerBackground) private var showsWidgetContainerBackground
-    
+    @Environment(\.widgetFamily) private var widgetFamily
+
     private func frame(for image: UIImage, using geoSize: CGSize) -> CGSize {
         if image.size.height > image.size.width { // Tall
             return .init(
@@ -27,7 +28,7 @@ struct LatestScreenshotView : View {
     
     var body: some View {
         switch entry.viewState {
-        case .screenshot(let image, _):
+        case .screenshot(let image, let assetID):
             VStack {
                 GeometryReader { geo in
                     Image(uiImage: image)
@@ -37,11 +38,21 @@ struct LatestScreenshotView : View {
                         .frame(maxWidth: .infinity)
                 }
                 
-                Button(
-                    "Refresh",
-                    systemImage: "arrow.clockwise",
-                    intent: RefreshLatestScreenshotIntent()
-                )
+                HStack {
+                    Button(
+                        "Refresh",
+                        systemImage: "arrow.clockwise",
+                        intent: RefreshLatestScreenshotIntent()
+                    )
+                    Spacer()
+                    Button(
+                        "Delete",
+                        systemImage: "trash",
+                        role: .destructive,
+                        intent: DeleteLatestScreenshotIntent(assetID: assetID)
+                    )
+                }
+                .labelStyle(.adaptive)
                 .font(.footnote)
             }
             .widgetURL(entry.url)

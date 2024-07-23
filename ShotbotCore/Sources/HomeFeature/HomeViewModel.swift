@@ -15,6 +15,7 @@ import StoreKit
 import OSLog
 import SBFoundation
 import Photos
+import CollectionConcurrencyKit
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var persistenceManager: any PersistenceManaging
@@ -104,7 +105,7 @@ import Photos
         switch imageType {
         case .individual:
             logger.notice("ImageType switched to individual.")
-
+            
             if imageResults.hasImages {
                 viewState = .individualImages(imageResults.individual)
                 logger.notice("ViewState switched to individual images.")
@@ -114,7 +115,7 @@ import Photos
             }
         case .combined:
             logger.notice("ImageType switched to combined.")
-
+            
             if let cachedImage = imageResults.combined {
                 logger.notice("Using cached combined image.")
                 viewState = .combinedImages(cachedImage)
@@ -129,7 +130,7 @@ import Photos
                         logger.notice("ImageResults.combined is nil.")
                         throw SBError.unsupportedImage
                     }
-                        
+                    
                     guard viewState == .combinedPlaceholder else {
                         logger.info("ViewState has changed- no need to switch view state.")
                         return
@@ -187,7 +188,7 @@ import Photos
     /// Autosaves the combined image to photos and iCloud if the user has `autoSaveToFiles` and/or `autoSaveToPhotos` enabled
     private func autoSaveCombinedIfNeeded() async {
         guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
-        guard let combinedURL = imageResults.combined?.url else { return } 
+        guard let combinedURL = imageResults.combined?.url else { return }
         
         do {
             if persistenceManager.autoSaveToFiles {
@@ -204,7 +205,7 @@ import Photos
             self.error = error
         }
     }
-
+    
     /// Cancels and nils out `combinedImageTask`
     private func stopCombinedImageTask() {
         logger.debug("Stopping combined image task.")
@@ -222,13 +223,13 @@ import Photos
                     continuation.resume(throwing: SBError.noSelf)
                     return
                 }
-
+                
                 self.logger.info("Starting combined image task.")
-
+                
                 defer {
                     self.logger.info("Ending combined image task.")
                 }
-
+                
                 let imagesWidth = images.map(\.size.width).reduce(0, +)
                 let resizedImages = images.map { image in
                     let widthScale = (image.size.width / imagesWidth)
@@ -239,23 +240,23 @@ import Photos
                     )
                     return image.resized(to: size)
                 }
-
+                
                 let combined = resizedImages.combineHorizontally()
-
+                
                 guard let data = combined.pngData() else {
                     self.logger.error("No combined image png data")
                     continuation.resume(throwing: SBError.noImageData)
                     return
                 }
-
+                
                 let temporaryURL = URL.temporaryDirectory.appending(path: "Combined \(UUID().uuidString).png")
-
+                
                 do {
                     try data.write(to: temporaryURL)
                     self.logger.info("Saving combined data to temporary url.")
-
+                    
                     let image = ShareableImage(framedScreenshot: combined, url: temporaryURL)
-
+                    
                     continuation.resume(returning: image)
                 } catch {
                     continuation.resume(throwing: error)
@@ -292,42 +293,104 @@ import Photos
         case .photoAssetID(let url):
             guard
                 let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-                let assetID = components.queryItems?.first?.value
+                let host = components.host,
+                let deepLink = DeepLink(rawValue: host)
             else {
                 throw SBError.badDeeplinkURL
             }
             
-            let fetchOptions = PHFetchOptions()
-            fetchOptions.fetchLimit = 1
-            let result = PHAsset.fetchAssets(withLocalIdentifiers: [assetID], options: fetchOptions)
-            
-            guard let latestScreenshotAsset = result.firstObject else {
-                throw SBError.noImageData
+            switch deepLink {
+            case .latestScreenshot:
+                guard let assetID = components.queryItems?.first?.value else {
+                    throw SBError.badDeeplinkURL
+                }
+                
+                let fetchOptions = PHFetchOptions()
+                fetchOptions.fetchLimit = 1
+                
+                let result = PHAsset.fetchAssets(
+                    withLocalIdentifiers: [assetID],
+                    options: fetchOptions
+                )
+                
+                guard let latestScreenshotAsset = result.firstObject else {
+                    throw SBError.noImageData
+                }
+                
+                let requestOptions = PHImageRequestOptions()
+                requestOptions.version = .original
+                requestOptions.deliveryMode = .highQualityFormat
+                requestOptions.isNetworkAccessAllowed = true
+                if #available(iOS 17, *) {
+                    requestOptions.allowSecondaryDegradedImage = false
+                }
+                
+                let (image, _) = await PHImageManager.default().requestImage(
+                    for: latestScreenshotAsset,
+                    targetSize: .init(
+                        width: latestScreenshotAsset.pixelWidth,
+                        height: latestScreenshotAsset.pixelHeight
+                    ),
+                    contentMode: .aspectFit,
+                    options: requestOptions
+                )
+                
+                guard let image else {
+                    throw SBError.noImageData
+                }
+                
+                screenshots = [image]
+            case .durationScreenshots:
+                guard
+                    let durationString = components.queryItems?.first?.value,
+                    let duration = Int(durationString),
+                    let option = DurationWidgetOption(rawValue: duration),
+                    let startDate = Calendar.current.date(
+                        byAdding: option.dateComponent,
+                        value: -option.dateValue,
+                        to: .now
+                    )
+                else {
+                    throw SBError.badDeeplinkURL
+                }
+                
+                let fetchOptions = PHFetchOptions()
+                let typePredicate = NSPredicate(format: "mediaSubtype = %d", PHAssetMediaSubtype.photoScreenshot.rawValue)
+                let timePredicate = NSPredicate(format: "creationDate > %@", startDate as NSDate)
+                let compoundPredicate = NSCompoundPredicate(
+                    type: .and,
+                    subpredicates: [
+                        typePredicate,
+                        timePredicate
+                    ]
+                )
+                fetchOptions.predicate = compoundPredicate
+                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+                
+                let result = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+                let requestOptions = PHImageRequestOptions()
+                requestOptions.version = .original
+                requestOptions.deliveryMode = .highQualityFormat
+                requestOptions.isNetworkAccessAllowed = true
+                if #available(iOS 17, *) {
+                    requestOptions.allowSecondaryDegradedImage = false
+                }
+                
+                let images = await result.phAssets.asyncCompactMap { asset in
+                    let (image, _) = await PHImageManager.default().requestImage(
+                        for: asset,
+                        targetSize: .init(
+                            width: asset.pixelWidth,
+                            height: asset.pixelHeight
+                        ),
+                        contentMode: .aspectFit,
+                        options: requestOptions
+                    )
+                    return image
+                }
+                
+                screenshots = images
             }
-            
-            let requestOptions = PHImageRequestOptions()
-            requestOptions.version = .original
-            requestOptions.deliveryMode = .highQualityFormat
-            requestOptions.isNetworkAccessAllowed = true
-            if #available(iOS 17, *) {
-                requestOptions.allowSecondaryDegradedImage = false
-            }
-            
-            let (image, _) = await PHImageManager.default().requestImage(
-                for: latestScreenshotAsset,
-                targetSize: .init(
-                    width: latestScreenshotAsset.pixelWidth,
-                    height: latestScreenshotAsset.pixelHeight
-                ),
-                contentMode: .aspectFit,
-                options: requestOptions
-            )
-            
-            guard let image else {
-                throw SBError.noImageData
-            }
-            
-            screenshots = [image]
         case .filePicker(let urls):
             screenshots = try urls.compactMap { url in
                 let accessing = url.startAccessingSecurityScopedResource()
@@ -380,14 +443,14 @@ import Photos
                 isLoading = false
             }
         }
-       
+        
         // Prep
         stopCombinedImageTask()
         
         let screenshots = try await getScreenshots(from: source)
         
         guard !screenshots.isEmpty else { return }
-                
+        
         if persistenceManager.defaultHomeTab == .combined,
            screenshots.count > 1,
            imageType == .individual {
@@ -437,12 +500,12 @@ import Photos
     private func askForAReview() {
         let deviceFrameCreations = persistenceManager.deviceFrameCreations
         let numberOfActivations = persistenceManager.numberOfActivations
-
+        
         guard deviceFrameCreations > 3 && numberOfActivations > 3 else {
             logger.debug("Review prompt criteria not met. DeviceFrameCreations: \(deviceFrameCreations, privacy: .public), numberOfActivations: \(numberOfActivations, privacy: .public).")
             return
         }
-            
+        
         guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
             logger.fault("Could not find UIWindowScene to ask for review")
             return
@@ -454,7 +517,7 @@ import Photos
                 return
             }
         }
-            
+        
         SKStoreReviewController.requestReview(in: scene)
         
         persistenceManager.lastReviewPromptDate = .now
@@ -645,4 +708,48 @@ import Photos
             self.error = error
         }
     }
+}
+
+
+extension PHFetchResult<PHAsset> {
+    var phAssets: [PHAsset] {
+        self.objects(at: IndexSet(0 ..< self.count))
+    }
+}
+
+enum DurationWidgetOption: Int, CaseIterable, Identifiable {
+    case thirtySeconds = 0
+    case fiveMinutes = 1
+    case fifteenMinutes = 2
+    case thirtyMinutes = 3
+    
+    private struct Info {
+        let title: String
+        let dateComponent: Calendar.Component
+        let dateValue: Int
+    }
+    
+    var id: Int { rawValue }
+    var title: String { info.title }
+    var dateComponent: Calendar.Component { info.dateComponent }
+    var dateValue: Int { info.dateValue }
+    
+    private var info: Info {
+        switch self {
+        case .thirtySeconds:
+            return Info(title: "30s", dateComponent: .second, dateValue: 30)
+        case .fiveMinutes:
+            return Info(title: "5m", dateComponent: .minute, dateValue: 5)
+        case .fifteenMinutes:
+            return Info(title: "15m", dateComponent: .minute, dateValue: 15)
+        case .thirtyMinutes:
+            return Info(title: "30m", dateComponent: .minute, dateValue: 30)
+        }
+    }
+}
+
+
+enum DeepLink: String {
+    case latestScreenshot
+    case durationScreenshots
 }

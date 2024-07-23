@@ -6,25 +6,13 @@
 //
 
 import SwiftUI
+import WidgetFeature
+import WidgetKit
 
 struct DurationScreenshotView : View {
-    var entry: DurationScreenshotEntry
+    let entry: DurationScreenshotEntry
     @Environment(\.showsWidgetContainerBackground) private var showsWidgetContainerBackground
     @Environment(\.widgetFamily) private var widgetFamily
-    
-    private func frame(for image: UIImage, using geoSize: CGSize) -> CGSize {
-        if image.size.height > image.size.width { // Tall
-            return .init(
-                width: geoSize.height / image.size.aspectRatio,
-                height: geoSize.height
-            )
-        } else { // Wide
-            return .init(
-                width: geoSize.width,
-                height: geoSize.width * image.size.aspectRatio
-            )
-        }
-    }
     
     var body: some View {
         VStack {

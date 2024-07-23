@@ -7,9 +7,10 @@
 
 import SwiftUI
 import WidgetKit
+import WidgetFeature
 
 struct LatestScreenshotWidget: Widget {
-    let kind: String = "Latest Screenshot"
+    private let kind: String = "Latest Screenshot"
     
     var body: some WidgetConfiguration {
         StaticConfiguration(
@@ -45,5 +46,17 @@ struct LatestScreenshotWidget: Widget {
     )
     LatestScreenshotEntry(
         viewState: .screenshot(.snapchat, "")
+    )
+    LatestScreenshotEntry(
+        viewState: .error,
+        photoLibraryManager: .empty(status: .authorized)
+    )
+    LatestScreenshotEntry(
+        viewState: .error,
+        photoLibraryManager: .empty(status: .denied)
+    )
+    LatestScreenshotEntry(
+        viewState: .error,
+        photoLibraryManager: .empty(status: .limited)
     )
 }

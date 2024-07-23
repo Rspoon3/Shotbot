@@ -16,6 +16,7 @@ import OSLog
 import SBFoundation
 import Photos
 import CollectionConcurrencyKit
+import WidgetFeature
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var persistenceManager: any PersistenceManaging
@@ -291,104 +292,16 @@ import CollectionConcurrencyKit
             logger.info("Fetching images from the photos picker.")
             screenshots = try await imageSelections.loadUImages()
         case .photoAssetID(let url):
-            guard
-                let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-                let host = components.host,
-                let deepLink = DeepLink(rawValue: host)
-            else {
-                throw SBError.badDeeplinkURL
-            }
-            
+            let deepLinkManager = DeepLinkManager()
+            let deepLink = try deepLinkManager.deepLink(from: url)
+            let imageManager = ImageManager()
+                        
             switch deepLink {
             case .latestScreenshot:
-                guard let assetID = components.queryItems?.first?.value else {
-                    throw SBError.badDeeplinkURL
-                }
-                
-                let fetchOptions = PHFetchOptions()
-                fetchOptions.fetchLimit = 1
-                
-                let result = PHAsset.fetchAssets(
-                    withLocalIdentifiers: [assetID],
-                    options: fetchOptions
-                )
-                
-                guard let latestScreenshotAsset = result.firstObject else {
-                    throw SBError.noImageData
-                }
-                
-                let requestOptions = PHImageRequestOptions()
-                requestOptions.version = .original
-                requestOptions.deliveryMode = .highQualityFormat
-                requestOptions.isNetworkAccessAllowed = true
-                if #available(iOS 17, *) {
-                    requestOptions.allowSecondaryDegradedImage = false
-                }
-                
-                let (image, _) = await PHImageManager.default().requestImage(
-                    for: latestScreenshotAsset,
-                    targetSize: .init(
-                        width: latestScreenshotAsset.pixelWidth,
-                        height: latestScreenshotAsset.pixelHeight
-                    ),
-                    contentMode: .aspectFit,
-                    options: requestOptions
-                )
-                
-                guard let image else {
-                    throw SBError.noImageData
-                }
-                
+                let image = try await imageManager.latestScreenshot(from: url)
                 screenshots = [image]
             case .durationScreenshots:
-                guard
-                    let durationString = components.queryItems?.first?.value,
-                    let duration = Int(durationString),
-                    let option = DurationWidgetOption(rawValue: duration),
-                    let startDate = Calendar.current.date(
-                        byAdding: option.dateComponent,
-                        value: -option.dateValue,
-                        to: .now
-                    )
-                else {
-                    throw SBError.badDeeplinkURL
-                }
-                
-                let fetchOptions = PHFetchOptions()
-                let typePredicate = NSPredicate(format: "mediaSubtype = %d", PHAssetMediaSubtype.photoScreenshot.rawValue)
-                let timePredicate = NSPredicate(format: "creationDate > %@", startDate as NSDate)
-                let compoundPredicate = NSCompoundPredicate(
-                    type: .and,
-                    subpredicates: [
-                        typePredicate,
-                        timePredicate
-                    ]
-                )
-                fetchOptions.predicate = compoundPredicate
-                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-                
-                let result = PHAsset.fetchAssets(with: .image, options: fetchOptions)
-                let requestOptions = PHImageRequestOptions()
-                requestOptions.version = .original
-                requestOptions.deliveryMode = .highQualityFormat
-                requestOptions.isNetworkAccessAllowed = true
-                if #available(iOS 17, *) {
-                    requestOptions.allowSecondaryDegradedImage = false
-                }
-                
-                let images = await result.phAssets.asyncCompactMap { asset in
-                    let (image, _) = await PHImageManager.default().requestImage(
-                        for: asset,
-                        targetSize: .init(
-                            width: asset.pixelWidth,
-                            height: asset.pixelHeight
-                        ),
-                        contentMode: .aspectFit,
-                        options: requestOptions
-                    )
-                    return image
-                }
-                
+                let images = try await imageManager.durationScreenshots(from: url)
                 screenshots = images
             }
         case .filePicker(let urls):
@@ -708,48 +621,4 @@ import CollectionConcurrencyKit
             self.error = error
         }
     }
-}
-
-
-extension PHFetchResult<PHAsset> {
-    var phAssets: [PHAsset] {
-        self.objects(at: IndexSet(0 ..< self.count))
-    }
-}
-
-enum DurationWidgetOption: Int, CaseIterable, Identifiable {
-    case thirtySeconds = 0
-    case fiveMinutes = 1
-    case fifteenMinutes = 2
-    case thirtyMinutes = 3
-    
-    private struct Info {
-        let title: String
-        let dateComponent: Calendar.Component
-        let dateValue: Int
-    }
-    
-    var id: Int { rawValue }
-    var title: String { info.title }
-    var dateComponent: Calendar.Component { info.dateComponent }
-    var dateValue: Int { info.dateValue }
-    
-    private var info: Info {
-        switch self {
-        case .thirtySeconds:
-            return Info(title: "30s", dateComponent: .second, dateValue: 30)
-        case .fiveMinutes:
-            return Info(title: "5m", dateComponent: .minute, dateValue: 5)
-        case .fifteenMinutes:
-            return Info(title: "15m", dateComponent: .minute, dateValue: 15)
-        case .thirtyMinutes:
-            return Info(title: "30m", dateComponent: .minute, dateValue: 30)
-        }
-    }
-}
-
-
-enum DeepLink: String {
-    case latestScreenshot
-    case durationScreenshots
 }

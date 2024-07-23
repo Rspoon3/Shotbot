@@ -6,26 +6,14 @@
 //
 
 import SwiftUI
+import WidgetKit
+import Photos
 
 struct LatestScreenshotView : View {
-    var entry: LatestScreenshotProvider.Entry
+    let entry: LatestScreenshotEntry
     @Environment(\.showsWidgetContainerBackground) private var showsWidgetContainerBackground
     @Environment(\.widgetFamily) private var widgetFamily
 
-    private func frame(for image: UIImage, using geoSize: CGSize) -> CGSize {
-        if image.size.height > image.size.width { // Tall
-            return .init(
-                width: geoSize.height / image.size.aspectRatio,
-                height: geoSize.height
-            )
-        } else { // Wide
-            return .init(
-                width: geoSize.width,
-                height: geoSize.width * image.size.aspectRatio
-            )
-        }
-    }
-    
     var body: some View {
         switch entry.viewState {
         case .screenshot(let image, let assetID):
@@ -33,10 +21,16 @@ struct LatestScreenshotView : View {
                 GeometryReader { geo in
                     Image(uiImage: image)
                         .resizable()
-                        .frame(size: frame(for: image, using: geo.size))
+                        .frame(
+                            size: entry.frameSize(
+                                for: image,
+                                using: geo.size
+                            )
+                        )
                         .containerRelativeOrRadius(cornerRadius: showsWidgetContainerBackground ? nil : 4)
                         .frame(maxWidth: .infinity)
                 }
+                .scaledToFit()
                 
                 HStack {
                     Button(
@@ -96,5 +90,23 @@ private extension View {
     
     func frame(size: CGSize, alignment: Alignment = .center) -> some View {
         self.frame(width: size.width, height: size.height, alignment: alignment)
+    }
+}
+
+
+struct LatestScreenshotView_Previews: PreviewProvider {
+    static var previews: some View {
+        ForEach(0...4, id: \.self) { i in
+            LatestScreenshotView(
+                entry: LatestScreenshotEntry(
+                    viewState: .error,
+                    photoLibraryManager: .empty(
+                        status: PHAuthorizationStatus(rawValue: i)!
+                    )
+                )
+            )
+            .previewContext(WidgetPreviewContext(family: .systemSmall))
+            .previewDisplayName(PHAuthorizationStatus(rawValue: i)!.title)
+        }
     }
 }

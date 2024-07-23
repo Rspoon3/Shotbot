@@ -9,11 +9,15 @@ import WidgetKit
 import SwiftUI
 import Photos
 import MediaManager
+import WidgetFeature
 
 struct LatestScreenshotProvider: TimelineProvider {
+    let imageManager: any ImageManaging
     
-    enum TimelineError: Error {
-        case noPhoto
+    // MARK: - Initializer
+    
+    init(imageManager: any ImageManaging = ImageManager()) {
+        self.imageManager = imageManager
     }
     
     // MARK: - TimelineProvider
@@ -47,8 +51,7 @@ struct LatestScreenshotProvider: TimelineProvider {
     
     private func timeline(in context: Context) async -> Timeline<LatestScreenshotEntry> {
         do {
-            let (image, assetID) = try await fetchLatestScreenshot(targetSize: context.displaySize * 3)
-            
+            let (image, assetID) = try await imageManager.latestScreenshot(targetSize: context.displaySize * 3)
             let currentDate = Date()
             let entries = (0..<6).compactMap { hourOffset -> LatestScreenshotEntry? in
                 guard let entryDate = Calendar.current.date(
@@ -72,38 +75,6 @@ struct LatestScreenshotProvider: TimelineProvider {
         }
     }
     
-    private func fetchLatestScreenshot(targetSize: CGSize) async throws -> (UIImage, String) {        
-        let fetchOptions = PHFetchOptions()
-        fetchOptions.fetchLimit = 1
-        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        fetchOptions.predicate = NSPredicate(format: "mediaSubtype = %d", PHAssetMediaSubtype.photoScreenshot.rawValue)
-        
-        let result = PHAsset.fetchAssets(with: .image, options: fetchOptions)
-        
-        guard let latestScreenshotAsset = result.firstObject else {
-            throw TimelineError.noPhoto
-        }
-        
-        let requestOptions = PHImageRequestOptions()
-        requestOptions.version = .original
-        requestOptions.deliveryMode = .highQualityFormat
-        requestOptions.isNetworkAccessAllowed = true
-        requestOptions.allowSecondaryDegradedImage = false
-        
-        let (image, _) = await PHImageManager.default().requestImage(
-            for: latestScreenshotAsset,
-            targetSize: targetSize,
-            contentMode: .aspectFit,
-            options: requestOptions
-        )
-        
-        guard let image else {
-            throw TimelineError.noPhoto
-        }
-        
-        return (image, latestScreenshotAsset.localIdentifier)
-    }
-    
     private func errorTimeline() -> Timeline<LatestScreenshotEntry> {
         let entryDate = Calendar.current.date(
             byAdding: .hour,
@@ -115,6 +86,7 @@ struct LatestScreenshotProvider: TimelineProvider {
             date: entryDate,
             viewState: .error
         )
+        
         return Timeline(
             entries: [entry],
             policy: .atEnd

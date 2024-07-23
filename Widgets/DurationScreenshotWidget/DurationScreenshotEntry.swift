@@ -7,13 +7,16 @@
 
 import UIKit
 import WidgetKit
+import WidgetFeature
 import Photos
 
 struct DurationScreenshotEntry: TimelineEntry {
     let date: Date = .now
     
+    // MARK: - Public
+    
     func url(for option: DurationWidgetOption) -> URL {
-        var components = URLComponents(string: "shotbot://durationScreenshots")
+        var components = URLComponents(string: "shotbot://\(DeepLink.durationScreenshots.rawValue)")
         components?.queryItems = [
             URLQueryItem(
                 name: "optionValue",

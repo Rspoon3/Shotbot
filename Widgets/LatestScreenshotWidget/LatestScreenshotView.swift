@@ -21,6 +21,7 @@ struct LatestScreenshotView : View {
                 GeometryReader { geo in
                     Image(uiImage: image)
                         .resizable()
+                        .scaledToFit()
                         .frame(
                             size: entry.frameSize(
                                 for: image,
@@ -30,7 +31,6 @@ struct LatestScreenshotView : View {
                         .containerRelativeOrRadius(cornerRadius: showsWidgetContainerBackground ? nil : 4)
                         .frame(maxWidth: .infinity)
                 }
-                .scaledToFit()
                 
                 HStack {
                     Button(

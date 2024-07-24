@@ -302,11 +302,11 @@ import WidgetFeature
                 let image = try await imageManager.latestScreenshot(from: url)
                 screenshots = [image]
                 logger.info("Successfully fetched latest screenshot.")
-            case .durationScreenshots:
-                logger.info("Fetching duration screenshots.")
-                let images = try await imageManager.durationScreenshots(from: url)
+            case .multipleScreenshots:
+                logger.info("Fetching multiple screenshots.")
+                let images = try await imageManager.multipleScreenshots(from: url)
                 screenshots = images
-                logger.info("Retrieved (\(screenshots.count, privacy: .public)) duration screenshots.")
+                logger.info("Retrieved (\(screenshots.count, privacy: .public)) screenshots.")
             }
         case .filePicker(let urls):
             screenshots = try urls.compactMap { url in

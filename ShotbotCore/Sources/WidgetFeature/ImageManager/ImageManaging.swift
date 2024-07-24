@@ -10,5 +10,5 @@ import UIKit
 public protocol ImageManaging {
     func latestScreenshot(from url: URL) async throws -> UIImage
     func latestScreenshot(targetSize: CGSize) async throws -> (image: UIImage, assetID: String)
-    func durationScreenshots(from url: URL) async throws -> [UIImage]
+    func multipleScreenshots(from url: URL) async throws -> [UIImage]
 }

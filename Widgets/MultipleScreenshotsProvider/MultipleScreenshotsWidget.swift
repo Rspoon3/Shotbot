@@ -1,5 +1,5 @@
 //
-//  DurationScreenshotWidget.swift
+//  MultipleScreenshotsWidget.swift
 //  WidgetsExtension
 //
 //  Created by Richard Witherspoon on 7/19/24.
@@ -8,19 +8,19 @@
 import SwiftUI
 import WidgetKit
 
-struct DurationScreenshotWidget: Widget {
-    let kind: String = "Duration Screenshots"
+struct MultipleScreenshotsWidget: Widget {
+    let kind: String = "Multiple Screenshots"
     
     var body: some WidgetConfiguration {
         StaticConfiguration(
             kind: kind,
-            provider: DurationScreenshotProvider()
+            provider: MultipleScreenshotsProvider()
         ) { entry in
-            DurationScreenshotView(entry: entry)
+            MultipleScreenshotsView(entry: entry)
         }
         .supportedFamilies([.systemMedium])
-        .configurationDisplayName("Duration Screenshot")
-        .description("Combine screenshots over the specified duration.")
+        .configurationDisplayName("Multiple Screenshots")
+        .description("Frame and combine multiple screenshots over the specified duration.")
         .disfavoredLocations(
             [.lockScreen],
             for: [
@@ -36,7 +36,7 @@ struct DurationScreenshotWidget: Widget {
 }
 
 #Preview(as: .systemMedium) {
-    DurationScreenshotWidget()
+    MultipleScreenshotsWidget()
 } timeline: {
-    DurationScreenshotEntry()
+    MultipleScreenshotsEntry()
 }

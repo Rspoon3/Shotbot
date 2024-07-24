@@ -9,5 +9,5 @@ import Foundation
 
 public enum DeepLink: String {
     case latestScreenshot
-    case durationScreenshots
+    case multipleScreenshots
 }

@@ -21,7 +21,7 @@ struct LatestScreenshotWidget: Widget {
         }
         .supportedFamilies([.systemSmall, .systemLarge])
         .configurationDisplayName("Latest Screenshot")
-        .description("Quickly access your latest screenshot to frame.")
+        .description("Quickly frame your latest screenshot.")
         .disfavoredLocations(
             [.lockScreen],
             for: [

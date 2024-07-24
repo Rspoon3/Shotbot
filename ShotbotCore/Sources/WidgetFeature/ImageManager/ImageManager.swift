@@ -67,6 +67,8 @@ public struct ImageManager: ImageManaging {
         return image
     }
     
+    /// Gets the latest screenshot with the target sized passed in.
+    /// Returns the image and the image assetID.
     public func latestScreenshot(targetSize: CGSize) async throws -> (image: UIImage, assetID: String)  {
         let fetchOptions = PHFetchOptions()
         fetchOptions.fetchLimit = 1
@@ -96,7 +98,8 @@ public struct ImageManager: ImageManaging {
         return (image, latestScreenshotAsset.localIdentifier)
     }
     
-    public func durationScreenshots(from url: URL) async throws -> [UIImage] {
+    /// Gets the screenshots over the specified duration included in the passed in URL.
+    public func multipleScreenshots(from url: URL) async throws -> [UIImage] {
         let durationString = try deepLinkManager.deepLinkValue(from: url)
 
         guard

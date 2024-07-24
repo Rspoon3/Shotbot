@@ -1,5 +1,5 @@
 //
-//  DurationScreenshotView.swift
+//  MultipleScreenshotsView.swift
 //  WidgetsExtension
 //
 //  Created by Richard Witherspoon on 7/19/24.
@@ -9,14 +9,14 @@ import SwiftUI
 import WidgetFeature
 import WidgetKit
 
-struct DurationScreenshotView : View {
-    let entry: DurationScreenshotEntry
+struct MultipleScreenshotsView : View {
+    let entry: MultipleScreenshotsEntry
     @Environment(\.showsWidgetContainerBackground) private var showsWidgetContainerBackground
     @Environment(\.widgetFamily) private var widgetFamily
     
     var body: some View {
         VStack {
-            Text("Combine Screenshots")
+            Text("Multiple Screenshots")
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
             

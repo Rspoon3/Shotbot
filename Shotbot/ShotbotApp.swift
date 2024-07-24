@@ -12,14 +12,19 @@ import Purchases
 import Persistence
 import MediaManager
 import AppIntents
+import WidgetKit
 import OSLog
+import Photos
+import Models
 
 @main
 struct ShotbotApp: App {
     @UIApplicationDelegateAdaptor(AppDelegateAdaptor.self) private var appDelegate
     @StateObject private var persistenceManager = PersistenceManager.shared
     @StateObject private var purchaseManager = PurchaseManager.shared
+    @StateObject private var tabManager = TabManager()
     @Environment(\.scenePhase) private var scenePhase
+
     private let logger = Logger(category: "ShotbotApp")
     
     init() {
@@ -35,6 +40,7 @@ struct ShotbotApp: App {
             AppTabNavigation()
                 .environmentObject(persistenceManager)
                 .environmentObject(purchaseManager)
+                .environmentObject(tabManager)
                 .task {
                     await purchaseManager.fetchOfferings()
                 }
@@ -43,8 +49,14 @@ struct ShotbotApp: App {
                 }
         }
         .onChange(of: scenePhase) { phase in
-            guard phase == .active else { return }
-            persistenceManager.numberOfActivations += 1
+            switch phase {
+            case .active:
+                persistenceManager.numberOfActivations += 1
+            case .background:
+                WidgetCenter.shared.reloadAllTimelines()
+            default:
+                break
+            }
         }
     #if os(visionOS)
         .defaultSize(

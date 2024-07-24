@@ -17,7 +17,8 @@ let package = Package(
         .library(name: "Purchases", targets: ["Purchases"]),
         .library(name: "MediaManager", targets: ["MediaManager"]),
         .library(name: "SettingsFeature", targets: ["SettingsFeature"]),
-        .library(name: "SBFoundation", targets: ["SBFoundation"])
+        .library(name: "SBFoundation", targets: ["SBFoundation"]),
+        .library(name: "WidgetFeature", targets: ["WidgetFeature"]),
     ],
     dependencies: [
         .package(
@@ -57,6 +58,7 @@ let package = Package(
                 "Purchases",
                 "MediaManager",
                 "SBFoundation",
+                "WidgetFeature",
                 .product(name: "AlertToast", package: "AlertToast")
             ]
         ),
@@ -96,6 +98,12 @@ let package = Package(
             dependencies: [
                 "Models"
             ]
-        )
+        ),
+        .target(
+            name: "WidgetFeature",
+            dependencies: [
+                .product(name: "CollectionConcurrencyKit", package: "CollectionConcurrencyKit"),
+            ]
+        ),
     ]
 )

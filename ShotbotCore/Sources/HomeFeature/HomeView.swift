@@ -15,8 +15,9 @@ import MediaManager
 
 public struct HomeView: View {
     @StateObject var viewModel = HomeViewModel()
+    @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
-    
+
     // MARK: - Initializer
     
     public init(viewModel: HomeViewModel) {
@@ -106,6 +107,12 @@ public struct HomeView: View {
             .onChange(of: scenePhase) { newValue in
                 guard newValue == .background || newValue == .active else { return }
                 viewModel.clearImagesOnAppBackground()
+            }
+            .onOpenURL { url in
+                tabManager.selectedTab = .home
+                Task {
+                    await viewModel.didOpenViaDeepLink(url)
+                }
             }
             .onAppear {
                 Task {

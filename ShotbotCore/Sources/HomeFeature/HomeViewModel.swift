@@ -14,6 +14,9 @@ import MediaManager
 import StoreKit
 import OSLog
 import SBFoundation
+import Photos
+import CollectionConcurrencyKit
+import WidgetFeature
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var persistenceManager: any PersistenceManaging
@@ -103,7 +106,7 @@ import SBFoundation
         switch imageType {
         case .individual:
             logger.notice("ImageType switched to individual.")
-
+            
             if imageResults.hasImages {
                 viewState = .individualImages(imageResults.individual)
                 logger.notice("ViewState switched to individual images.")
@@ -113,7 +116,7 @@ import SBFoundation
             }
         case .combined:
             logger.notice("ImageType switched to combined.")
-
+            
             if let cachedImage = imageResults.combined {
                 logger.notice("Using cached combined image.")
                 viewState = .combinedImages(cachedImage)
@@ -128,7 +131,7 @@ import SBFoundation
                         logger.notice("ImageResults.combined is nil.")
                         throw SBError.unsupportedImage
                     }
-                        
+                    
                     guard viewState == .combinedPlaceholder else {
                         logger.info("ViewState has changed- no need to switch view state.")
                         return
@@ -186,7 +189,7 @@ import SBFoundation
     /// Autosaves the combined image to photos and iCloud if the user has `autoSaveToFiles` and/or `autoSaveToPhotos` enabled
     private func autoSaveCombinedIfNeeded() async {
         guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
-        guard let combinedURL = imageResults.combined?.url else { return } 
+        guard let combinedURL = imageResults.combined?.url else { return }
         
         do {
             if persistenceManager.autoSaveToFiles {
@@ -203,7 +206,7 @@ import SBFoundation
             self.error = error
         }
     }
-
+    
     /// Cancels and nils out `combinedImageTask`
     private func stopCombinedImageTask() {
         logger.debug("Stopping combined image task.")
@@ -221,13 +224,13 @@ import SBFoundation
                     continuation.resume(throwing: SBError.noSelf)
                     return
                 }
-
+                
                 self.logger.info("Starting combined image task.")
-
+                
                 defer {
                     self.logger.info("Ending combined image task.")
                 }
-
+                
                 let imagesWidth = images.map(\.size.width).reduce(0, +)
                 let resizedImages = images.map { image in
                     let widthScale = (image.size.width / imagesWidth)
@@ -238,23 +241,23 @@ import SBFoundation
                     )
                     return image.resized(to: size)
                 }
-
+                
                 let combined = resizedImages.combineHorizontally()
-
+                
                 guard let data = combined.pngData() else {
                     self.logger.error("No combined image png data")
                     continuation.resume(throwing: SBError.noImageData)
                     return
                 }
-
+                
                 let temporaryURL = URL.temporaryDirectory.appending(path: "Combined \(UUID().uuidString).png")
-
+                
                 do {
                     try data.write(to: temporaryURL)
                     self.logger.info("Saving combined data to temporary url.")
-
+                    
                     let image = ShareableImage(framedScreenshot: combined, url: temporaryURL)
-
+                    
                     continuation.resume(returning: image)
                 } catch {
                     continuation.resume(throwing: error)
@@ -288,6 +291,23 @@ import SBFoundation
         case .photoPicker:
             logger.info("Fetching images from the photos picker.")
             screenshots = try await imageSelections.loadUImages()
+        case .photoAssetID(let url):
+            let deepLinkManager = DeepLinkManager()
+            let deepLink = try deepLinkManager.deepLink(from: url)
+            let imageManager = ImageManager()
+                        
+            switch deepLink {
+            case .latestScreenshot:
+                logger.info("Fetching latest screenshot.")
+                let image = try await imageManager.latestScreenshot(from: url)
+                screenshots = [image]
+                logger.info("Successfully fetched latest screenshot.")
+            case .multipleScreenshots:
+                logger.info("Fetching multiple screenshots.")
+                let images = try await imageManager.multipleScreenshots(from: url)
+                screenshots = images
+                logger.info("Retrieved (\(screenshots.count, privacy: .public)) screenshots.")
+            }
         case .filePicker(let urls):
             screenshots = try urls.compactMap { url in
                 let accessing = url.startAccessingSecurityScopedResource()
@@ -340,14 +360,14 @@ import SBFoundation
                 isLoading = false
             }
         }
-       
+        
         // Prep
         stopCombinedImageTask()
         
         let screenshots = try await getScreenshots(from: source)
         
         guard !screenshots.isEmpty else { return }
-                
+        
         if persistenceManager.defaultHomeTab == .combined,
            screenshots.count > 1,
            imageType == .individual {
@@ -397,12 +417,12 @@ import SBFoundation
     private func askForAReview() {
         let deviceFrameCreations = persistenceManager.deviceFrameCreations
         let numberOfActivations = persistenceManager.numberOfActivations
-
+        
         guard deviceFrameCreations > 3 && numberOfActivations > 3 else {
             logger.debug("Review prompt criteria not met. DeviceFrameCreations: \(deviceFrameCreations, privacy: .public), numberOfActivations: \(numberOfActivations, privacy: .public).")
             return
         }
-            
+        
         guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
             logger.fault("Could not find UIWindowScene to ask for review")
             return
@@ -414,7 +434,7 @@ import SBFoundation
                 return
             }
         }
-            
+        
         SKStoreReviewController.requestReview(in: scene)
         
         persistenceManager.lastReviewPromptDate = .now
@@ -440,6 +460,14 @@ import SBFoundation
     public func didDropItem(_ items: [Data]) async {
         do {
             try await processSelectedPhotos(source: .dropItems(items))
+        } catch {
+            self.error = error
+        }
+    }
+    
+    public func didOpenViaDeepLink(_ url: URL) async {
+        do {
+            try await processSelectedPhotos(source: .photoAssetID(url))
         } catch {
             self.error = error
         }

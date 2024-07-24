@@ -128,7 +128,7 @@ public struct ImageManager: ImageManaging {
         
         let result = PHAsset.fetchAssets(with: .image, options: fetchOptions)
         
-        return await result.phAssets.asyncCompactMap { asset in
+        let images = await result.phAssets.asyncCompactMap { asset in
             let (image, _) = await client.requestImage(
                 asset,
                 .init(
@@ -140,6 +140,12 @@ public struct ImageManager: ImageManaging {
             )
             return image
         }
+        
+        guard !images.isEmpty else {
+            throw WidgetError.noImages(for: option)
+        }
+        
+        return images
     }
     
     // MARK: - Errors

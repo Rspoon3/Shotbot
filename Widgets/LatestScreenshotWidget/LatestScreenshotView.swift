@@ -75,6 +75,7 @@ struct LatestScreenshotView : View {
                         endPoint: .bottom
                     )
                 }
+                .widgetURL(nil)
         }
     }
 }

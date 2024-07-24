@@ -110,7 +110,9 @@ public struct HomeView: View {
             }
             .onOpenURL { url in
                 tabManager.selectedTab = .home
-                viewModel.didOpenViaDeepLink(url)
+                Task {
+                    await viewModel.didOpenViaDeepLink(url)
+                }
             }
             .onAppear {
                 Task {

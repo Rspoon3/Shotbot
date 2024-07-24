@@ -465,9 +465,11 @@ import WidgetFeature
         }
     }
     
-    public func didOpenViaDeepLink(_ url: URL) {
-        Task {
+    public func didOpenViaDeepLink(_ url: URL) async {
+        do {
             try await processSelectedPhotos(source: .photoAssetID(url))
+        } catch {
+            self.error = error
         }
     }
     

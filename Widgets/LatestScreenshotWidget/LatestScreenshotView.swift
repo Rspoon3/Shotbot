@@ -95,6 +95,7 @@ private extension View {
 }
 
 
+#if DEBUG
 struct LatestScreenshotView_Previews: PreviewProvider {
     static var previews: some View {
         ForEach(0...4, id: \.self) { i in
@@ -111,3 +112,4 @@ struct LatestScreenshotView_Previews: PreviewProvider {
         }
     }
 }
+#endif

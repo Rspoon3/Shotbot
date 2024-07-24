@@ -35,6 +35,7 @@ struct LatestScreenshotWidget: Widget {
     }
 }
 
+#if DEBUG
 #Preview(as: .systemSmall) {
     LatestScreenshotWidget()
 } timeline: {
@@ -60,3 +61,4 @@ struct LatestScreenshotWidget: Widget {
         photoLibraryManager: .empty(status: .limited)
     )
 }
+#endif

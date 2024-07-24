@@ -15,13 +15,16 @@ import AppIntents
 import WidgetKit
 import OSLog
 import Photos
+import Models
 
 @main
 struct ShotbotApp: App {
     @UIApplicationDelegateAdaptor(AppDelegateAdaptor.self) private var appDelegate
     @StateObject private var persistenceManager = PersistenceManager.shared
     @StateObject private var purchaseManager = PurchaseManager.shared
+    @StateObject private var tabManager = TabManager()
     @Environment(\.scenePhase) private var scenePhase
+
     private let logger = Logger(category: "ShotbotApp")
     
     init() {
@@ -37,6 +40,7 @@ struct ShotbotApp: App {
             AppTabNavigation()
                 .environmentObject(persistenceManager)
                 .environmentObject(purchaseManager)
+                .environmentObject(tabManager)
                 .task {
                     await purchaseManager.fetchOfferings()
                 }

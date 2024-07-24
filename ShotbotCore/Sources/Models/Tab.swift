@@ -7,6 +7,6 @@
 
 import Foundation
 
-enum Tab {
+public enum Tab {
     case home, settings
 }

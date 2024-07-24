@@ -298,11 +298,15 @@ import WidgetFeature
                         
             switch deepLink {
             case .latestScreenshot:
+                logger.info("Fetching latest screenshot.")
                 let image = try await imageManager.latestScreenshot(from: url)
                 screenshots = [image]
+                logger.info("Successfully fetched latest screenshot.")
             case .durationScreenshots:
+                logger.info("Fetching duration screenshots.")
                 let images = try await imageManager.durationScreenshots(from: url)
                 screenshots = images
+                logger.info("Retrieved (\(screenshots.count, privacy: .public)) duration screenshots.")
             }
         case .filePicker(let urls):
             screenshots = try urls.compactMap { url in

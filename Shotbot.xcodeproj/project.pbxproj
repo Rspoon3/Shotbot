@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		94016B042C4F4F03006F025B /* WidgetFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 94016B032C4F4F03006F025B /* WidgetFeature */; };
+		940A9E662C514AA20093893D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9482BE752C51402A00881181 /* Preview Assets.xcassets */; };
 		94453E472C4AAD7900B15690 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94453E462C4AAD7800B15690 /* WidgetKit.framework */; };
 		94453E492C4AAD7900B15690 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94453E482C4AAD7900B15690 /* SwiftUI.framework */; };
 		94453E4C2C4AAD7900B15690 /* WidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */; };
@@ -90,6 +91,7 @@
 		946E7FC32C4C3341001E4C46 /* MultipleScreenshotsEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleScreenshotsEntry.swift; sourceTree = "<group>"; };
 		946E7FC42C4C3341001E4C46 /* MultipleScreenshotsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleScreenshotsWidget.swift; sourceTree = "<group>"; };
 		946E7FCA2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteLatestScreenshotIntent.swift; sourceTree = "<group>"; };
+		9482BE752C51402A00881181 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		94BD65C62A44B28700D0CE61 /* Shotbot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shotbot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotbotApp.swift; sourceTree = "<group>"; };
 		94BD65CD2A44B28700D0CE61 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 		94453E4A2C4AAD7900B15690 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
+				9482BE742C51401900881181 /* Preview Content */,
 				94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */,
 				946E7FBF2C4C3333001E4C46 /* MultipleScreenshotsProvider */,
 				94C4E2662C4B063D0017C18E /* LatestScreenshotWidget */,
@@ -179,6 +182,14 @@
 				946E7FC42C4C3341001E4C46 /* MultipleScreenshotsWidget.swift */,
 			);
 			path = MultipleScreenshotsProvider;
+			sourceTree = "<group>";
+		};
+		9482BE742C51401900881181 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				9482BE752C51402A00881181 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		94BD65BD2A44B28700D0CE61 = {
@@ -396,6 +407,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94C4E26F2C4B23950017C18E /* Assets.xcassets in Resources */,
+				940A9E662C514AA20093893D /* Preview Assets.xcassets in Resources */,
 				94453E522C4AAD7A00B15690 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -484,6 +496,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
+				DEVELOPMENT_ASSET_PATHS = "\"Widgets/Preview Content\"";
 				DEVELOPMENT_TEAM = 29BB6CT754;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -515,6 +528,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(CURRENT_PROJECT_VERSION)";
+				DEVELOPMENT_ASSET_PATHS = "\"Widgets/Preview Content\"";
 				DEVELOPMENT_TEAM = 29BB6CT754;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;

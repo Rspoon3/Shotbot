@@ -28,6 +28,7 @@ import WidgetFeature
     private var imageQuality: ImageQuality
     private(set) var imageResults = ImageResults()
     private let logger = Logger(category: HomeViewModel.self)
+    private let clock: any Clock<Duration>
     @Published public var showPurchaseView = false
     @Published public var showAutoSaveToast = false
     @Published public var showCopyToast = false
@@ -89,7 +90,8 @@ import WidgetFeature
         photoLibraryManager: PhotoLibraryManager = .live,
         purchaseManager: any PurchaseManaging = PurchaseManager.shared,
         fileManager: any FileManaging = FileManager.default,
-        reviewManager: any ReviewManaging = ReviewManager()
+        reviewManager: any ReviewManaging = ReviewManager(),
+        clock: any Clock<Duration> = ContinuousClock()
     ) {
         self.persistenceManager = persistenceManager
         self.photoLibraryManager = photoLibraryManager
@@ -98,6 +100,7 @@ import WidgetFeature
         self.reviewManager = reviewManager
         self.imageQuality = persistenceManager.imageQuality
         self.showGridView = persistenceManager.defaultHomeView == .grid
+        self.clock = clock
     }
     
     
@@ -175,14 +178,14 @@ import WidgetFeature
                 }
             }
             
-            try await Task.sleep(for: .seconds(0.75))
+            try await clock.sleep(for: .seconds(0.75))
             showAutoSaveToast = true
             
             if toastText == nil {
                 logger.fault("Toast text returned nil.")
             }
             
-            try await Task.sleep(for: .seconds(0.75))
+            try await clock.sleep(for: .seconds(0.75))
         } catch {
             logger.info("An autosave error occurred: \(error.localizedDescription, privacy: .public).")
             self.error = error

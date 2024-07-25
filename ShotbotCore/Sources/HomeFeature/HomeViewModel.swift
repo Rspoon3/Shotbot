@@ -25,15 +25,15 @@ import WidgetFeature
     private let fileManager: any FileManaging
     private let imageCombiner: any ImageCombining
     private let reviewManager: any ReviewManaging
+    private let autoCRUDManager: any AutoCRUDManaging
     private var combinedImageTask: Task<Void, Never>?
     private let screenshotImporter: any ScreenshotImporting
     private var imageQuality: ImageQuality
     private let logger = Logger(category: HomeViewModel.self)
-    private let clock: any Clock<Duration>
     private(set) var imageResults = ImageResults()
     @Published public var showPurchaseView = false
-    @Published public var showAutoSaveToast = false
     @Published public var showCopyToast = false
+    @Published public var showAutoSaveToast = false
     @Published public var showQuickSaveToast = false
     @Published public var showPhotosPicker = false
     @Published public var isLoading = false
@@ -94,8 +94,8 @@ import WidgetFeature
         fileManager: any FileManaging = FileManager.default,
         screenshotImporter: any ScreenshotImporting = ScreenshotImporter(),
         reviewManager: any ReviewManaging = ReviewManager(),
-        clock: any Clock<Duration> = ContinuousClock(),
-        imageCombiner: any ImageCombining = ImageCombiner()
+        imageCombiner: any ImageCombining = ImageCombiner(),
+        autoCRUDManager: any AutoCRUDManaging = AutoCRUDManager()
     ) {
         self.persistenceManager = persistenceManager
         self.photoLibraryManager = photoLibraryManager
@@ -103,8 +103,8 @@ import WidgetFeature
         self.fileManager = fileManager
         self.reviewManager = reviewManager
         self.screenshotImporter = screenshotImporter
-        self.clock = clock
         self.imageCombiner = imageCombiner
+        self.autoCRUDManager = autoCRUDManager
         self.imageQuality = persistenceManager.imageQuality
         self.showGridView = persistenceManager.defaultHomeView == .grid
     }
@@ -153,69 +153,6 @@ import WidgetFeature
                     logger.notice("ViewState switched to combined images.")
                 }
             }
-        }
-    }
-    
-    /// Asks the user to confirm deleting the selected photos from the photo library if this
-    /// setting is enabled.
-    private func autoDeleteScreenshotsIfNeeded() async {
-        guard persistenceManager.autoDeleteScreenshots else { return }
-        let ids = imageSelections.compactMap(\.itemIdentifier)
-        try? await photoLibraryManager.delete(ids)
-        logger.notice("Deleting \(ids.count, privacy: .public) images.")
-    }
-    
-    /// Shows the `showAutoSaveToast` if the user has `autoSaveToFiles` or `autoSaveToPhotos` enabled
-    ///
-    /// Using a slight delay in order to make the UI less jarring
-    private func autoSaveIndividualImagesIfNeeded() async {
-        guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
-        
-        do {
-            for result in imageResults.individual {
-                if persistenceManager.autoSaveToFiles {
-                    try fileManager.copyToiCloudFiles(from: result.url)
-                    logger.info("Saving to iCloud.")
-                }
-                
-                if persistenceManager.autoSaveToPhotos {
-                    try await photoLibraryManager.savePhoto(result.url)
-                    logger.info("Saving to Photo library.")
-                }
-            }
-            
-            try await clock.sleep(for: .seconds(0.75))
-            showAutoSaveToast = true
-            
-            if toastText == nil {
-                logger.fault("Toast text returned nil.")
-            }
-            
-            try await clock.sleep(for: .seconds(0.75))
-        } catch {
-            logger.info("An autosave error occurred: \(error.localizedDescription, privacy: .public).")
-            self.error = error
-        }
-    }
-    
-    /// Autosaves the combined image to photos and iCloud if the user has `autoSaveToFiles` and/or `autoSaveToPhotos` enabled
-    private func autoSaveCombinedIfNeeded() async {
-        guard persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos else { return }
-        guard let combinedURL = imageResults.combined?.url else { return }
-        
-        do {
-            if persistenceManager.autoSaveToFiles {
-                try fileManager.copyToiCloudFiles(from: combinedURL)
-                logger.info("Saving combined image to iCloud.")
-            }
-            
-            if persistenceManager.autoSaveToPhotos {
-                try await photoLibraryManager.savePhoto(combinedURL)
-                logger.info("Saving combined image to Photo library.")
-            }
-        } catch {
-            logger.info("An autosave error occurred for the combined image: \(error.localizedDescription, privacy: .public).")
-            self.error = error
         }
     }
     
@@ -305,7 +242,7 @@ import WidgetFeature
         
         Task(priority: .userInitiated) {
             await combineDeviceFrames()
-            await autoSaveCombinedIfNeeded()
+            try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
             
             if imageType == .combined {
                 isLoading = false
@@ -320,8 +257,10 @@ import WidgetFeature
             }
             
             // Post FramedScreenshot generation
-            await autoSaveIndividualImagesIfNeeded()
-            await autoDeleteScreenshotsIfNeeded()
+            try? await autoCRUDManager.autoSaveIndividualImagesIfNeeded(using: imageResults.individual) { [weak self] in
+                self?.showAutoSaveToast = true
+            }
+            await autoCRUDManager.autoDeleteScreenshotsIfNeeded(items: imageSelections)
             reviewManager.askForAReview()
         }
     }

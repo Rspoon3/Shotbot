@@ -163,7 +163,6 @@ import WidgetFeature
         combinedImageTask = nil
     }
     
-    
     /// If their are multiple image results, it will start the process of combining them horizontally
     private func combineDeviceFrames() async {
         guard imageResults.hasMultipleImages else { return }
@@ -265,6 +264,28 @@ import WidgetFeature
         }
     }
     
+    /// Creates a `ShareableImage` from a `UIScreenshot`
+    ///
+    /// Will auto save to files or photos if necessary
+    private func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> ShareableImage {
+        let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality)
+        let path = "Framed Screenshot \(count)_\(UUID()).png"
+        let temporaryURL = URL.temporaryDirectory.appending(path: path)
+        
+        guard let data = framedScreenshot.pngData() else {
+            logger.error("Could not get png data for framedScreenshot.")
+            throw SBError.noImageData
+        }
+        
+        try data.write(to: temporaryURL)
+        logger.info("Writing \(path, privacy: .public) to temporary url.")
+        
+        return ShareableImage(
+            framedScreenshot: framedScreenshot,
+            url: temporaryURL
+        )
+    }
+    
     // MARK: - Public
     
     /// Updates the `defaultHomeView` in the persistence manger and then updates
@@ -320,28 +341,6 @@ import WidgetFeature
         }
         
         showPhotosPicker = true
-    }
-    
-    /// Creates a `ShareableImage` from a `UIScreenshot`
-    ///
-    /// Will auto save to files or photos if necessary
-    public func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> ShareableImage {
-        let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality)
-        let path = "Framed Screenshot \(count)_\(UUID()).png"
-        let temporaryURL = URL.temporaryDirectory.appending(path: path)
-        
-        guard let data = framedScreenshot.pngData() else {
-            logger.error("Could not get png data for framedScreenshot.")
-            throw SBError.noImageData
-        }
-        
-        try data.write(to: temporaryURL)
-        logger.info("Writing \(path, privacy: .public) to temporary url.")
-        
-        return ShareableImage(
-            framedScreenshot: framedScreenshot,
-            url: temporaryURL
-        )
     }
     
     /// Clears all images when the user backgrounds the app, if the setting is enabled.

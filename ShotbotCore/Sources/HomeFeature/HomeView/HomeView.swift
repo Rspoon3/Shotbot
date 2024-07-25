@@ -103,6 +103,7 @@ public struct HomeView: View {
             }
             .task {
                 await viewModel.requestPhotoLibraryAdditionAuthorization()
+                await viewModel.changeImageQualityIfNeeded()
             }
             .onChange(of: scenePhase) { newValue in
                 guard newValue == .background || newValue == .active else { return }
@@ -112,11 +113,6 @@ public struct HomeView: View {
                 tabManager.selectedTab = .home
                 Task {
                     await viewModel.didOpenViaDeepLink(url)
-                }
-            }
-            .onAppear {
-                Task {
-                    await viewModel.changeImageQualityIfNeeded()
                 }
             }
             .sheet(isPresented: $viewModel.showPurchaseView) {

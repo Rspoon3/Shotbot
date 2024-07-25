@@ -23,6 +23,9 @@ public protocol AutoCRUDManaging {
     func autoDeleteScreenshotsIfNeeded(items: [PhotosPickerItem]) async
 }
 
+/// An object thats responsible for auto saving individual and combined images as
+/// well as auto deleting screenshots. All actions are only applicable with
+/// certain user settings enabled.
 public struct AutoCRUDManager: AutoCRUDManaging {
     private var persistenceManager: any PersistenceManaging
     private let logger = Logger(category: AutoCRUDManager.self)

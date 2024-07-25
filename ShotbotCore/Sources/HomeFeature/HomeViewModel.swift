@@ -23,6 +23,7 @@ import WidgetFeature
     private let photoLibraryManager: PhotoLibraryManager
     private let purchaseManager: any PurchaseManaging
     private let fileManager: any FileManaging
+    private let imageCombiner: any ImageCombining
     private let reviewManager: any ReviewManaging
     private var combinedImageTask: Task<Void, Never>?
     private var imageQuality: ImageQuality
@@ -91,16 +92,18 @@ import WidgetFeature
         purchaseManager: any PurchaseManaging = PurchaseManager.shared,
         fileManager: any FileManaging = FileManager.default,
         reviewManager: any ReviewManaging = ReviewManager(),
-        clock: any Clock<Duration> = ContinuousClock()
+        clock: any Clock<Duration> = ContinuousClock(),
+        imageCombiner: any ImageCombining = ImageCombiner()
     ) {
         self.persistenceManager = persistenceManager
         self.photoLibraryManager = photoLibraryManager
         self.purchaseManager = purchaseManager
         self.fileManager = fileManager
         self.reviewManager = reviewManager
+        self.clock = clock
+        self.imageCombiner = imageCombiner
         self.imageQuality = persistenceManager.imageQuality
         self.showGridView = persistenceManager.defaultHomeView == .grid
-        self.clock = clock
     }
     
     
@@ -220,57 +223,6 @@ import WidgetFeature
         combinedImageTask = nil
     }
     
-    /// Combines images Horizontally with scaling to keep consistent spacing
-    private func createCombinedImage(from images: [UIImage]) async throws -> ShareableImage {
-        let imageQualityValue = imageQuality.value
-        
-        return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInteractive).async { [weak self] in
-                guard let self else {
-                    continuation.resume(throwing: SBError.noSelf)
-                    return
-                }
-                
-                self.logger.info("Starting combined image task.")
-                
-                defer {
-                    self.logger.info("Ending combined image task.")
-                }
-                
-                let imagesWidth = images.map(\.size.width).reduce(0, +)
-                let resizedImages = images.map { image in
-                    let widthScale = (image.size.width / imagesWidth)
-                    let scale = max(widthScale, imageQualityValue)
-                    let size = CGSize(
-                        width: image.size.width * scale,
-                        height: image.size.height * scale
-                    )
-                    return image.resized(to: size)
-                }
-                
-                let combined = resizedImages.combineHorizontally()
-                
-                guard let data = combined.pngData() else {
-                    self.logger.error("No combined image png data")
-                    continuation.resume(throwing: SBError.noImageData)
-                    return
-                }
-                
-                let temporaryURL = URL.temporaryDirectory.appending(path: "Combined \(UUID().uuidString).png")
-                
-                do {
-                    try data.write(to: temporaryURL)
-                    self.logger.info("Saving combined data to temporary url.")
-                    
-                    let image = ShareableImage(framedScreenshot: combined, url: temporaryURL)
-                    
-                    continuation.resume(returning: image)
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-    }
     
     /// If their are multiple image results, it will start the process of combining them horizontally
     private func combineDeviceFrames() async {
@@ -281,8 +233,9 @@ import WidgetFeature
         combinedImageTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
             
-            imageResults.combined = try? await createCombinedImage(
-                from: imageResults.individual.map(\.framedScreenshot)
+            imageResults.combined = try? await imageCombiner.createCombinedImage(
+                from: imageResults.individual.map(\.framedScreenshot),
+                imageQuality: imageQuality.value
             )
         }
         

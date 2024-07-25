@@ -26,10 +26,11 @@ import WidgetFeature
     private let imageCombiner: any ImageCombining
     private let reviewManager: any ReviewManaging
     private var combinedImageTask: Task<Void, Never>?
+    private let screenshotImporter: any ScreenshotImporting
     private var imageQuality: ImageQuality
-    private(set) var imageResults = ImageResults()
     private let logger = Logger(category: HomeViewModel.self)
     private let clock: any Clock<Duration>
+    private(set) var imageResults = ImageResults()
     @Published public var showPurchaseView = false
     @Published public var showAutoSaveToast = false
     @Published public var showCopyToast = false
@@ -91,6 +92,7 @@ import WidgetFeature
         photoLibraryManager: PhotoLibraryManager = .live,
         purchaseManager: any PurchaseManaging = PurchaseManager.shared,
         fileManager: any FileManaging = FileManager.default,
+        screenshotImporter: any ScreenshotImporting = ScreenshotImporter(),
         reviewManager: any ReviewManaging = ReviewManager(),
         clock: any Clock<Duration> = ContinuousClock(),
         imageCombiner: any ImageCombining = ImageCombiner()
@@ -100,6 +102,7 @@ import WidgetFeature
         self.purchaseManager = purchaseManager
         self.fileManager = fileManager
         self.reviewManager = reviewManager
+        self.screenshotImporter = screenshotImporter
         self.clock = clock
         self.imageCombiner = imageCombiner
         self.imageQuality = persistenceManager.imageQuality
@@ -242,55 +245,6 @@ import WidgetFeature
         await combinedImageTask?.value
     }
     
-    /// Loads an array of `Screenshot`from different source types depending on the input `PhotoSource`
-    private func getScreenshots(from source: PhotoSource) async throws -> [UIScreenshot] {
-        let screenshots: [UIScreenshot]
-        
-        switch source {
-        case .photoPicker:
-            logger.info("Fetching images from the photos picker.")
-            screenshots = try await imageSelections.loadUImages()
-        case .photoAssetID(let url):
-            let deepLinkManager = DeepLinkManager()
-            let deepLink = try deepLinkManager.deepLink(from: url)
-            let imageManager = ImageManager()
-                        
-            switch deepLink {
-            case .latestScreenshot:
-                logger.info("Fetching latest screenshot.")
-                let image = try await imageManager.latestScreenshot(from: url)
-                screenshots = [image]
-                logger.info("Successfully fetched latest screenshot.")
-            case .multipleScreenshots:
-                logger.info("Fetching multiple screenshots.")
-                let images = try await imageManager.multipleScreenshots(from: url)
-                screenshots = images
-                logger.info("Retrieved (\(screenshots.count, privacy: .public)) screenshots.")
-            }
-        case .filePicker(let urls):
-            screenshots = try urls.compactMap { url in
-                let accessing = url.startAccessingSecurityScopedResource()
-                let data = try Data(contentsOf: url)
-                let image = UIImage(data: data)
-                
-                if accessing {
-                    url.stopAccessingSecurityScopedResource()
-                }
-                
-                return image
-            }
-            logger.info("Using file picker images (\(screenshots.count, privacy: .public)).")
-        case .dropItems(let items):
-            logger.info("Using dropped photos (\(items.count, privacy: .public)).")
-            screenshots = items.compactMap { UIImage(data: $0) }
-        case .existingScreenshots(let existing):
-            logger.info("Using existing screenshots (\(existing.count, privacy: .public)).")
-            screenshots = existing
-        }
-        
-        return screenshots
-    }
-    
     /// Updates `imageResults` `individual`property and counts up `PersistenceManaging.deviceFrameCreations`
     private func updateImageResultsIndividualImages(using screenshots: [UIImage]) async throws {
         var shareableImages = [ShareableImage]()
@@ -323,7 +277,7 @@ import WidgetFeature
         // Prep
         stopCombinedImageTask()
         
-        let screenshots = try await getScreenshots(from: source)
+        let screenshots = try await screenshotImporter.screenshots(from: source)
         
         guard !screenshots.isEmpty else { return }
         
@@ -408,7 +362,7 @@ import WidgetFeature
     /// using `photoPicker` as the image source
     public func imageSelectionsDidChange() async {
         do {
-            try await processSelectedPhotos(source: .photoPicker)
+            try await processSelectedPhotos(source: .photoPicker(imageSelections))
         } catch {
             self.error = error
         }

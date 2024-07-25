@@ -23,6 +23,7 @@ import WidgetFeature
     private let photoLibraryManager: PhotoLibraryManager
     private let purchaseManager: any PurchaseManaging
     private let fileManager: any FileManaging
+    private let reviewManager: any ReviewManaging
     private var combinedImageTask: Task<Void, Never>?
     private var imageQuality: ImageQuality
     private(set) var imageResults = ImageResults()
@@ -87,12 +88,14 @@ import WidgetFeature
         persistenceManager: any PersistenceManaging = PersistenceManager.shared,
         photoLibraryManager: PhotoLibraryManager = .live,
         purchaseManager: any PurchaseManaging = PurchaseManager.shared,
-        fileManager: any FileManaging = FileManager.default
+        fileManager: any FileManaging = FileManager.default,
+        reviewManager: any ReviewManaging = ReviewManager()
     ) {
         self.persistenceManager = persistenceManager
         self.photoLibraryManager = photoLibraryManager
         self.purchaseManager = purchaseManager
         self.fileManager = fileManager
+        self.reviewManager = reviewManager
         self.imageQuality = persistenceManager.imageQuality
         self.showGridView = persistenceManager.defaultHomeView == .grid
     }
@@ -409,36 +412,8 @@ import WidgetFeature
             // Post FramedScreenshot generation
             await autoSaveIndividualImagesIfNeeded()
             await autoDeleteScreenshotsIfNeeded()
-            askForAReview()
+            reviewManager.askForAReview()
         }
-    }
-    
-    /// Asks the user for a review
-    private func askForAReview() {
-        let deviceFrameCreations = persistenceManager.deviceFrameCreations
-        let numberOfActivations = persistenceManager.numberOfActivations
-        
-        guard deviceFrameCreations > 3 && numberOfActivations > 3 else {
-            logger.debug("Review prompt criteria not met. DeviceFrameCreations: \(deviceFrameCreations, privacy: .public), numberOfActivations: \(numberOfActivations, privacy: .public).")
-            return
-        }
-        
-        guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
-            logger.fault("Could not find UIWindowScene to ask for review")
-            return
-        }
-        
-        if let date = persistenceManager.lastReviewPromptDate {
-            guard date >= Date.now.adding(days: 3) else {
-                logger.debug("Last review prompt date to recent: \(date, privacy: .public).")
-                return
-            }
-        }
-        
-        SKStoreReviewController.requestReview(in: scene)
-        
-        persistenceManager.lastReviewPromptDate = .now
-        logger.log("Prompting the user for a review")
     }
     
     // MARK: - Public

@@ -8,11 +8,11 @@
 import Foundation
 
 public extension Date {
-    func adding(days:Int) -> Date {
-        return Calendar.current.date(byAdding: .day, value: days, to: self)!
+    func adding(_ value: Int, _ component: Calendar.Component) -> Date {
+        Calendar.current.date(byAdding: component, value: value, to: self)!
     }
     
-    func subtracting(hours: Int) -> Date {
-        return Calendar.current.date(byAdding: .hour, value: -hours, to: self) ?? self
+    func subtracting(_ value: Int, _ component: Calendar.Component) -> Date {
+        adding(-value, component)
     }
 }

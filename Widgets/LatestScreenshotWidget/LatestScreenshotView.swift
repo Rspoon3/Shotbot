@@ -58,6 +58,7 @@ struct LatestScreenshotView : View {
                     .overlay {
                         Rectangle()
                             .background(.ultraThinMaterial)
+                            .environment(\.colorScheme, .light)
                     }
             }
         case .error:

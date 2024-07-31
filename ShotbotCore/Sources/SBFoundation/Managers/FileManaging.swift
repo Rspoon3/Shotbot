@@ -11,6 +11,7 @@ import Models
 public protocol FileManaging {
     func copyToiCloudFiles(from source: URL) throws
     func write(_ data: Data, to filePath: URL, options: Data.WritingOptions) throws
+    func removeItem(at URL: URL) throws
 }
 
 extension FileManager: FileManaging {

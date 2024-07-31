@@ -360,6 +360,7 @@ import WidgetFeature
         imageSelections.removeAll()
         viewState = .individualPlaceholder
         imageType = .individual
+        try? fileManager.removeItem(at: .temporaryDirectory)
     }
     
     /// Checks if the users has changed image quality. If so, the original screenshots are rerun

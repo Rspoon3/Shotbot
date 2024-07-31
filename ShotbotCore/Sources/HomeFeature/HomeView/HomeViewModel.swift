@@ -257,7 +257,9 @@ import WidgetFeature
             
             // Post FramedScreenshot generation
             try? await autoCRUDManager.autoSaveIndividualImagesIfNeeded(using: imageResults.individual) { [weak self] in
-                self?.showAutoSaveToast = true
+                DispatchQueue.main.async {
+                    self?.showAutoSaveToast = true
+                }
             }
             await autoCRUDManager.autoDeleteScreenshotsIfNeeded(items: imageSelections)
             reviewManager.askForAReview()

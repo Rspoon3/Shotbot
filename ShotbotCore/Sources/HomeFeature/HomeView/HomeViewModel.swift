@@ -211,15 +211,16 @@ import WidgetFeature
         }
         
         // Prep
+        clearTemporaryDirectory()
         stopCombinedImageTask()
         
         let screenshots = try await screenshotImporter.screenshots(from: source)
         
         guard !screenshots.isEmpty else { return }
         
-        if persistenceManager.defaultHomeTab == .combined,
-           screenshots.count > 1,
-           imageType == .individual {
+        if screenshots.count == 1, imageType == .combined {
+            imageType = .individual
+        } else if persistenceManager.defaultHomeTab == .combined, screenshots.count > 1, imageType == .individual {
             imageType = .combined
         }
         
@@ -286,6 +287,13 @@ import WidgetFeature
             framedScreenshot: framedScreenshot,
             url: temporaryURL
         )
+    }
+    
+    private func clearTemporaryDirectory() {
+        guard let contents = try? fileManager.contentsOfDirectory(at: .temporaryDirectory) else { return }
+        for url in contents {
+            try? fileManager.removeItem(at: url)
+        }
     }
     
     // MARK: - Public
@@ -362,11 +370,7 @@ import WidgetFeature
         imageSelections.removeAll()
         viewState = .individualPlaceholder
         imageType = .individual
-        
-        guard let contents = try? fileManager.contentsOfDirectory(at: .temporaryDirectory) else { return }
-        for url in contents {
-            try? fileManager.removeItem(at: url)
-        }
+        clearTemporaryDirectory()
     }
     
     /// Checks if the users has changed image quality. If so, the original screenshots are rerun

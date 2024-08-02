@@ -362,7 +362,11 @@ import WidgetFeature
         imageSelections.removeAll()
         viewState = .individualPlaceholder
         imageType = .individual
-        try? fileManager.removeItem(at: .temporaryDirectory)
+        
+        guard let contents = try? fileManager.contentsOfDirectory(at: .temporaryDirectory) else { return }
+        for url in contents {
+            try? fileManager.removeItem(at: url)
+        }
     }
     
     /// Checks if the users has changed image quality. If so, the original screenshots are rerun

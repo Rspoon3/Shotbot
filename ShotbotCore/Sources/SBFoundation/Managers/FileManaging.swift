@@ -12,9 +12,14 @@ public protocol FileManaging {
     func copyToiCloudFiles(from source: URL) throws
     func write(_ data: Data, to filePath: URL, options: Data.WritingOptions) throws
     func removeItem(at URL: URL) throws
+    func contentsOfDirectory(at url: URL) throws -> [URL]
 }
 
 extension FileManager: FileManaging {
+    public func contentsOfDirectory(at url: URL) throws -> [URL] {
+        try contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
+    }
+    
     public func copyToiCloudFiles(from source: URL) throws {
         guard let driveURL = url(forUbiquityContainerIdentifier: nil)?.appendingPathComponent("Documents") else {
             throw SBError.missingiCloudDirectory

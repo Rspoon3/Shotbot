@@ -199,6 +199,12 @@ import WidgetFeature
     
     /// Starts the image pipeline using the passed in screenshots
     private func processSelectedPhotos(source: PhotoSource) async throws {
+        // Subscription Check
+        guard persistenceManager.canSaveFramedScreenshot else {
+            showPurchaseView = true
+            return
+        }
+        
         // Loading
         logger.info("Starting processing selected photos")
         isLoading = true
@@ -320,6 +326,7 @@ import WidgetFeature
         }
     }
     
+    /// Triggered by a widget deep link to kick off the image pipeline using `photoAssetID` as the image source
     public func didOpenViaDeepLink(_ url: URL) async {
         do {
             try await processSelectedPhotos(source: .photoAssetID(url))

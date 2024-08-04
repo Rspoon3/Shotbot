@@ -29,10 +29,7 @@ struct ShotbotApp: App {
     
     init() {
         Purchases.logLevel = .info
-        Purchases.configure(
-            with: Configuration.Builder(withAPIKey: "appl_VOYNmwadBWEHBTYKlnZludJLwEX")
-                .build()
-        )
+        Purchases.configure(withAPIKey: "appl_VOYNmwadBWEHBTYKlnZludJLwEX")
     }
     
     var body: some Scene {

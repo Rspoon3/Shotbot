@@ -31,7 +31,7 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/RevenueCat/purchases-ios.git",
-            exact: .init("4.36.3")!
+            exact: .init("5.2.2")!
         )
     ],
     targets: [
@@ -45,11 +45,17 @@ let package = Package(
         .target(
             name: "Models",
             dependencies: [
-                .product(name: "CollectionConcurrencyKit", package: "CollectionConcurrencyKit"),
+                .product(
+                    name: "CollectionConcurrencyKit",
+                    package: "CollectionConcurrencyKit"
+                ),
             ],
             resources: [.process("Resources")]
         ),
-        .testTarget(name: "ModelsTests", dependencies: ["Models"]),
+        .testTarget(
+            name: "ModelsTests",
+            dependencies: ["Models"]
+        ),
         .target(
             name: "HomeFeature",
             dependencies: [
@@ -59,10 +65,16 @@ let package = Package(
                 "MediaManager",
                 "SBFoundation",
                 "WidgetFeature",
-                .product(name: "AlertToast", package: "AlertToast")
+                .product(
+                    name: "AlertToast",
+                    package: "AlertToast"
+                )
             ]
         ),
-        .testTarget(name: "HomeFeatureTests", dependencies: ["HomeFeature"]),
+        .testTarget(
+            name: "HomeFeatureTests",
+            dependencies: ["HomeFeature"]
+        ),
         .target(
             name: "Persistence",
             dependencies: [
@@ -73,14 +85,20 @@ let package = Package(
             name: "Purchases",
             dependencies: [
                 "Persistence",
-                .product(name: "RevenueCat", package: "purchases-ios"),
+                .product(
+                    name: "RevenueCat",
+                    package: "purchases-ios"
+                ),
             ]
         ),
         .target(
             name: "MediaManager",
             dependencies: [
                 "Models",
-                .product(name: "CollectionConcurrencyKit", package: "CollectionConcurrencyKit"),
+                .product(
+                    name: "CollectionConcurrencyKit",
+                    package: "CollectionConcurrencyKit"
+                ),
             ]
         ),
         .target(
@@ -102,7 +120,10 @@ let package = Package(
         .target(
             name: "WidgetFeature",
             dependencies: [
-                .product(name: "CollectionConcurrencyKit", package: "CollectionConcurrencyKit"),
+                .product(
+                    name: "CollectionConcurrencyKit",
+                    package: "CollectionConcurrencyKit"
+                ),
             ]
         ),
     ]

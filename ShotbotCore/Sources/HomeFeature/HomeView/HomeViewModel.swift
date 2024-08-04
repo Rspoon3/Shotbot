@@ -17,8 +17,10 @@ import SBFoundation
 import Photos
 import CollectionConcurrencyKit
 import WidgetFeature
+import Combine
 
 @MainActor public final class HomeViewModel: ObservableObject {
+    private var cancellables = Set<AnyCancellable>()
     private var persistenceManager: any PersistenceManaging
     private let photoLibraryManager: PhotoLibraryManager
     private let purchaseManager: any PurchaseManaging
@@ -28,6 +30,7 @@ import WidgetFeature
     private let autoCRUDManager: any AutoCRUDManaging
     private var combinedImageTask: Task<Void, Never>?
     private let screenshotImporter: any ScreenshotImporting
+    private let notificationCenter: any NotificationCenterProtocol
     private var imageQuality: ImageQuality
     private let logger = Logger(category: HomeViewModel.self)
     private(set) var imageResults = ImageResults()
@@ -92,6 +95,7 @@ import WidgetFeature
         photoLibraryManager: PhotoLibraryManager = .live,
         purchaseManager: any PurchaseManaging = PurchaseManager.shared,
         fileManager: any FileManaging = FileManager.default,
+        notificationCenter: any NotificationCenterProtocol = NotificationCenter.default,
         screenshotImporter: any ScreenshotImporting = ScreenshotImporter(),
         reviewManager: any ReviewManaging = ReviewManager(),
         imageCombiner: any ImageCombining = ImageCombiner(),
@@ -107,10 +111,22 @@ import WidgetFeature
         self.autoCRUDManager = autoCRUDManager
         self.imageQuality = persistenceManager.imageQuality
         self.showGridView = persistenceManager.defaultHomeView == .grid
+        self.notificationCenter = notificationCenter
+        
+        subscribeToNotificationCenterPublishers()
     }
     
     
     // MARK: - Private Helpers
+    
+    /// Subscribes to notification center publishers such as memory warnings.
+    private func subscribeToNotificationCenterPublishers() {
+        notificationCenter.publisher(for: UIApplication.didReceiveMemoryWarningNotification)
+            .sink { [weak self] _ in
+                self?.error = SBError.lowMemoryWarning
+            }.store(in: &cancellables)
+    }
+    
     /// Updates `viewState` when `imageType` changes.
     ///
     /// Will wait for `combinedImageTask` if needed.

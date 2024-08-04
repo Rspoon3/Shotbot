@@ -17,7 +17,6 @@ public struct HomeView: View {
     @StateObject var viewModel = HomeViewModel()
     @Environment(\.scenePhase) var scenePhase
     
-    
     // MARK: - Initializer
     
     public init(viewModel: HomeViewModel) {
@@ -54,7 +53,9 @@ public struct HomeView: View {
                 }
                 return true
             }
-            .alert(error: $viewModel.error)
+            .alert(error: $viewModel.error) {
+                viewModel.clearContent()
+            }
             .toast(isPresenting: $viewModel.showQuickSaveToast, duration: 2) {
                 AlertToast(
                     displayMode: .hud,
@@ -89,7 +90,7 @@ public struct HomeView: View {
                 )
             }
             .overlay {
-                if viewModel.isLoading {
+                if viewModel.showLoadingSpinner {
                     ProgressView()
                         .scaleEffect(1.5)
                         .padding(.all, 20)
@@ -163,7 +164,7 @@ public struct HomeView: View {
         case .individualPlaceholder:
             placeholder
         case .individualImages(let shareableImages):
-            tabView(shareableImages: shareableImages)
+            individualImagesView(shareableImages)
         case .combinedImages(let shareableImage):
             Image(uiImage: shareableImage.framedScreenshot)
                 .resizable()
@@ -249,19 +250,35 @@ public struct HomeView: View {
             }
         }
         .tabViewStyle(.page)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                PurchaseShareLink(
-                    items: shareableImages.map(\.url),
-                    showPurchaseView: $viewModel.showPurchaseView
-                )
-            }
-        }
         .onAppear {
             let appearance = UIPageControl.appearance()
             appearance.currentPageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.75)
             appearance.pageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.33)
         }
+    }
+    
+    private func gridView(shareableImages: [ShareableImage]) -> some View {
+        ScrollView {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 400))],
+                spacing: 20
+            ) {
+                ForEach(shareableImages) { shareableImage in
+                    Image(uiImage: shareableImage.framedScreenshot)
+                        .resizable()
+                        .scaledToFit()
+                        .contextMenu {
+                            contextMenu(shareableImage: shareableImage)
+                        }
+                        .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                        .onTapGesture(count: 2) {
+                            viewModel.copy(shareableImage.framedScreenshot)
+                        }
+                }
+            }
+            .padding(.horizontal)
+        }
+        .padding(.vertical)
     }
     
     @ViewBuilder
@@ -290,6 +307,32 @@ public struct HomeView: View {
             items: [shareableImage.url],
             showPurchaseView: $viewModel.showPurchaseView
         )
+    }
+    
+    private func individualImagesView(_ shareableImages: [ShareableImage]) -> some View {
+        Group {
+            if viewModel.showGridView {
+                gridView(shareableImages: shareableImages)
+            } else {
+                tabView(shareableImages: shareableImages)
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                if let name = viewModel.viewTypeImageName {
+                    Button {
+                        viewModel.toggleIndividualViewType()
+                    } label: {
+                        Label("Individual View Type", systemImage: name)
+                    }
+                }
+
+                PurchaseShareLink(
+                    items: shareableImages.map(\.url),
+                    showPurchaseView: $viewModel.showPurchaseView
+                )
+            }
+        }
     }
 }
 

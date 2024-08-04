@@ -55,6 +55,12 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
     @AppStorage("autoDeleteScreenshots")
     public var autoDeleteScreenshots: Bool = false
     
+    @AppStorage("defaultHomeTab")
+    public var defaultHomeTab: ImageType = .individual
+    
+    @AppStorage("defaultHomeView")
+    public var defaultHomeView: HomeViewType = .tabbed
+    
     @AppStorage("clearImagesOnAppBackground")
     public var clearImagesOnAppBackground: Bool = false
     
@@ -101,6 +107,8 @@ public class MockPersistenceManager: PersistenceManaging {
     public var autoSaveToFiles: Bool = false
     public var autoSaveToPhotos: Bool = false
     public var autoDeleteScreenshots: Bool = false
+    public var defaultHomeTab: ImageType = .individual
+    public var defaultHomeView: HomeViewType = .tabbed
     public var clearImagesOnAppBackground: Bool = false
     public var imageSelectionType: ImageSelectionType = .all
     public var imageQuality: ImageQuality = .original
@@ -114,6 +122,8 @@ public class MockPersistenceManager: PersistenceManaging {
         autoSaveToFiles = false
         autoSaveToPhotos = false
         autoDeleteScreenshots = false
+        defaultHomeTab = .individual
+        defaultHomeView = .tabbed
         clearImagesOnAppBackground = false
         numberOfLaunches = 0
         numberOfActivations = 0

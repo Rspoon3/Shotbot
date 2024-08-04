@@ -10,13 +10,15 @@ import SwiftUI
 extension View {
     public func alert(
         error: Binding<Error?>,
-        buttonTitle: String = "OK"
+        buttonTitle: String = "OK",
+        action: (()-> Void)? = nil
     ) -> some View {
         alert(
             error.wrappedValue?.localizedDescription ?? "Error",
             isPresented: .constant(error.wrappedValue != nil)
         ) {
             Button(buttonTitle) {
+                action?()
                 error.wrappedValue = nil
             }
         } message: {

@@ -8,7 +8,7 @@
 import UIKit
 import Models
 
-struct ImageResults {
+public struct ImageResults {
     var originalScreenshots: [UIScreenshot] = []
     var individual: [ShareableImage] = []
     var combined: ShareableImage?

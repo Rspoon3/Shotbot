@@ -34,8 +34,14 @@ public struct SettingsView: View {
                     .padding(.top, 40)
 #endif
             }
-            
             Section() {
+                Picker("Default Home Tab", selection: $persistenceManager.defaultHomeTab) {
+                    ForEach(ImageType.allCases) { type in
+                        Text(type.rawValue)
+                            .tag(type)
+                    }
+                }
+
                 Picker("Image Selection Filter", selection: $persistenceManager.imageSelectionType) {
                     ForEach(ImageSelectionType.allCases) { type in
                         Text(type.title)

@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import Models
 import HomeFeature
 import SettingsFeature
 
 public struct AppTabNavigation: View {
-    @State private var tabSelection = Tab.home
-    
+    @EnvironmentObject var tabManager: TabManager
+
     // MARK: - Initializer
     
     public init() {}
@@ -19,7 +20,7 @@ public struct AppTabNavigation: View {
     // MARK: - Body
     
     public var body: some View {
-        TabView(selection: $tabSelection) {
+        TabView(selection: $tabManager.selectedTab) {
             NavigationView {
                 HomeView(viewModel: .init())
             }

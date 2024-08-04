@@ -50,7 +50,7 @@ import SBFoundation
             isGeneratingLogs = true
             
             let store = try OSLogStore(scope: .currentProcessIdentifier)
-            let twoHoursAgo = Date.now.subtracting(hours: 2)
+            let twoHoursAgo = Date.now.subtracting(2, .hour)
             let logs = try await store.generateLogAttachments(startDate: twoHoursAgo)
             
             try createCSVFile(from: logs)

@@ -58,6 +58,6 @@ public struct SBError: LocalizedError {
     
     public static let noSelf = Self(
         errorDescription: "Memory Issue",
-        recoverySuggestion: "A memory issue occured"
+        recoverySuggestion: "A memory issue occurred"
     )
 }

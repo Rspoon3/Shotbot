@@ -124,6 +124,7 @@ import Combine
         notificationCenter.publisher(for: UIApplication.didReceiveMemoryWarningNotification)
             .sink { [weak self] _ in
                 self?.error = SBError.lowMemoryWarning
+                self?.logger.warning("Memory warning hit")
             }.store(in: &cancellables)
     }
     
@@ -388,6 +389,11 @@ import Combine
     ///
     /// - Warning: `imageResults.removeAll()` causes a small memory leak.
     public func clearContent() {
+        guard error as? SBError != SBError.lowMemoryWarning else {
+            logger.info("Not clearing all content due to low memory warning.")
+            return
+        }
+        
         logger.info("Clearing all content")
         
         stopCombinedImageTask()

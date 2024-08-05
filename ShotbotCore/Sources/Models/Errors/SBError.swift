@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SBError: LocalizedError {
+public struct SBError: LocalizedError, Equatable {
     public let errorDescription: String?
     public let recoverySuggestion: String?
     

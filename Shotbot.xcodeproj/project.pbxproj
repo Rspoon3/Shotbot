@@ -14,7 +14,7 @@
 		94453E4C2C4AAD7900B15690 /* WidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */; };
 		94453E4E2C4AAD7900B15690 /* LatestScreenshotProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4D2C4AAD7900B15690 /* LatestScreenshotProvider.swift */; };
 		94453E522C4AAD7A00B15690 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94453E512C4AAD7A00B15690 /* Assets.xcassets */; };
-		94453E562C4AAD7A00B15690 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		94453E562C4AAD7A00B15690 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9455F4DC2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455F4DB2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift */; };
 		946E7FC52C4C3341001E4C46 /* MultipleScreenshotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC12C4C3341001E4C46 /* MultipleScreenshotsView.swift */; };
 		946E7FC62C4C3341001E4C46 /* MultipleScreenshotsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC42C4C3341001E4C46 /* MultipleScreenshotsWidget.swift */; };
@@ -478,6 +478,7 @@
 /* Begin PBXTargetDependency section */
 		94453E552C4AAD7A00B15690 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 94453E442C4AAD7800B15690 /* WidgetsExtension */;
 			targetProxy = 94453E542C4AAD7A00B15690 /* PBXContainerItemProxy */;
 		};

@@ -7,10 +7,14 @@
 
 import Foundation
 
-public struct SBError: LocalizedError {
+public struct SBError: LocalizedError, Equatable {
     public let errorDescription: String?
     public let recoverySuggestion: String?
     
+    public static let lowMemoryWarning = Self(
+        errorDescription: "Low Memory",
+        recoverySuggestion: "The device is running low on memory. Please either reduce the amount of images being framed at once or decrease the image quality."
+    )
     public static let unsupportedImage = Self(
         errorDescription: "Unsupported Image",
         recoverySuggestion: "Please make sure you the image selected is a supported screenshot"

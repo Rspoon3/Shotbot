@@ -7,7 +7,8 @@ let package = Package(
     name: "ShotbotCore",
     platforms: [
         .iOS(.v16),
-        .visionOS(.v1)
+        .visionOS(.v1),
+        .macOS(.v13)
     ],
     products: [
         .library(name: "AppFeature", targets: ["AppFeature"]),

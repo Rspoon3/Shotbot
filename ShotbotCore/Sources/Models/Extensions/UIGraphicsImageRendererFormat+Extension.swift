@@ -5,6 +5,7 @@
 //  Created by Richard Witherspoon on 8/4/24.
 //
 
+#if canImport(UIKit)
 import UIKit
 import AVFoundation
 
@@ -16,3 +17,4 @@ extension UIGraphicsImageRendererFormat {
     
     static let singleScale = UIGraphicsImageRendererFormat(scale: 1)
 }
+#endif

@@ -5,7 +5,11 @@
 //  Created by Richard Witherspoon on 4/19/23.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 public struct DeviceInfo: Decodable {
     public let deviceFrame: String
@@ -35,10 +39,10 @@ public struct DeviceInfo: Decodable {
     
     // MARK: - Functions
     
-    public func framed(using screenshot: UIImage) -> UIImage? {
+    public func framed(using screenshot: PlatformImage) -> PlatformImage? {
         var screenshot = screenshot
         
-        guard let frameImage = UIImage(named: deviceFrame, in: .module, with: nil) else {
+        guard let frameImage = PlatformImage(named: deviceFrame, in: .module) else {
             return nil
         }
         
@@ -57,7 +61,7 @@ public struct DeviceInfo: Decodable {
             let image = frameImage.merge(with: screenshot, offset: offSet)
             return image.merge(with: frameImage, offset: .zero)
         case .islandOverlay:
-            guard let noIsland = UIImage(named: "\(deviceFrame) Without Island", in: .module, with: nil) else {
+            guard let noIsland = PlatformImage(named: "\(deviceFrame) Without Island", in: .module) else {
                 return nil
             }
             

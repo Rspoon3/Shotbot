@@ -21,3 +21,14 @@ import UIKit.UIImage
 /// Alias for `UIImage`.
 public typealias PlatformImage = UIImage
 #endif
+
+
+public extension Image {
+    init(platformImage: PlatformImage) {
+    #if os(macOS)
+        self.init(nsImage: platformImage)
+    #else
+        self.init(uiImage: platformImage)
+    #endif
+    }
+}

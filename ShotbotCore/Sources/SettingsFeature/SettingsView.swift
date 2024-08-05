@@ -5,6 +5,7 @@
 //  Created by Richard Witherspoon on 4/20/23.
 //
 
+#if !os(macOS)
 import SwiftUI
 import Persistence
 import Models
@@ -229,3 +230,4 @@ struct SettingsView_Previews: PreviewProvider {
         }
     }
 }
+#endif

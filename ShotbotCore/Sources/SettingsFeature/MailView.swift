@@ -6,9 +6,9 @@
 //  Copyright © 2020 Richard Witherspoon. All rights reserved.
 //
 
+#if !os(macOS)
 import SwiftUI
 import MessageUI
-
 
 public struct MailView: UIViewControllerRepresentable {
     @Environment(\.presentationMode) var presentation
@@ -144,3 +144,4 @@ public struct MailView: UIViewControllerRepresentable {
 //        }
 //    }
 //}
+#endif

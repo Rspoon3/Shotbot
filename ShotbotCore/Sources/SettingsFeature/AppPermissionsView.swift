@@ -31,8 +31,10 @@ struct AppPermissionsView: View {
                 }
             }
         }
+        #if !os(macOS)
         .navigationBarTitle("App Permissions")
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .buttonStyle(.plain)
     }
 }

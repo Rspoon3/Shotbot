@@ -5,10 +5,19 @@
 //  Created by Richard Witherspoon on 8/5/21.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 public extension URL {
+#if os(macOS)
+    static let appSettings = URL(string: "https://github.com/Rspoon3/Shotbot")!
+#else
     static let appSettings = URL(string: UIApplication.openSettingsURLString)!
+#endif
+    
     static let gitHub   = URL(string: "https://github.com/Rspoon3/Shotbot")!
     static let personal = URL(string: "https://www.rspoon3.com")!
     static let mastodon = URL(string: "https://mastodon.social/@rwitherspoon")!

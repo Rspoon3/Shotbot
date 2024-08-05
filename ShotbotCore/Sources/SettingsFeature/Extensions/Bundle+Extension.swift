@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Models
 
 public extension Bundle {    
     static let appTitle   = main.infoDictionary?["CFBundleName"] as? String
@@ -17,7 +18,7 @@ public extension Bundle {
         case current, primary, alternative(named: String)
     }
     
-    static func appIcon(type: IconType) -> UIImage? {
+    static func appIcon(type: IconType) -> PlatformImage? {
         // First will be smallest for the device class, last will be the largest for device class
         switch type{
         case .current:
@@ -33,7 +34,7 @@ public extension Bundle {
         }
     }
     
-    static private func getPrimaryAppIcon()->UIImage?{
+    static private func getPrimaryAppIcon()->PlatformImage?{
         guard
             let iconsDictionary = main.infoDictionary?["CFBundleIcons"] as? NSDictionary,
             let primaryIconsDictionary = iconsDictionary["CFBundlePrimaryIcon"] as? NSDictionary,
@@ -43,10 +44,10 @@ public extension Bundle {
             return nil
         }
         
-        return UIImage(named: lastIcon)
+        return PlatformImage(named: lastIcon)
     }
     
-    static private func getAlternateAppIcon(named iconName: String)->UIImage?{
+    static private func getAlternateAppIcon(named iconName: String)->PlatformImage?{
         guard
             let iconsDictionary = main.infoDictionary?["CFBundleIcons"] as? NSDictionary,
             let alternativeIconsDictionary = iconsDictionary["CFBundleAlternateIcons"] as? NSDictionary,
@@ -57,6 +58,6 @@ public extension Bundle {
             return nil
         }
         
-        return UIImage(named: lastIcon)
+        return PlatformImage(named: lastIcon)
     }
 }

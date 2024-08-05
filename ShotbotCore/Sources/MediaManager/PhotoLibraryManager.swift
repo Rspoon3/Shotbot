@@ -14,14 +14,14 @@ public struct PhotoLibraryManager {
     public let photoAdditionStatus: PHAuthorizationStatus
     public var requestPhotoLibraryAdditionAuthorization: () async -> Void
     public var savePhoto: (URL) async throws -> Void
-    public var save: (_ at: UIImage) async throws -> Void
+    public var save: (_ at: PlatformImage) async throws -> Void
     public var delete: ([String]) async throws -> Void
     
     public init(
         photoAdditionStatus: PHAuthorizationStatus,
         requestPhotoLibraryAdditionAuthorization: @escaping () async -> Void,
         savePhoto: @escaping (URL) async throws -> Void,
-        save: @escaping (UIImage) async throws -> Void,
+        save: @escaping (PlatformImage) async throws -> Void,
         delete: @escaping ([String]) async throws -> Void
     ) {
         self.photoAdditionStatus = photoAdditionStatus

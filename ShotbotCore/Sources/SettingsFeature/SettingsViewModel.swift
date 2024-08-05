@@ -5,6 +5,7 @@
 //  Created by Richard Witherspoon on 7/7/23.
 //
 
+#if !os(macOS)
 import UIKit
 import OSLog
 import Models
@@ -78,3 +79,4 @@ import SBFoundation
         ]
     }
 }
+#endif

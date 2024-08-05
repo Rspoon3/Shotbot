@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Models
 
 public struct SettingsMadeBy: View {
     let appID: Int
@@ -26,7 +27,7 @@ public struct SettingsMadeBy: View {
                     .cornerRadius(5)
 #else
                 if let icon = Bundle.appIcon(type: .current) {
-                    Image(uiImage: icon)
+                    Image(platformImage: icon)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 35, height: 35)
@@ -39,7 +40,7 @@ public struct SettingsMadeBy: View {
                     .fontWeight(.semibold)
                     .foregroundColor(Color(.systemGray))
                 Text("Version \(Bundle.appVersion ?? "N/A") (\(Bundle.appBuild ?? "N/A"))")
-#if os(visionOS)
+#if os(visionOS) || os(macOS)
                     .foregroundColor(Color(.systemGray))
 #else
                     .foregroundColor(Color(.systemGray2))
@@ -55,7 +56,7 @@ public struct SettingsMadeBy: View {
                 Text("by ") + Text("Ricky Witherspoon")
                     .foregroundColor(.accentColor)
             }
-#if os(visionOS)
+#if os(visionOS) || os(macOS)
             .foregroundColor(Color(.systemGray))
 #else
             .foregroundColor(Color(.systemGray2))
@@ -67,7 +68,9 @@ public struct SettingsMadeBy: View {
             }
         }
         .padding(.top)
+        #if !os(macOS)
         .listRowBackground(Color(.systemGroupedBackground))
+        #endif
     }
 }
 

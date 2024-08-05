@@ -38,7 +38,9 @@ struct SupportedDevicesView: View {
             }
         }
         .navigationTitle("About")
+        #if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .searchable(text: $searchText)
         .animation(.default, value: searchText)
         .overlay {

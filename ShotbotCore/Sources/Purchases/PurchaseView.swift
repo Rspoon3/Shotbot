@@ -38,7 +38,9 @@ public struct PurchaseView: View {
             bottomButtons
         }
         .navigationTitle("Shotbot Pro")
+        #if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .alert(error: $viewModel.error)
         .overlay {
             if viewModel.userAction != nil {

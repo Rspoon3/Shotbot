@@ -12,10 +12,13 @@ import Purchases
 import Persistence
 import MediaManager
 import AppIntents
-import WidgetKit
 import OSLog
 import Photos
 import Models
+
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 @main
 struct ShotbotApp: App {
@@ -29,10 +32,7 @@ struct ShotbotApp: App {
     
     init() {
         Purchases.logLevel = .info
-        Purchases.configure(
-            with: Configuration.Builder(withAPIKey: "appl_VOYNmwadBWEHBTYKlnZludJLwEX")
-                .build()
-        )
+        Purchases.configure(withAPIKey: "appl_VOYNmwadBWEHBTYKlnZludJLwEX")
     }
     
     var body: some Scene {
@@ -53,7 +53,9 @@ struct ShotbotApp: App {
             case .active:
                 persistenceManager.numberOfActivations += 1
             case .background:
+                #if canImport(WidgetKit)
                 WidgetCenter.shared.reloadAllTimelines()
+                #endif
             default:
                 break
             }

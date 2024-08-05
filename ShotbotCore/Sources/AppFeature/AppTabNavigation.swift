@@ -24,7 +24,9 @@ public struct AppTabNavigation: View {
             NavigationView {
                 HomeView(viewModel: .init())
             }
+            #if !os(macOS)
             .navigationViewStyle(.stack)
+            #endif
             .tabItem {
                 Label("Home", systemImage: "house")
                     .accessibility(label: Text("Home"))
@@ -32,9 +34,15 @@ public struct AppTabNavigation: View {
             .tag(Tab.home)
             
             NavigationView {
+                #if os(macOS)
+                Text("Settings")
+                #else
                 SettingsView()
+                #endif
             }
+            #if !os(macOS)
             .navigationViewStyle(.stack)
+            #endif
             .tabItem {
                 Label("Settings", systemImage: "gear")
                     .accessibility(label: Text("Settings"))

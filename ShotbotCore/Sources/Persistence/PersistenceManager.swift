@@ -25,6 +25,7 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
     }
     
     public var canSaveFramedScreenshot: Bool {
+        return true
 #if DEBUG
         switch subscriptionOverride {
         case .alwaysFalse:

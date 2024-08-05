@@ -6,7 +6,7 @@
 //
 
 #if os(macOS)
-import AppKit
+import SwiftUI
 #else
 import UIKit
 #endif
@@ -15,8 +15,8 @@ import AVFoundation
 
 public extension PlatformImage {
     convenience init?(named name: String, in bundle: Bundle) {
-#if os(macOS)
-        self.init(named: name)
+#if os(macOS)                                                                   
+        self.init(resource: .init(name: name, bundle: bundle))
 #else
         self.init(named: name, in: bundle, with: nil)
 #endif

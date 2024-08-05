@@ -84,7 +84,7 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
     }
     
     private func createDeviceFrame(using data: Data) async throws -> URL {
-        guard let screenshot = UIImage(data: data) else {
+        guard let screenshot = PlatformImage(data: data) else {
             logger.error("Data could not be turned into a UIImage")
             throw SBError.unsupportedImage
         }

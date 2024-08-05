@@ -14,7 +14,7 @@
 		94453E4C2C4AAD7900B15690 /* WidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */; };
 		94453E4E2C4AAD7900B15690 /* LatestScreenshotProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94453E4D2C4AAD7900B15690 /* LatestScreenshotProvider.swift */; };
 		94453E522C4AAD7A00B15690 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94453E512C4AAD7A00B15690 /* Assets.xcassets */; };
-		94453E562C4AAD7A00B15690 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		94453E562C4AAD7A00B15690 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */; platformFilters = (ios, xros, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9455F4DC2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455F4DB2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift */; };
 		946E7FC52C4C3341001E4C46 /* MultipleScreenshotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC12C4C3341001E4C46 /* MultipleScreenshotsView.swift */; };
 		946E7FC62C4C3341001E4C46 /* MultipleScreenshotsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC42C4C3341001E4C46 /* MultipleScreenshotsWidget.swift */; };
@@ -27,7 +27,7 @@
 		94BD65D12A44B28700D0CE61 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65D02A44B28700D0CE61 /* Preview Assets.xcassets */; };
 		94BD65DB2A44B3B300D0CE61 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 94BD65DA2A44B3B300D0CE61 /* AppFeature */; };
 		94BD65E32A44B49900D0CE61 /* UniformTypeIdentifiers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94BD65E22A44B49900D0CE61 /* UniformTypeIdentifiers.framework */; };
-		94BD65EF2A44B49900D0CE61 /* ShotbotActionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94BD65E12A44B49900D0CE61 /* ShotbotActionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		94BD65EF2A44B49900D0CE61 /* ShotbotActionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94BD65E12A44B49900D0CE61 /* ShotbotActionExtension.appex */; platformFilters = (ios, xros, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		94BD65F52A44B53200D0CE61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65F42A44B53200D0CE61 /* Assets.xcassets */; };
 		94BD65FC2A44B67600D0CE61 /* ActionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BD65F92A44B67600D0CE61 /* ActionViewController.swift */; };
 		94BD65FD2A44B67600D0CE61 /* ActionExtensionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BD65FA2A44B67600D0CE61 /* ActionExtensionView.swift */; };
@@ -481,11 +481,19 @@
 /* Begin PBXTargetDependency section */
 		94453E552C4AAD7A00B15690 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilters = (
+				ios,
+				xros,
+			);
 			target = 94453E442C4AAD7800B15690 /* WidgetsExtension */;
 			targetProxy = 94453E542C4AAD7A00B15690 /* PBXContainerItemProxy */;
 		};
 		94BD65EE2A44B49900D0CE61 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilters = (
+				ios,
+				xros,
+			);
 			target = 94BD65E02A44B49900D0CE61 /* ShotbotActionExtension */;
 			targetProxy = 94BD65ED2A44B49900D0CE61 /* PBXContainerItemProxy */;
 		};
@@ -517,7 +525,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.rspoon3.ShotbotFrames.Widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -552,7 +560,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.rspoon3.ShotbotFrames.Widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -792,6 +800,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -825,6 +834,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

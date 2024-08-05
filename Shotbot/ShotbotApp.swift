@@ -15,6 +15,7 @@ import AppIntents
 import OSLog
 import Photos
 import Models
+import HomeFeature
 
 #if canImport(WidgetKit)
 import WidgetKit
@@ -22,7 +23,9 @@ import WidgetKit
 
 @main
 struct ShotbotApp: App {
+    #if !os(macOS)
     @UIApplicationDelegateAdaptor(AppDelegateAdaptor.self) private var appDelegate
+    #endif
     @StateObject private var persistenceManager = PersistenceManager.shared
     @StateObject private var purchaseManager = PurchaseManager.shared
     @StateObject private var tabManager = TabManager()
@@ -37,6 +40,18 @@ struct ShotbotApp: App {
     
     var body: some Scene {
         WindowGroup {
+#if os(macOS)
+            HomeView(viewModel: .init())
+                .environmentObject(persistenceManager)
+                .environmentObject(purchaseManager)
+                .environmentObject(tabManager)
+                .task {
+                    await purchaseManager.fetchOfferings()
+                }
+                .onAppear {
+                    performLogging()
+                }
+#else
             AppTabNavigation()
                 .environmentObject(persistenceManager)
                 .environmentObject(purchaseManager)
@@ -47,6 +62,7 @@ struct ShotbotApp: App {
                 .onAppear {
                     performLogging()
                 }
+#endif
         }
         .onChange(of: scenePhase) { phase in
             switch phase {
@@ -69,6 +85,7 @@ struct ShotbotApp: App {
     }
     
     private func performLogging() {
+#if !os(macOS)
         let systemVersion = UIDevice.current.systemVersion
         let version = Bundle.appVersion ?? "N/A"
         let build = Bundle.appBuild ?? "N/A"
@@ -91,12 +108,15 @@ struct ShotbotApp: App {
         let screenWidth = screenSize.width.formatted()
         let screenHeight = screenSize.height.formatted()
         logger.notice("Screen width: \(screenWidth, privacy: .public). Screen height: \(screenHeight, privacy: .public).")
+        #endif
     }
 }
 
+#if !os(macOS)
 class AppDelegateAdaptor: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         PersistenceManager.shared.numberOfLaunches += 1
         return true
     }
 }
+#endif

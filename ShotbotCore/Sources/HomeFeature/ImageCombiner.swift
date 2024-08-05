@@ -19,11 +19,12 @@ public protocol ImageCombining {
 
 /// An object responsible for combing images horizontally.
 public struct ImageCombiner: ImageCombining {
-    private let logger = Logger(category: ImageCombiner.self)
     
     // MARK: - Initializer
     
     public init() {}
+    
+    // MARK: - Public
     
     /// Combines images Horizontally with scaling to keep consistent spacing
     public func createCombinedImage(
@@ -32,10 +33,11 @@ public struct ImageCombiner: ImageCombining {
     ) async throws -> ShareableImage {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInteractive).async {
-                self.logger.info("Starting combined image task.")
+                let logger = Logger(category: ImageCombiner.self)
+                logger.info("Starting combined image task.")
                 
                 defer {
-                    self.logger.info("Ending combined image task.")
+                    logger.info("Ending combined image task.")
                 }
                 
                 let imagesWidth = images.map(\.size.width).reduce(0, +)
@@ -52,7 +54,7 @@ public struct ImageCombiner: ImageCombining {
                 let combined = resizedImages.combineHorizontally()
                 
                 guard let data = combined.pngData() else {
-                    self.logger.error("No combined image png data")
+                    logger.error("No combined image png data")
                     continuation.resume(throwing: SBError.noImageData)
                     return
                 }
@@ -61,7 +63,7 @@ public struct ImageCombiner: ImageCombining {
                 
                 do {
                     try data.write(to: temporaryURL)
-                    self.logger.info("Saving combined data to temporary url.")
+                    logger.info("Saving combined data to temporary url.")
                     
                     let image = ShareableImage(framedScreenshot: combined, url: temporaryURL)
                     

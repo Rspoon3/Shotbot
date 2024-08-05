@@ -385,6 +385,8 @@ import Combine
     }
     
     /// Clears all images and reverts the viewState back to individual placeholder
+    ///
+    /// - Warning: `imageResults.removeAll()` causes a small memory leak.
     public func clearContent() {
         logger.info("Clearing all content")
         

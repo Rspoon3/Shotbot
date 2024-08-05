@@ -5,6 +5,7 @@
 //  Created by Richard Witherspoon on 7/24/24.
 //
 
+#if !os(macOS)
 import Foundation
 import StoreKit
 
@@ -13,3 +14,4 @@ public protocol SKStoreReviewControlling {
 }
 
 extension SKStoreReviewController: SKStoreReviewControlling { }
+#endif

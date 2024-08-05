@@ -5,8 +5,14 @@
 //  Created by Richard Witherspoon on 7/19/24.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
+
 import Photos
+import Models
 
 extension PHImageManager {
     public func requestImage(
@@ -14,7 +20,7 @@ extension PHImageManager {
         targetSize: CGSize,
         contentMode: PHImageContentMode,
         options: PHImageRequestOptions?
-    ) async -> (UIImage?, [AnyHashable : Any]?) {
+    ) async -> (PlatformImage?, [AnyHashable : Any]?) {
         var callCount = 0
         
         return await withCheckedContinuation { continuation in

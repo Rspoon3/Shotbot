@@ -5,7 +5,12 @@
 //  Created by Richard Witherspoon on 6/4/23.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
+
 import Models
 
 public struct ImageResults {

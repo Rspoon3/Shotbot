@@ -32,3 +32,23 @@ public extension Image {
     #endif
     }
 }
+
+
+#if os(macOS)
+public extension NSImage {
+    convenience init?(systemName: String) {
+        self.init(systemSymbolName: systemName, accessibilityDescription: nil)
+    }
+    
+    func pngData() -> Data? {
+        guard
+            let tiffRepresentation = self.tiffRepresentation,
+            let bitmapImage = NSBitmapImageRep(data: tiffRepresentation)
+        else {
+            return nil
+        }
+        
+        return bitmapImage.representation(using: .png, properties: [:])
+    }
+}
+#endif

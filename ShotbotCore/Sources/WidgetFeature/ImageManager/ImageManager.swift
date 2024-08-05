@@ -5,7 +5,13 @@
 //  Created by Richard Witherspoon on 7/22/24.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
+
+import Models
 import Photos
 import CollectionConcurrencyKit
 
@@ -35,7 +41,7 @@ public struct ImageManager: ImageManaging {
     // MARK: - Public
     
     /// Gets the latest screenshot based on the assetID in the passed in URL.
-    public func latestScreenshot(from url: URL) async throws -> UIImage {
+    public func latestScreenshot(from url: URL) async throws -> PlatformImage {
         let assetID = try deepLinkManager.deepLinkValue(from: url)
 
         let fetchOptions = PHFetchOptions()
@@ -69,7 +75,7 @@ public struct ImageManager: ImageManaging {
     
     /// Gets the latest screenshot with the target sized passed in.
     /// Returns the image and the image assetID.
-    public func latestScreenshot(targetSize: CGSize) async throws -> (image: UIImage, assetID: String)  {
+    public func latestScreenshot(targetSize: CGSize) async throws -> (image: PlatformImage, assetID: String)  {
         let fetchOptions = PHFetchOptions()
         fetchOptions.fetchLimit = 1
         fetchOptions.sortDescriptors = [creationDateSortDescriptor]
@@ -99,7 +105,7 @@ public struct ImageManager: ImageManaging {
     }
     
     /// Gets the screenshots over the specified duration included in the passed in URL.
-    public func multipleScreenshots(from url: URL) async throws -> [UIImage] {
+    public func multipleScreenshots(from url: URL) async throws -> [PlatformImage] {
         let durationString = try deepLinkManager.deepLinkValue(from: url)
 
         guard

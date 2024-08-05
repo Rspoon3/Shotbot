@@ -8,7 +8,7 @@ let package = Package(
     platforms: [
         .iOS(.v16),
         .visionOS(.v1),
-        .macOS(.v13)
+        .macOS(.v14)
     ],
     products: [
         .library(name: "AppFeature", targets: ["AppFeature"]),
@@ -121,6 +121,7 @@ let package = Package(
         .target(
             name: "WidgetFeature",
             dependencies: [
+                "Models",
                 .product(
                     name: "CollectionConcurrencyKit",
                     package: "CollectionConcurrencyKit"

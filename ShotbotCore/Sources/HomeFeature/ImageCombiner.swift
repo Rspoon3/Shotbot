@@ -5,14 +5,19 @@
 //  Created by Richard Witherspoon on 7/24/24.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
+
 import OSLog
 import Models
 import Persistence
 
 public protocol ImageCombining {
     func createCombinedImage(
-        from images: [UIImage],
+        from images: [PlatformImage],
         imageQuality: Double
     ) async throws -> ShareableImage
 }
@@ -28,7 +33,7 @@ public struct ImageCombiner: ImageCombining {
     
     /// Combines images Horizontally with scaling to keep consistent spacing
     public func createCombinedImage(
-        from images: [UIImage],
+        from images: [PlatformImage],
         imageQuality: Double
     ) async throws -> ShareableImage {
         return try await withCheckedThrowingContinuation { continuation in

@@ -169,10 +169,10 @@ public struct HomeView: View {
         case .individualImages(let shareableImages):
             individualImagesView(shareableImages)
         case .combinedImages(let shareableImage):
-            Image(uiImage: shareableImage.framedScreenshot)
+            Image(platformImage: shareableImage.framedScreenshot)
                 .resizable()
                 .scaledToFit()
-                .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                .draggable(Image(platformImage: shareableImage.framedScreenshot))
                 .contextMenu {
                     contextMenu(shareableImage: shareableImage)
                 }
@@ -207,6 +207,7 @@ public struct HomeView: View {
             .contextMenu { importFileButton }
             .frame(maxWidth: 200)
             .padding()
+    #if !os(macOS)
             .contentShape(
                 .hoverEffect,
                 .rect(
@@ -215,6 +216,7 @@ public struct HomeView: View {
                 )
             )
             .hoverEffect()
+        #endif
             .foregroundColor(.secondary)
             .frame(maxHeight: .infinity)
             .onTapGesture { viewModel.selectPhotos() }
@@ -238,7 +240,7 @@ public struct HomeView: View {
     private func tabView(shareableImages: [ShareableImage]) -> some View {
         TabView {
             ForEach(shareableImages) { shareableImage in
-                Image(uiImage: shareableImage.framedScreenshot)
+                Image(platformImage: shareableImage.framedScreenshot)
                     .resizable()
                     .scaledToFit()
                     .contextMenu {
@@ -246,18 +248,20 @@ public struct HomeView: View {
                     }
                     .padding([.horizontal, .top])
                     .padding(.bottom, 40)
-                    .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                    .draggable(Image(platformImage: shareableImage.framedScreenshot))
                     .onTapGesture(count: 2) {
                         viewModel.copy(shareableImage.framedScreenshot)
                     }
             }
         }
+        #if !os(macOS)
         .tabViewStyle(.page)
         .onAppear {
             let appearance = UIPageControl.appearance()
             appearance.currentPageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.75)
             appearance.pageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.33)
         }
+        #endif
     }
     
     private func gridView(shareableImages: [ShareableImage]) -> some View {
@@ -267,13 +271,13 @@ public struct HomeView: View {
                 spacing: 20
             ) {
                 ForEach(shareableImages) { shareableImage in
-                    Image(uiImage: shareableImage.framedScreenshot)
+                    Image(platformImage: shareableImage.framedScreenshot)
                         .resizable()
                         .scaledToFit()
                         .contextMenu {
                             contextMenu(shareableImage: shareableImage)
                         }
-                        .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                        .draggable(Image(platformImage: shareableImage.framedScreenshot))
                         .onTapGesture(count: 2) {
                             viewModel.copy(shareableImage.framedScreenshot)
                         }

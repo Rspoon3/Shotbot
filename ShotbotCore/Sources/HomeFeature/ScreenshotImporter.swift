@@ -52,7 +52,7 @@ public struct ScreenshotImporter: ScreenshotImporting {
             let screenshots = try urls.compactMap { url in
                 let accessing = url.startAccessingSecurityScopedResource()
                 let data = try Data(contentsOf: url)
-                let image = UIImage(data: data)
+                let image = PlatformImage(data: data)
                 
                 if accessing {
                     url.stopAccessingSecurityScopedResource()
@@ -64,7 +64,7 @@ public struct ScreenshotImporter: ScreenshotImporting {
             return screenshots
         case .dropItems(let items):
             logger.info("Using dropped photos (\(items.count, privacy: .public)).")
-            return items.compactMap { UIImage(data: $0) }
+            return items.compactMap { PlatformImage(data: $0) }
         case .existingScreenshots(let existing):
             logger.info("Using existing screenshots (\(existing.count, privacy: .public)).")
             return existing

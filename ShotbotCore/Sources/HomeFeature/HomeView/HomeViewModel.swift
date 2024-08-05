@@ -121,11 +121,13 @@ import Combine
     
     /// Subscribes to notification center publishers such as memory warnings.
     private func subscribeToNotificationCenterPublishers() {
+        #if !os(macOS)
         notificationCenter.publisher(for: UIApplication.didReceiveMemoryWarningNotification)
             .sink { [weak self] _ in
                 self?.error = SBError.lowMemoryWarning
                 self?.logger.warning("Memory warning hit")
             }.store(in: &cancellables)
+        #endif
     }
     
     /// Updates `viewState` when `imageType` changes.
@@ -199,7 +201,7 @@ import Combine
     }
     
     /// Updates `imageResults` `individual`property and counts up `PersistenceManaging.deviceFrameCreations`
-    private func updateImageResultsIndividualImages(using screenshots: [UIImage]) async throws {
+    private func updateImageResultsIndividualImages(using screenshots: [PlatformImage]) async throws {
         var shareableImages = [ShareableImage]()
         
         for (i, screenshot) in screenshots.enumerated() {
@@ -427,7 +429,9 @@ import Combine
             return
         }
         
+        #if !os(macOS)
         UIPasteboard.general.image = image
+        #endif
         showCopyToast = true
         logger.debug("Copying image.")
     }

@@ -5,8 +5,14 @@
 //  Created by Richard Witherspoon on 7/22/24.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
+
 import Photos
+import Models
 
 public struct PHImageClient {
     public var requestImage: (
@@ -14,7 +20,7 @@ public struct PHImageClient {
         _ targetSize: CGSize,
         _ contentMode: PHImageContentMode,
         _ options: PHImageRequestOptions?
-    ) async -> (UIImage?, [AnyHashable : Any]?)
+    ) async -> (PlatformImage?, [AnyHashable : Any]?)
     
     // MARK: - Initializer
     
@@ -24,7 +30,7 @@ public struct PHImageClient {
             _ targetSize: CGSize,
             _ contentMode: PHImageContentMode,
             _ options: PHImageRequestOptions?
-        ) async -> (UIImage?, [AnyHashable : Any]?)
+        ) async -> (PlatformImage?, [AnyHashable : Any]?)
     ) {
         self.requestImage = requestImage
     }
@@ -45,7 +51,7 @@ public extension PHImageClient {
     #if DEBUG
     static var mockImage: Self {
         return Self { asset, targetSize, contentMode, options in
-            (UIImage(systemName: "star"), nil)
+            (PlatformImage(systemName: "star"), nil)
         }
     }
     #endif

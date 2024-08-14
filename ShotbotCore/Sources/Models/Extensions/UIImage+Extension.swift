@@ -15,10 +15,12 @@ public extension UIImage {
     
     /// Resizes an image to a specified size
     func resized(to size: CGSize) -> UIImage {
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
+        let render = UIGraphicsImageRenderer(
+            size: size,
+            format: .singleScale
+        )
         
-        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
+        return render.image { _ in
             draw(in: CGRect(origin: .zero, size: size))
         }
     }
@@ -30,11 +32,12 @@ public extension UIImage {
         let scaledSize = CGSize(width: size.width * percentage, height: size.height * percentage)
         let availableRect = AVMakeRect(aspectRatio: size, insideRect: .init(origin: .zero, size: scaledSize))
         let targetSize = availableRect.size
-        
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        
-        return UIGraphicsImageRenderer(size: targetSize, format: format).image { _ in
+        let render = UIGraphicsImageRenderer(
+            size: targetSize,
+            format: .singleScale
+        )
+            
+        return render.image { _ in
             draw(in: CGRect(origin: .zero, size: targetSize))
         }
     }
@@ -45,27 +48,38 @@ public extension UIImage {
         offset: CGPoint,
         alpha: CGFloat = 1
     ) -> UIImage {
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
+        let render = UIGraphicsImageRenderer(
+            size: size,
+            format: .singleScale
+        )
         
-        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
-            let rect = CGRect(origin: .zero, size: size)
+        return render.image { _ in
+            let rect = CGRect(
+                origin: .zero,
+                size: size
+            )
             
             draw(in: rect)
             
             topImage.draw(
-                in: .init(origin: offset, size: topImage.size),
+                in: .init(
+                    origin: offset,
+                    size: topImage.size
+                ),
                 blendMode: .normal,
-                alpha: alpha)
+                alpha: alpha
+            )
         }
     }
     
     /// Clips the four corners of an image by a specified amount
     func clipEdges(amount: CGFloat) -> UIImage {
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        
-        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
+        let render = UIGraphicsImageRenderer(
+            size: size,
+            format: .singleScale
+        )
+            
+        return render.image { _ in
             let rect = CGRect(origin: .zero, size: size)
             let path = UIBezierPath()
             
@@ -115,9 +129,9 @@ public extension Array where Element: UIImage {
         let maxSize = CGSize(width: maxWidth ?? 0, height: maxHeight)
         let totalSpacing = spacing * CGFloat(count - 1)
         let size = CGSize(width: imagesWidth + totalSpacing, height: maxSize.height)
-        let renderer = UIGraphicsImageRenderer(size: size)
+        let renderer = UIGraphicsImageRenderer(size: size, format: .singleScale)
         
-        return renderer.image { (context) in
+        return renderer.image { context in
             var previousX: CGFloat = 0
             
             for (index, image) in self.enumerated() {

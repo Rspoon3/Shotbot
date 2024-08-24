@@ -249,7 +249,11 @@ public struct HomeView: View {
             ForEach(shareableImages) { shareableImage in
                 Image(uiImage: shareableImage.framedScreenshot)
                     .resizable()
+                    .border(Color.red)
                     .scaledToFit()
+//                    .border(Color.black)
+//                    .padding(50)
+//                    .background(Color.orange)
                     .contextMenu {
                         contextMenu(shareableImage: shareableImage)
                     }

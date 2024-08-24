@@ -115,9 +115,165 @@ public extension UIImage {
             throw SBError.unsupportedImage
         }
         
-        return framedScreenshot
+//        return framedScreenshot
+        
+        print(framedScreenshot.size)
+//        (1339.0, 2716.0)
+        
+        let color = UIColor.random().image(size: .init(width: 3000, height: 3000))!
+        
+        return color.overlayWith(image: framedScreenshot)!
+        
+        // Add a background
+//        let backgroundImage = framedScreenshot.redrawing(overColor: .systemRed)
+//        let backgroundImage = framedScreenshot.withBackground(color: .systemBlue, padding: 150)!
+
+//        let backgroundImage = framedScreenshot.withGradientBackground(colors: [.systemRed, .systemOrange, .systemBlue])!
+
+        
+//        return backgroundImage
     }
 }
+
+import UIKit
+
+extension UIColor {
+    func image(size: CGSize) -> UIImage? {
+        let rect = CGRect(origin: .zero, size: size)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return nil
+        }
+        
+        context.setFillColor(self.cgColor)
+        context.fill(rect)
+        
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return image
+    }
+}
+
+extension UIImage {
+    func overlayWith(image: UIImage, position: CGPoint? = nil) -> UIImage? {
+        let baseSize = self.size
+        let overlaySize = image.size
+
+        // Use the overlay image's original size, ignoring the aspect ratio
+        let targetWidth = overlaySize.width
+        let targetHeight = overlaySize.height
+
+        // Center the overlay image on the base image
+        let targetRect = CGRect(
+            x: position?.x ?? (baseSize.width - targetWidth) / 2,
+            y: position?.y ?? (baseSize.height - targetHeight) / 2,
+            width: targetWidth,
+            height: targetHeight
+        )
+
+        // Begin the graphics context
+        UIGraphicsBeginImageContextWithOptions(baseSize, false, self.scale)
+        
+        // Draw the base image
+        self.draw(in: CGRect(origin: .zero, size: baseSize))
+        
+        // Draw the overlay image
+        image.draw(in: targetRect)
+        
+        // Get the final image
+        let combinedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return combinedImage
+    }
+}
+
+
+
+
+extension UIImage {
+    func withBackground(color: UIColor, size: CGSize? = nil, padding: CGFloat = 0) -> UIImage? {
+        let newSize = size ?? self.size
+        let rect = CGRect(origin: .zero, size: newSize)
+
+        UIGraphicsBeginImageContextWithOptions(newSize, false, self.scale)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+
+        // Fill the background with the specified color
+        context.setFillColor(color.cgColor)
+        context.fill(rect)
+
+        // Calculate the available size after padding is applied
+        let availableWidth = newSize.width - 2 * padding
+        let availableHeight = newSize.height - 2 * padding
+
+        // Calculate the aspect ratio of the original image
+        let aspectRatio = self.size.width / self.size.height
+
+        // Determine the final size of the image within the padded area
+        var targetWidth: CGFloat
+        var targetHeight: CGFloat
+
+        if availableWidth / aspectRatio <= availableHeight {
+            targetWidth = availableWidth
+            targetHeight = availableWidth / aspectRatio
+        } else {
+            targetHeight = availableHeight
+            targetWidth = availableHeight * aspectRatio
+        }
+
+        // Center the image within the padded area
+        let targetRect = CGRect(
+            x: padding + (availableWidth - targetWidth) / 2,
+            y: padding + (availableHeight - targetHeight) / 2,
+            width: targetWidth,
+            height: targetHeight
+        )
+
+        // Draw the original image on top of the background
+        self.draw(in: targetRect)
+
+        // Get the new image
+        let imageWithBackground = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return imageWithBackground
+    }
+}
+
+extension UIImage {
+    func withGradientBackground(colors: [UIColor], size: CGSize? = nil) -> UIImage? {
+        let newSize = size ?? self.size
+        let rect = CGRect(origin: .zero, size: newSize)
+
+        UIGraphicsBeginImageContextWithOptions(newSize, false, self.scale)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+
+        // Create a gradient
+        let cgColors = colors.map { $0.cgColor }
+        guard let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: cgColors as CFArray, locations: nil) else { return nil }
+
+        // Draw the gradient in the context
+        let startPoint = CGPoint(x: 0, y: 0)
+        let endPoint = CGPoint(x: 0, y: newSize.height)
+        context.drawLinearGradient(gradient, start: startPoint, end: endPoint, options: [])
+
+        // Draw the original image on top of the gradient
+        self.draw(in: CGRect(x: (newSize.width - self.size.width) / 2,
+                             y: (newSize.height - self.size.height) / 2,
+                             width: self.size.width,
+                             height: self.size.height))
+
+        // Get the new image
+        let imageWithGradientBackground = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return imageWithGradientBackground
+    }
+}
+
 
 public extension Array where Element: UIImage {
     /// Combines multiple images horizontally
@@ -163,3 +319,39 @@ public extension Array where Element: UIImage {
         }
     }
 }
+
+import CoreGraphics
+
+extension CGSize {
+    static func +<T: Numeric>(lhs: CGSize, rhs: T) -> CGSize where T: BinaryInteger {
+        return CGSize(width: lhs.width + CGFloat(rhs), height: lhs.height + CGFloat(rhs))
+    }
+
+    static func +<T: Numeric>(lhs: T, rhs: CGSize) -> CGSize where T: BinaryInteger {
+        return CGSize(width: rhs.width + CGFloat(lhs), height: rhs.height + CGFloat(lhs))
+    }
+
+    static func +<T: Numeric>(lhs: CGSize, rhs: T) -> CGSize where T: BinaryFloatingPoint {
+        return CGSize(width: lhs.width + CGFloat(rhs), height: lhs.height + CGFloat(rhs))
+    }
+
+    static func +<T: Numeric>(lhs: T, rhs: CGSize) -> CGSize where T: BinaryFloatingPoint {
+        return CGSize(width: rhs.width + CGFloat(lhs), height: rhs.height + CGFloat(lhs))
+    }
+}
+
+
+extension UIColor {
+    static func random(alpha: CGFloat = 1.0) -> UIColor {
+        let r = CGFloat.random(in: 0...1)
+        let g = CGFloat.random(in: 0...1)
+        let b = CGFloat.random(in: 0...1)
+        
+        return UIColor(red: r, green: g, blue: b, alpha: alpha)
+    }
+    
+    static var lightRandom: UIColor {
+        random(alpha: 0.3)
+    }
+}
+

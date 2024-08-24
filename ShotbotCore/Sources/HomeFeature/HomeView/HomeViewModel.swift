@@ -498,12 +498,22 @@ import Combine
     /// This will change the order of both the individual and combined images.
     public func reverseImages() async {
         logger.info("Re-running pipeline to reverse combined images.")
+
+        isLoading = true
+        defer { isLoading = false }
         
         await combinedImageTask?.value
-        imageResults.originalScreenshots.reverse()
+        imageResults.reverseImages()
+        await combineDeviceFrames()
+        try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
         
-        try? await processSelectedPhotos(
-            source: .existingScreenshots(imageResults.originalScreenshots)
-        )
+        guard let combined = imageResults.combined else {
+            logger.fault("Processing selected photos returning early because combined image results has no image.")
+            error = SBError.unsupportedImage
+            return
+        }
+        
+        logger.fault("Setting viewState to combinedImages")
+        viewState = .combinedImages(combined)
     }
 }

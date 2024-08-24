@@ -182,7 +182,16 @@ public struct HomeView: View {
                     viewModel.copy(shareableImage.framedScreenshot)
                 }
                 .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
+                    ToolbarItemGroup(placement: .primaryAction) {
+                        Button {
+                            Task {
+                                await viewModel.reverseImages()
+                            }
+                        } label: {
+                            Label("Reverse Images", systemImage: "arrow.left.arrow.right")
+                        }
+                        .disabled(viewModel.isLoading)
+
                         PurchaseShareLink(
                             items: [shareableImage.url],
                             showPurchaseView: $viewModel.showPurchaseView

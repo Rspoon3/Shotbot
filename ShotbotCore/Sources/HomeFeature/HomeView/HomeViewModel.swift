@@ -492,4 +492,18 @@ import Combine
             self.error = error
         }
     }
+    
+    /// Re-runs the image pipeline with the images reversed.
+    ///
+    /// This will change the order of both the individual and combined images.
+    public func reverseImages() async {
+        logger.info("Re-running pipeline to reverse combined images.")
+        
+        await combinedImageTask?.value
+        imageResults.originalScreenshots.reverse()
+        
+        try? await processSelectedPhotos(
+            source: .existingScreenshots(imageResults.originalScreenshots)
+        )
+    }
 }

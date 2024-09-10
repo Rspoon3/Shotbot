@@ -1,10 +1,23 @@
 [
     {
         "deviceFrame": "Watch Ultra 2022",
-        "mergeMethod": "doubleOverlay",
+        "mergeMethod": "singleOverlayV2",
         "inputSize": [410, 502],
-        "offSet": [95, 219],
-    },    {
+        "cornerRadius": 10
+    },
+    {
+        "deviceFrame": "Watch Series 10 46 Jet Black",
+        "mergeMethod": "singleOverlayV2",
+        "inputSize": [416, 496],
+        "cornerRadius": 10
+    },
+    {
+        "deviceFrame": "Watch Series 10 42 Jet Black",
+        "mergeMethod": "singleOverlayV2",
+        "inputSize": [374, 446],
+        "cornerRadius": 10
+    },
+    {
         "deviceFrame": "Watch Series 7 45 Midnight",
         "mergeMethod": "doubleOverlay",
         "inputSize": [396, 484],

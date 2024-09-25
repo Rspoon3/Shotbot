@@ -16,6 +16,7 @@
 		94453E522C4AAD7A00B15690 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94453E512C4AAD7A00B15690 /* Assets.xcassets */; };
 		94453E562C4AAD7A00B15690 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9455F4DC2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455F4DB2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift */; };
+		9466A0D52CA3B16600700BAA /* SBFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 9466A0D42CA3B16600700BAA /* SBFoundation */; };
 		946E7FC52C4C3341001E4C46 /* MultipleScreenshotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC12C4C3341001E4C46 /* MultipleScreenshotsView.swift */; };
 		946E7FC62C4C3341001E4C46 /* MultipleScreenshotsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC42C4C3341001E4C46 /* MultipleScreenshotsWidget.swift */; };
 		946E7FC72C4C3341001E4C46 /* MultipleScreenshotsEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC32C4C3341001E4C46 /* MultipleScreenshotsEntry.swift */; };
@@ -141,6 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9466A0D52CA3B16600700BAA /* SBFoundation in Frameworks */,
 				94BD66042A44B8D000D0CE61 /* Models in Frameworks */,
 				94BD66022A44B8CC00D0CE61 /* Persistence in Frameworks */,
 				94BD65E32A44B49900D0CE61 /* UniformTypeIdentifiers.framework in Frameworks */,
@@ -352,6 +354,7 @@
 			packageProductDependencies = (
 				94BD66012A44B8CC00D0CE61 /* Persistence */,
 				94BD66032A44B8D000D0CE61 /* Models */,
+				9466A0D42CA3B16600700BAA /* SBFoundation */,
 			);
 			productName = ShotbotActionExtension;
 			productReference = 94BD65E12A44B49900D0CE61 /* ShotbotActionExtension.appex */;
@@ -869,6 +872,10 @@
 		94016B032C4F4F03006F025B /* WidgetFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WidgetFeature;
+		};
+		9466A0D42CA3B16600700BAA /* SBFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SBFoundation;
 		};
 		94BD65DA2A44B3B300D0CE61 /* AppFeature */ = {
 			isa = XCSwiftPackageProductDependency;

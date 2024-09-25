@@ -18,11 +18,22 @@ struct ActionExtensionView: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel"){
                             viewModel.cancelButtonTapped()
-                        }
+                        }.tint(.red)
                     }
                     
-                    if let urls = viewModel.sharableURLs {
-                        ToolbarItem(placement: .primaryAction) {
+                    ToolbarItemGroup(placement: .primaryAction) {
+                        if viewModel.showReveseImageButton {
+                            Button {
+                                Task {
+                                    await viewModel.reverseImages()
+                                }
+                            } label: {
+                                Label("Reverse Images", systemImage: "arrow.left.arrow.right")
+                            }
+                            .disabled(viewModel.isReversingImages)
+                        }
+
+                        if let urls = viewModel.sharableURLs {
                             ShareLink(items: urls)
                         }
                     }

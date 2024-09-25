@@ -45,6 +45,11 @@ struct ActionExtensionMainContentView: View {
             case .combined:
                 if let shareableCombinedImage = viewModel.shareableCombinedImage {
                     image(uiImage: shareableCombinedImage.framedScreenshot)
+                        .overlay {
+                            if viewModel.isReversingImages {
+                                ProgressView()
+                            }
+                        }
                 } else {
                     ProgressView()
                         .frame(maxHeight: .infinity)

@@ -17,10 +17,11 @@ import CreateCombinedImageFeature
 
 @MainActor final class ActionExtensionViewModel: ObservableObject {
     private let logger = Logger(category: ActionExtensionViewModel.self)
-    private let attachments: [NSItemProvider]
+    private var attachments: [NSItemProvider]
     private let extensionContext: NSExtensionContext
     private let imageTypeIdentifier = UTType.image.identifier
     private let imageTitle = "Framed Screenshot"
+    @Published var isReversingImages = false
     @Published var imageType: ImageType
     @Published var shareableImages: [ShareableImage]?
     @Published var shareableCombinedImage: ShareableImage?
@@ -58,6 +59,10 @@ import CreateCombinedImageFeature
     
     var hasMultipleImages: Bool {
         shareableImages?.count ?? 0 > 1
+    }
+    
+    var showReveseImageButton: Bool {
+        hasMultipleImages && imageType == .combined
     }
     
     // MARK: - Initializer
@@ -101,6 +106,14 @@ import CreateCombinedImageFeature
         Task {
             await createCombineImageIfNeeded()
         }
+    }
+    
+    func reverseImages() async {
+        isReversingImages = true
+        defer { isReversingImages = false }
+        
+        attachments.reverse()
+        await loadAttachments()
     }
     
     // MARK: - Private

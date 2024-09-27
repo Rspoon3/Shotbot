@@ -189,9 +189,37 @@ import Combine
         combinedImageTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
             
-            imageResults.combined = try? await imageCombiner.createCombinedImage(
+            let combinedScreenshots = try! await imageCombiner.createCombinedImage(
                 from: imageResults.individual.map(\.framedScreenshot),
                 imageQuality: imageQuality.value
+            )
+            let size = combinedScreenshots.framedScreenshot.size + 400
+//            let color = UIColor.random().image(size: size + 400)!
+            
+            let renderer = ImageRenderer {
+                AngularGradient(
+                    gradient: Gradient(
+                        colors: [
+                            .red,
+                            .yellow,
+                            .green,
+                            .blue,
+                            .purple,
+                            .red
+                        ]
+                    ),
+                    center: .center
+                )
+                .frame(width: size.width, height: size.height)
+            }
+
+            
+            let framedBackgroundScreenshot = renderer.uiImage!.overlayWith(image: combinedScreenshots.framedScreenshot)!
+            
+            imageResults.combined = .init(
+                framedScreenshot: combinedScreenshots.framedScreenshot,
+                framedBackgroundScreenshot: framedBackgroundScreenshot,
+                url: combinedScreenshots.url
             )
         }
         
@@ -295,6 +323,11 @@ import Combine
     /// Will auto save to files or photos if necessary
     private func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> ShareableImage {
         let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality)
+        
+        
+        let color = UIColor.random().image(size:framedScreenshot.size + 400)!
+        let framedBackgroundScreenshot = color.overlayWith(image: framedScreenshot)!
+        
         let path = "Framed Screenshot \(count)_\(UUID()).png"
         let temporaryURL = URL.temporaryDirectory.appending(path: path)
         
@@ -308,6 +341,7 @@ import Combine
         
         return ShareableImage(
             framedScreenshot: framedScreenshot,
+            framedBackgroundScreenshot: framedBackgroundScreenshot,
             url: temporaryURL
         )
     }
@@ -505,5 +539,12 @@ import Combine
         try? await processSelectedPhotos(
             source: .existingScreenshots(imageResults.originalScreenshots)
         )
+    }
+}
+
+extension ImageRenderer {
+    @MainActor
+    convenience init(_ content: () -> Content) {
+        self.init(content: content())
     }
 }

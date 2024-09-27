@@ -13,10 +13,23 @@ import Models
 import Purchases
 import MediaManager
 
+enum BackgroundType: String, CaseIterable, Identifiable {
+    var id: Self { self }
+    case solidColor
+    case linearGradient
+    case angularGradient
+    case radialGradient
+    case image
+}
+
 public struct HomeView: View {
     @StateObject var viewModel = HomeViewModel()
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
+    @State private var color = Color.blue
+    @State private var backgroundType: BackgroundType = .angularGradient
+    @State private var renderedImage = Image(systemName: "photo")
+    @Environment(\.displayScale) var displayScale
 
     // MARK: - Initializer
     
@@ -30,12 +43,25 @@ public struct HomeView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 picker
+                
+                Picker("Background Type", selection: $backgroundType) {
+                    ForEach(BackgroundType.allCases) { type in
+                        Text(type.rawValue).tag(type)
+                    }
+                }
+                .pickerStyle(.segmented)
+                
+                ColorPicker("Color", selection: $color)
+                
                 mainContent
                 pickerMenu
             }
             #if os(iOS)
             .navigationTitle("Shotbot")
             #endif
+            .onChange(of: backgroundType) { _ in
+                render()
+            }
             .photosPicker(
                 isPresented: $viewModel.showPhotosPicker,
                 selection: $viewModel.imageSelections,
@@ -169,7 +195,7 @@ public struct HomeView: View {
         case .individualImages(let shareableImages):
             individualImagesView(shareableImages)
         case .combinedImages(let shareableImage):
-            Image(uiImage: shareableImage.framedScreenshot)
+            Image(uiImage: shareableImage.framedBackgroundScreenshot)
                 .resizable()
                 .scaledToFit()
                 .draggable(Image(uiImage: shareableImage.framedScreenshot))
@@ -244,22 +270,67 @@ public struct HomeView: View {
         .padding([.bottom, .horizontal])
     }
     
+    @ViewBuilder
+    private var backgroundView: some View {
+        switch backgroundType {
+        case .image:
+            Image(uiImage: viewModel.imageResults.originalScreenshots.first!)
+                .resizable()
+                .scaledToFill()
+                .blur(radius: 20)
+        case .solidColor:
+            color
+        case .linearGradient:
+            Rectangle().fill(color.gradient)
+        case .radialGradient:
+            RadialGradient(
+                gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
+                center: .center,
+                startRadius: 50,
+                endRadius: 1000
+            )
+        case .angularGradient:
+            AngularGradient(
+                gradient: Gradient(
+                    colors: [
+                        .red,
+                        .yellow,
+                        .green,
+                        .blue,
+                        .purple,
+                        .red
+                    ]
+                ),
+                center: .center
+            )
+        }
+    }
+    
+    fileprivate func rendered(_ shareableImage: ShareableImage) -> some View {
+        return Image(uiImage: shareableImage.framedScreenshot)
+            .resizable()
+            .scaledToFit()
+            .padding(100)
+            .background {
+                backgroundView
+                    .animation(.default, value: backgroundType)
+                    .animation(.default, value: color)
+                    .scaledToFit()
+            }
+            .clipped()
+            .cornerRadius(20)
+    }
+    
     private func tabView(shareableImages: [ShareableImage]) -> some View {
         TabView {
             ForEach(shareableImages) { shareableImage in
-                Image(uiImage: shareableImage.framedScreenshot)
-                    .resizable()
-                    .border(Color.red)
-                    .scaledToFit()
-//                    .border(Color.black)
-//                    .padding(50)
-//                    .background(Color.orange)
+                rendered(shareableImage)
                     .contextMenu {
                         contextMenu(shareableImage: shareableImage)
                     }
                     .padding([.horizontal, .top])
                     .padding(.bottom, 40)
-                    .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                    .draggable(renderedImage)
                     .onTapGesture(count: 2) {
                         viewModel.copy(shareableImage.framedScreenshot)
                     }
@@ -280,13 +351,13 @@ public struct HomeView: View {
                 spacing: 20
             ) {
                 ForEach(shareableImages) { shareableImage in
-                    Image(uiImage: shareableImage.framedScreenshot)
+                    Image(uiImage: shareableImage.framedBackgroundScreenshot)
                         .resizable()
                         .scaledToFit()
                         .contextMenu {
                             contextMenu(shareableImage: shareableImage)
                         }
-                        .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                        .draggable(renderedImage)
                         .onTapGesture(count: 2) {
                             viewModel.copy(shareableImage.framedScreenshot)
                         }
@@ -348,6 +419,17 @@ public struct HomeView: View {
                     showPurchaseView: $viewModel.showPurchaseView
                 )
             }
+        }
+    }
+    
+    @MainActor func render() {
+        let renderer = ImageRenderer(content: rendered(viewModel.imageResults.individual.first!))
+        
+        // make sure and use the correct display scale for this device
+        renderer.scale = displayScale
+        
+        if let uiImage = renderer.uiImage {
+            renderedImage = Image(uiImage: uiImage)
         }
     }
 }

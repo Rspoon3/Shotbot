@@ -115,12 +115,12 @@ public extension UIImage {
             throw SBError.unsupportedImage
         }
         
-//        return framedScreenshot
+        return framedScreenshot
         
         print(framedScreenshot.size)
 //        (1339.0, 2716.0)
         
-        let color = UIColor.random().image(size: .init(width: 3000, height: 3000))!
+        let color = UIColor.random().image(size:framedScreenshot.size + 400)!
         
         return color.overlayWith(image: framedScreenshot)!
         
@@ -138,7 +138,7 @@ public extension UIImage {
 import UIKit
 
 extension UIColor {
-    func image(size: CGSize) -> UIImage? {
+    public func image(size: CGSize) -> UIImage? {
         let rect = CGRect(origin: .zero, size: size)
         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
         
@@ -157,7 +157,7 @@ extension UIColor {
 }
 
 extension UIImage {
-    func overlayWith(image: UIImage, position: CGPoint? = nil) -> UIImage? {
+    public func overlayWith(image: UIImage, position: CGPoint? = nil) -> UIImage? {
         let baseSize = self.size
         let overlaySize = image.size
 
@@ -322,7 +322,7 @@ public extension Array where Element: UIImage {
 
 import CoreGraphics
 
-extension CGSize {
+public extension CGSize {
     static func +<T: Numeric>(lhs: CGSize, rhs: T) -> CGSize where T: BinaryInteger {
         return CGSize(width: lhs.width + CGFloat(rhs), height: lhs.height + CGFloat(rhs))
     }
@@ -341,7 +341,7 @@ extension CGSize {
 }
 
 
-extension UIColor {
+public extension UIColor {
     static func random(alpha: CGFloat = 1.0) -> UIColor {
         let r = CGFloat.random(in: 0...1)
         let g = CGFloat.random(in: 0...1)

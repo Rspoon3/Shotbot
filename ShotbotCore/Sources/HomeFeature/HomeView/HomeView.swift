@@ -31,7 +31,13 @@ public struct HomeView: View {
             VStack(spacing: 0) {
                 picker
                 mainContent
-                pickerMenu
+                
+                VStack(spacing: 16) {
+                    selectPhotosButton
+                    importPhotosButton
+                }
+                .disabled(viewModel.isLoading)
+                .padding([.bottom, .horizontal])
             }
             #if os(iOS)
             .navigationTitle("Shotbot")
@@ -229,7 +235,7 @@ public struct HomeView: View {
             .onTapGesture { viewModel.selectPhotos() }
     }
     
-    private var pickerMenu: some View {
+    private var selectPhotosButton: some View {
         Button {
             viewModel.selectPhotos()
         } label:{
@@ -239,9 +245,13 @@ public struct HomeView: View {
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
-        .disabled(viewModel.isLoading)
-        .contextMenu { importFileButton }
-        .padding([.bottom, .horizontal])
+    }
+    
+    private var importPhotosButton: some View {
+        Button("Select From Files") {
+            viewModel.isImportingFile = true
+        }
+        .font(.headline)
     }
     
     private func tabView(shareableImages: [ShareableImage]) -> some View {

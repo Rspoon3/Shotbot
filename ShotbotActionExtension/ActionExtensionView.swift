@@ -14,6 +14,9 @@ struct ActionExtensionView: View {
         NavigationView {
             bodyItem
                 .task { await viewModel.loadAttachments() }
+                .alert(error: $viewModel.error) {
+                    viewModel.cancelButtonTapped()
+                }
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel"){
@@ -22,7 +25,7 @@ struct ActionExtensionView: View {
                     }
                     
                     ToolbarItemGroup(placement: .primaryAction) {
-                        if viewModel.showReveseImageButton {
+                        if viewModel.showReverseImageButton {
                             Button {
                                 Task {
                                     await viewModel.reverseImages()
@@ -31,6 +34,14 @@ struct ActionExtensionView: View {
                                 Label("Reverse Images", systemImage: "arrow.left.arrow.right")
                             }
                             .disabled(viewModel.isReversingImages)
+                        }
+                        
+                        if let name = viewModel.viewTypeImageName {
+                            Button {
+                                viewModel.toggleIndividualViewType()
+                            } label: {
+                                Label("Individual View Type", systemImage: name)
+                            }
                         }
 
                         if let urls = viewModel.sharableURLs {

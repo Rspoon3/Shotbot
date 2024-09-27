@@ -25,6 +25,8 @@ import CreateCombinedImageFeature
     @Published var imageType: ImageType
     @Published var shareableImages: [ShareableImage]?
     @Published var shareableCombinedImage: ShareableImage?
+    @Published var showGridView: Bool
+    @Published public var error: Error?
     private var persistenceManager: any PersistenceManaging
     private let fileManager: any FileManaging
 
@@ -61,8 +63,13 @@ import CreateCombinedImageFeature
         shareableImages?.count ?? 0 > 1
     }
     
-    var showReveseImageButton: Bool {
+    var showReverseImageButton: Bool {
         hasMultipleImages && imageType == .combined
+    }
+    
+    var viewTypeImageName: String? {
+        guard hasMultipleImages, imageType == .individual else { return nil }
+        return persistenceManager.defaultHomeView == .grid ? "ellipsis.rectangle" : "square.grid.2x2"
     }
     
     // MARK: - Initializer
@@ -77,6 +84,7 @@ import CreateCombinedImageFeature
         self.extensionContext = extensionContext
         self.persistenceManager = persistenceManager
         self.fileManager = fileManager
+        self.showGridView = persistenceManager.defaultHomeView == .grid
         
         logger.notice("attachments: \(attachments.count.formatted(), privacy: .public)")
         logger.notice("canSaveFramedScreenshot: \(persistenceManager.canSaveFramedScreenshot, privacy: .public)")
@@ -102,6 +110,11 @@ import CreateCombinedImageFeature
     func loadAttachments() async {
         guard persistenceManager.canSaveFramedScreenshot else { return }
         await createIndividualImages()
+        
+        if (shareableImages ?? []).count != attachments.count {
+            error = SBError.unsupportedImage
+            return
+        }
         
         Task {
             await createCombineImageIfNeeded()
@@ -186,5 +199,16 @@ import CreateCombinedImageFeature
         for url in contents {
             try? fileManager.removeItem(at: url)
         }
+    }
+    
+    public func toggleIndividualViewType() {
+        switch persistenceManager.defaultHomeView {
+        case .grid:
+            persistenceManager.defaultHomeView = .tabbed
+        case .tabbed:
+            persistenceManager.defaultHomeView = .grid
+        }
+        
+        showGridView = persistenceManager.defaultHomeView == .grid && hasMultipleImages
     }
 }

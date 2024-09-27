@@ -26,17 +26,13 @@ struct ActionExtensionMainContentView: View {
             
             switch viewModel.imageType {
             case .individual:
-                if let shareableImage = viewModel.shareableImages {
-                    TabView {
-                        ForEach(shareableImage) { shareableImage in
-                            image(uiImage: shareableImage.framedScreenshot)
+                if let shareableImages = viewModel.shareableImages {
+                    Group {
+                        if viewModel.showGridView {
+                            gridView(shareableImages: shareableImages)
+                        } else {
+                            tabView(shareableImages: shareableImages)
                         }
-                    }
-                    .tabViewStyle(.page)
-                    .onAppear {
-                        let appearance = UIPageControl.appearance()
-                        appearance.currentPageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.75)
-                        appearance.pageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.33)
                     }
                 } else {
                     ProgressView()
@@ -69,5 +65,36 @@ struct ActionExtensionMainContentView: View {
             .frame(maxHeight: .infinity)
             .padding([.horizontal, .top])
             .padding(.bottom, 40)
+    }
+    
+    private func tabView(shareableImages: [ShareableImage]) -> some View {
+        TabView {
+            ForEach(shareableImages) { shareableImage in
+                image(uiImage: shareableImage.framedScreenshot)
+            }
+        }
+        .tabViewStyle(.page)
+        .onAppear {
+            let appearance = UIPageControl.appearance()
+            appearance.currentPageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.75)
+            appearance.pageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.33)
+        }
+    }
+    
+    private func gridView(shareableImages: [ShareableImage]) -> some View {
+        ScrollView {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 400))],
+                spacing: 20
+            ) {
+                ForEach(shareableImages) { shareableImage in
+                    Image(uiImage: shareableImage.framedScreenshot)
+                        .resizable()
+                        .scaledToFit()
+                }
+            }
+            .padding(.horizontal)
+        }
+        .padding(.vertical)
     }
 }

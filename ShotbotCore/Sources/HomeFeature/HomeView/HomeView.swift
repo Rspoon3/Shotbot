@@ -205,7 +205,7 @@ public struct HomeView: View {
                 .padding()
                 .frame(maxHeight: .infinity, alignment: .center)
                 .onTapGesture(count: 2) {
-                    viewModel.copy(shareableImage.framedScreenshot)
+                    viewModel.copy(shareableImage.framedBackgroundScreenshot)
                 }
                 .toolbar {
                     ToolbarItemGroup(placement: .primaryAction) {

@@ -55,10 +55,10 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
     @AppStorage("autoDeleteScreenshots")
     public var autoDeleteScreenshots: Bool = false
     
-    @AppStorage("defaultHomeTab")
+    @AppStorage("defaultHomeTab", store: .shared)
     public var defaultHomeTab: ImageType = .individual
     
-    @AppStorage("defaultHomeView")
+    @AppStorage("defaultHomeView", store: .shared)
     public var defaultHomeView: HomeViewType = .tabbed
     
     @AppStorage("clearImagesOnAppBackground")

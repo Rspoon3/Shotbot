@@ -9,7 +9,7 @@
 			<key>NSExtensionActivationRule</key>
 			<dict>
 				<key>NSExtensionActivationSupportsImageWithMaxCount</key>
-				<integer>4</integer>
+				<integer>999999999</integer>
 			</dict>
 			<key>NSExtensionServiceFinderPreviewIconName</key>
 			<string>NSActionTemplate</string>

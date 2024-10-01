@@ -11,7 +11,23 @@ import SwiftUI
 @main
 struct WidgetsBundle: WidgetBundle {
     var body: some Widget {
+        if #available(iOSApplicationExtension 18.0, *) {
+            return allWidgetsIncludingiOS18
+        } else {
+            return noniOS18OnlyWidgets
+        }
+    }
+    
+    @WidgetBundleBuilder
+    var noniOS18OnlyWidgets: some Widget {
         LatestScreenshotWidget()
         MultipleScreenshotsWidget()
+    }
+    
+    @available(iOSApplicationExtension 18.0, *)
+    @WidgetBundleBuilder
+    var allWidgetsIncludingiOS18: some Widget {
+        noniOS18OnlyWidgets
+        MultipleScreenshotsControlWidget()
     }
 }

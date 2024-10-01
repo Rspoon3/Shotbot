@@ -14,6 +14,7 @@ import Purchases
 import MediaManager
 
 public struct HomeView: View {
+    @StateObject var manager = AppIntentManager.shared
     @StateObject var viewModel = HomeViewModel()
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
@@ -29,6 +30,7 @@ public struct HomeView: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                Text("\(manager.selectDurationIntentID ?? -1)")
                 picker
                 mainContent
                 pickerMenu

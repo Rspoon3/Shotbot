@@ -30,28 +30,7 @@ public struct HomeView: View {
         VStack(spacing: 0) {
             picker
             mainContent
-            
-            VStack(spacing: 16) {
-                if ProcessInfo.processInfo.isiOSAppOnMac {
-                    PrimaryButton(title: "Select From Files") {
-                        viewModel.attemptToImportFile()
-                    }
-                    Button("Select Photos") {
-                        viewModel.selectPhotos()
-                    }
-                    .font(.headline)
-                } else {
-                    PrimaryButton(title: "Select Photos") {
-                        viewModel.selectPhotos()
-                    }
-                    Button("Select From Files") {
-                        viewModel.attemptToImportFile()
-                    }
-                    .font(.headline)
-                }
-            }
-            .disabled(viewModel.isLoading)
-            .padding([.bottom, .horizontal])
+            selectionButtons
         }
 #if os(iOS)
         .navigationTitle("Shotbot")
@@ -220,11 +199,44 @@ public struct HomeView: View {
         }
     }
     
-    private var importFileButton: some View {
-        Button {
-            viewModel.isImportingFile = true
-        } label: {
-            Label("Select From Files", systemImage: "doc")
+    private var selectionButtons: some View {
+        VStack(spacing: 16) {
+            if ProcessInfo.processInfo.isiOSAppOnMac {
+                PrimaryButton(title: "Select From Files") {
+                    viewModel.attemptToImportFile()
+                }
+                Button("Select Photos") {
+                    viewModel.selectPhotos()
+                }
+                .font(.headline)
+            } else {
+                PrimaryButton(title: "Select Photos") {
+                    viewModel.selectPhotos()
+                }
+                Button("Select From Files") {
+                    viewModel.attemptToImportFile()
+                }
+                .font(.headline)
+            }
+        }
+        .disabled(viewModel.isLoading)
+        .padding([.bottom, .horizontal])
+    }
+    
+    @ViewBuilder
+    private var placeholderContextButton: some View {
+        if ProcessInfo.processInfo.isiOSAppOnMac {
+            Button {
+                viewModel.selectPhotos()
+            } label: {
+                Label("Select Photos", systemImage: "photo")
+            }
+        } else {
+            Button {
+                viewModel.attemptToImportFile()
+            } label: {
+                Label("Select From Files", systemImage: "doc")
+            }
         }
     }
     
@@ -232,7 +244,7 @@ public struct HomeView: View {
         Image(systemName: "photo")
             .resizable()
             .scaledToFit()
-            .contextMenu { importFileButton }
+            .contextMenu { placeholderContextButton }
             .frame(maxWidth: 200)
             .padding()
             .contentShape(
@@ -245,7 +257,13 @@ public struct HomeView: View {
             .hoverEffect()
             .foregroundColor(.secondary)
             .frame(maxHeight: .infinity)
-            .onTapGesture { viewModel.selectPhotos() }
+            .onTapGesture {
+                if ProcessInfo.processInfo.isiOSAppOnMac {
+                    viewModel.attemptToImportFile()
+                } else {
+                    viewModel.selectPhotos()
+                }
+            }
     }
     
     private func tabView(shareableImages: [ShareableImage]) -> some View {

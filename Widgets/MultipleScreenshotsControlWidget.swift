@@ -87,4 +87,19 @@ struct SelectDurationIntent: ControlConfigurationIntent {
     init() {
         durationOption = .latestScreenshot
     }
+    
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        AppIntentManager.shared.selectDurationIntentID = 100
+        
+        // You can add more functionality here like a deep link into your app either using a result type that opens a url or write an extension that routes to a screen.
+        return .result()
+    }
+    
+//    @MainActor
+//    func perform() async throws -> some IntentResult & OpensIntent {
+//        let url = URL(string: "myapp://myappintent")!
+//        
+//        return .result(opensIntent: OpenURLIntent(url))
+//    }
 }

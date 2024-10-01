@@ -18,6 +18,7 @@ import Photos
 import CollectionConcurrencyKit
 import WidgetFeature
 import Combine
+import CreateCombinedImageFeature
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()

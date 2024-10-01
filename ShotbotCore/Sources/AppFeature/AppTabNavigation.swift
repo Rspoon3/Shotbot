@@ -21,20 +21,20 @@ public struct AppTabNavigation: View {
     
     public var body: some View {
         TabView(selection: $tabManager.selectedTab) {
-            NavigationView {
+            NavigationStack {
                 HomeView(viewModel: .init())
+                    .toolbar(ProcessInfo.processInfo.isiOSAppOnMac ? .hidden : .automatic)
             }
-            .navigationViewStyle(.stack)
             .tabItem {
                 Label("Home", systemImage: "house")
                     .accessibility(label: Text("Home"))
             }
             .tag(Tab.home)
             
-            NavigationView {
+            NavigationStack {
                 SettingsView()
+                    .toolbar(ProcessInfo.processInfo.isiOSAppOnMac ? .hidden : .automatic)
             }
-            .navigationViewStyle(.stack)
             .tabItem {
                 Label("Settings", systemImage: "gear")
                     .accessibility(label: Text("Settings"))

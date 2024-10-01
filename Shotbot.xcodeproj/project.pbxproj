@@ -16,6 +16,9 @@
 		94453E522C4AAD7A00B15690 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94453E512C4AAD7A00B15690 /* Assets.xcassets */; };
 		94453E562C4AAD7A00B15690 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9455F4DC2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455F4DB2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift */; };
+		9466A0D52CA3B16600700BAA /* SBFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 9466A0D42CA3B16600700BAA /* SBFoundation */; };
+		9466A0D72CA3B3B500700BAA /* CreateCombinedImageFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 9466A0D62CA3B3B500700BAA /* CreateCombinedImageFeature */; };
+		9466A0D92CA3B52100700BAA /* ActionExtensionMainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9466A0D82CA3B52100700BAA /* ActionExtensionMainContentView.swift */; };
 		946E7FC52C4C3341001E4C46 /* MultipleScreenshotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC12C4C3341001E4C46 /* MultipleScreenshotsView.swift */; };
 		946E7FC62C4C3341001E4C46 /* MultipleScreenshotsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC42C4C3341001E4C46 /* MultipleScreenshotsWidget.swift */; };
 		946E7FC72C4C3341001E4C46 /* MultipleScreenshotsEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC32C4C3341001E4C46 /* MultipleScreenshotsEntry.swift */; };
@@ -88,6 +91,7 @@
 		94453E512C4AAD7A00B15690 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		94453E532C4AAD7A00B15690 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9455F4DB2C4F2F3B009D0707 /* AdaptiveLabelStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLabelStyle.swift; sourceTree = "<group>"; };
+		9466A0D82CA3B52100700BAA /* ActionExtensionMainContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionExtensionMainContentView.swift; sourceTree = "<group>"; };
 		946E7FC02C4C3341001E4C46 /* MultipleScreenshotsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleScreenshotsProvider.swift; sourceTree = "<group>"; };
 		946E7FC12C4C3341001E4C46 /* MultipleScreenshotsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleScreenshotsView.swift; sourceTree = "<group>"; };
 		946E7FC32C4C3341001E4C46 /* MultipleScreenshotsEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleScreenshotsEntry.swift; sourceTree = "<group>"; };
@@ -144,9 +148,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9466A0D52CA3B16600700BAA /* SBFoundation in Frameworks */,
 				94BD66042A44B8D000D0CE61 /* Models in Frameworks */,
 				94BD66022A44B8CC00D0CE61 /* Persistence in Frameworks */,
 				94BD65E32A44B49900D0CE61 /* UniformTypeIdentifiers.framework in Frameworks */,
+				9466A0D72CA3B3B500700BAA /* CreateCombinedImageFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +260,7 @@
 			children = (
 				94BD65F62A44B55D00D0CE61 /* ShotbotActionExtension.entitlements */,
 				94BD65FA2A44B67600D0CE61 /* ActionExtensionView.swift */,
+				9466A0D82CA3B52100700BAA /* ActionExtensionMainContentView.swift */,
 				94BD65FB2A44B67600D0CE61 /* ActionExtensionViewModel.swift */,
 				94BD65F92A44B67600D0CE61 /* ActionViewController.swift */,
 				94BD65F72A44B62000D0CE61 /* Info.plist */,
@@ -356,6 +363,8 @@
 			packageProductDependencies = (
 				94BD66012A44B8CC00D0CE61 /* Persistence */,
 				94BD66032A44B8D000D0CE61 /* Models */,
+				9466A0D42CA3B16600700BAA /* SBFoundation */,
+				9466A0D62CA3B3B500700BAA /* CreateCombinedImageFeature */,
 			);
 			productName = ShotbotActionExtension;
 			productReference = 94BD65E12A44B49900D0CE61 /* ShotbotActionExtension.appex */;
@@ -369,7 +378,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1530;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					94453E442C4AAD7800B15690 = {
 						CreatedOnToolsVersion = 15.4;
@@ -474,6 +483,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94BD65FD2A44B67600D0CE61 /* ActionExtensionView.swift in Sources */,
+				9466A0D92CA3B52100700BAA /* ActionExtensionMainContentView.swift in Sources */,
 				94BD65FE2A44B67600D0CE61 /* ActionExtensionViewModel.swift in Sources */,
 				94BD65FC2A44B67600D0CE61 /* ActionViewController.swift in Sources */,
 			);
@@ -613,7 +623,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.8;
+				MARKETING_VERSION = 1.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -671,7 +681,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.8;
+				MARKETING_VERSION = 1.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -684,7 +694,6 @@
 		94BD65D52A44B28700D0CE61 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Shotbot/Shotbot.entitlements;
@@ -726,7 +735,6 @@
 		94BD65D62A44B28700D0CE61 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Shotbot/Shotbot.entitlements;
@@ -875,6 +883,14 @@
 		94016B032C4F4F03006F025B /* WidgetFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WidgetFeature;
+		};
+		9466A0D42CA3B16600700BAA /* SBFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SBFoundation;
+		};
+		9466A0D62CA3B3B500700BAA /* CreateCombinedImageFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CreateCombinedImageFeature;
 		};
 		94BD65DA2A44B3B300D0CE61 /* AppFeature */ = {
 			isa = XCSwiftPackageProductDependency;

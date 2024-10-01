@@ -322,6 +322,17 @@ import CreateCombinedImageFeature
     
     // MARK: - Public
     
+    /// Checks if the user has permission to save screenshot, and if so starts
+    /// the file importing process. If not, it shows the purchase sheet.
+    public func attemptToImportFile() {
+        guard persistenceManager.canSaveFramedScreenshot else {
+            showPurchaseView = true
+            return
+        }
+        
+        isImportingFile = true
+    }
+    
     /// Updates the `defaultHomeView` in the persistence manger and then updates
     /// `showGridView`.
     public func toggleIndividualViewType() {

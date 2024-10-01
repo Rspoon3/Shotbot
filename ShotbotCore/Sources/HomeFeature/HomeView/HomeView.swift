@@ -29,14 +29,14 @@ public struct HomeView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-                Text("\(manager.selectDurationIntentID ?? -1)")
+            Text("\(manager.selectDurationIntentID ?? -1)")
             picker
             mainContent
             
             VStack(spacing: 16) {
                 if ProcessInfo.processInfo.isiOSAppOnMac {
                     PrimaryButton(title: "Select From Files") {
-                        viewModel.isImportingFile = true
+                        viewModel.attemptToImportFile()
                     }
                     Button("Select Photos") {
                         viewModel.selectPhotos()
@@ -47,7 +47,7 @@ public struct HomeView: View {
                         viewModel.selectPhotos()
                     }
                     Button("Select From Files") {
-                        viewModel.isImportingFile = true
+                        viewModel.attemptToImportFile()
                     }
                     .font(.headline)
                 }

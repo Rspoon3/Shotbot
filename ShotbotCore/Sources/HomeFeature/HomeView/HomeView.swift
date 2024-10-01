@@ -34,7 +34,7 @@ public struct HomeView: View {
             VStack(spacing: 16) {
                 if ProcessInfo.processInfo.isiOSAppOnMac {
                     PrimaryButton(title: "Select From Files") {
-                        viewModel.isImportingFile = true
+                        viewModel.attemptToImportFile()
                     }
                     Button("Select Photos") {
                         viewModel.selectPhotos()
@@ -45,7 +45,7 @@ public struct HomeView: View {
                         viewModel.selectPhotos()
                     }
                     Button("Select From Files") {
-                        viewModel.isImportingFile = true
+                        viewModel.attemptToImportFile()
                     }
                     .font(.headline)
                 }

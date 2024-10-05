@@ -8,7 +8,6 @@
 import UIKit
 import OSLog
 import Models
-import Persistence
 
 public protocol ImageCombining {
     func createCombinedImage(

@@ -29,7 +29,7 @@ public struct HomeView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            Text("\(manager.selectDurationIntentID ?? -1)")
+            Text("\(manager.selectTimveIntervalIntentID ?? -1)")
             picker
             mainContent
             selectionButtons
@@ -110,9 +110,9 @@ public struct HomeView: View {
             guard newValue == .background || newValue == .active else { return }
             viewModel.clearImagesOnAppBackground()
         }
-        .onReceive(AppIntentManager.shared.$selectDurationIntentID) { value in
+        .onReceive(manager.$selectTimveIntervalIntentID) { value in
             guard let value else { return }
-            AppIntentManager.shared.selectDurationIntentID = nil
+            manager.selectTimveIntervalIntentID = nil
             tabManager.selectedTab = .home
             Task {
                 await viewModel.didOpenViaControlCenter(id: value)

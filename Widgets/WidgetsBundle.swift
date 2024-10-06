@@ -28,6 +28,6 @@ struct WidgetsBundle: WidgetBundle {
     @WidgetBundleBuilder
     var allWidgetsIncludingiOS18: some Widget {
         noniOS18OnlyWidgets
-        MultipleScreenshotsControlWidget()
+        FramedScreenshotsControlWidget()
     }
 }

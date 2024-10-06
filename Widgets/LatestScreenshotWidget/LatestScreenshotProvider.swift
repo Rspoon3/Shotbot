@@ -10,6 +10,7 @@ import SwiftUI
 import Photos
 import MediaManager
 import WidgetFeature
+@preconcurrency import WidgetKit
 
 struct LatestScreenshotProvider: TimelineProvider {
     let imageManager: any ImageManaging
@@ -28,7 +29,7 @@ struct LatestScreenshotProvider: TimelineProvider {
     }
     
     /// Widget Gallery
-    func getSnapshot(in context: Context, completion: @escaping (LatestScreenshotEntry) -> Void) {
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (LatestScreenshotEntry) -> Void) {
         Task {
             guard let entry = await timeline(in: context).entries.first else {
                 completion(LatestScreenshotEntry(viewState: .screenshot(.demoScreenshot, "")))
@@ -40,7 +41,7 @@ struct LatestScreenshotProvider: TimelineProvider {
     }
     
     /// Added Widget
-    func getTimeline(in context: Context, completion: @escaping (Timeline<LatestScreenshotEntry>) -> Void) {
+    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<LatestScreenshotEntry>) -> Void) {
         Task {
             let timeline = await timeline(in: context)
             completion(timeline)

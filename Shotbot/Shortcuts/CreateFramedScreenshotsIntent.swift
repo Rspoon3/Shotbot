@@ -14,10 +14,10 @@ import OSLog
 import SBFoundation
 
 public struct CreateFramedScreenshotsIntent: AppIntent {
-    static let intentClassName = "CreateFramedScreenshotsIntent"
-    public static var title: LocalizedStringResource = "Create Framed Screenshots"
-    static var description = IntentDescription("Creates framed screenshots with a device frame using the images passed in.")
-    public static var isDiscoverable: Bool = true
+    public static let intentClassName = "CreateFramedScreenshotsIntent"
+    public static let title: LocalizedStringResource = "Create Framed Screenshots"
+    public static let description = IntentDescription("Creates framed screenshots with a device frame using the images passed in.")
+    public static let isDiscoverable: Bool = true
     private let logger = Logger(category: CreateFramedScreenshotsIntent.self)
     
     public init() { }

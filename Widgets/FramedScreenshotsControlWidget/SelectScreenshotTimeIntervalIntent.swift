@@ -30,7 +30,7 @@ struct SelectScreenshotTimeIntervalIntent: ControlConfigurationIntent {
     
     @MainActor
     func perform() async throws -> some IntentResult & OpensIntent {
-        AppIntentManager.shared.selectTimveIntervalIntentID = entity?.rawValue
+        AppIntentManager.shared.selectTimeIntervalIntentID = entity?.rawValue
         return .result()
     }
 }

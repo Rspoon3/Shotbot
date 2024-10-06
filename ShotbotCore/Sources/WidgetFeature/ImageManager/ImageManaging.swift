@@ -8,7 +8,6 @@
 import UIKit
 
 public protocol ImageManaging {
-    func latestScreenshot(from url: URL) async throws -> UIImage
-    func latestScreenshot(targetSize: CGSize) async throws -> (image: UIImage, assetID: String)
-    func multipleScreenshots(within duration: Int) async throws -> [UIImage]
+    func latestScreenshot(using option: ImageManager.ScreenshotFetchOption) async throws -> (image: UIImage, assetID: String?)
+    func multipleScreenshots(for option: DurationWidgetOption) async throws -> [UIImage]
 }

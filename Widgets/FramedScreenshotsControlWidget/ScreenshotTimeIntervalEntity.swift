@@ -7,7 +7,9 @@
 
 import Foundation
 import AppIntents
+import WidgetFeature
 
+@available(iOS, deprecated: 18.0, message: "This functionality is deprecated due to known issues. For more information, visit: https://github.com/feedback-assistant/reports/issues/425")
 public enum ScreenshotTimeIntervalEntity: Int, CaseIterable, AppEntity {
     case latestScreenshot = 0
     case oneMinute = 1

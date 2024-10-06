@@ -39,14 +39,20 @@ public struct ScreenshotImporter: ScreenshotImporting {
             switch deepLink {
             case .latestScreenshot:
                 logger.info("Fetching latest screenshot.")
-                let screenshot = try await imageManager.latestScreenshot(from: url)
+                let (screenshot, _) = try await imageManager.latestScreenshot(using: .url(url))
                 logger.info("Successfully fetched latest screenshot.")
                 return [screenshot]
             case .multipleScreenshots:
                 logger.info("Fetching multiple screenshots.")
                 let durationString = try deepLinkManager.deepLinkValue(from: url)
-                let duration = Int(durationString)!
-                let screenshots = try await imageManager.multipleScreenshots(within: duration)
+                guard
+                    let duration = Int(durationString),
+                    let option = DurationWidgetOption(rawValue: duration)
+                else {
+                    throw DeepLinkManager.DeepLinkManagerError.badDeepLinkURL
+                }
+                
+                let screenshots = try await imageManager.multipleScreenshots(for: option)
                 logger.info("Retrieved (\(screenshots.count, privacy: .public)) screenshots.")
                 return screenshots
             }
@@ -75,19 +81,34 @@ public struct ScreenshotImporter: ScreenshotImporting {
 
             switch id {
             case 0:
-                let screenshot = try await imageManager.latestScreenshot()
+                let (screenshot, _) = try await imageManager.latestScreenshot(using: .latest)
                 return [screenshot]
-            case 1:
-                return try await imageManager.multipleScreenshots(within: 0)
-            case 2:
-                return try await imageManager.multipleScreenshots(within: 1)
-            case 3:
-                return try await imageManager.multipleScreenshots(within: 2)
-            case 4:
-                return try await imageManager.multipleScreenshots(within: 3)
+            case 1...4:
+                guard let option = DurationWidgetOption(rawValue: id - 1) else {
+                    throw Error.invalidOption
+                }
+                
+                return try await imageManager.multipleScreenshots(for: option)
             default:
-                throw SBError.lowMemoryWarning
+                throw Error.invalidID
             }
         }
+    }
+    
+    // MARK: - Errors
+    
+    public struct Error: LocalizedError {
+        public let errorDescription: String?
+        public let recoverySuggestion: String?
+                
+        public static let invalidOption = Self(
+            errorDescription: "Invalid Option",
+            recoverySuggestion: "The option that was passed in is invalid"
+        )
+        
+        public static let invalidID = Self(
+            errorDescription: "Invalid ID",
+            recoverySuggestion: "The id that was passed in is invalid"
+        )
     }
 }

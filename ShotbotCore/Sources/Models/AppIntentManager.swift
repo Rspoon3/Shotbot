@@ -9,5 +9,5 @@ import Foundation
 public final class AppIntentManager: ObservableObject {
     public static let shared = AppIntentManager()
     
-    @Published public var selectTimveIntervalIntentID: Int?
+    @Published public var selectTimeIntervalIntentID: Int?
 }

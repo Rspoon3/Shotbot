@@ -12,7 +12,15 @@ import CollectionConcurrencyKit
 public struct ImageManager: ImageManaging {
     private let client: PHImageClient
     private let deepLinkManager = DeepLinkManager()
+    
+// The simulator does not have mediaSubtype so just ignore it.
+#if targetEnvironment(simulator)
+    private let typePredicate = NSPredicate(format: "creationDate > %@", Date.distantPast as NSDate)
+#else
     private let typePredicate = NSPredicate(format: "mediaSubtype = %d", PHAssetMediaSubtype.photoScreenshot.rawValue)
+#endif
+    
+    
     private let creationDateSortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
     
     private var imageRequestOptions: PHImageRequestOptions {
@@ -26,6 +34,12 @@ public struct ImageManager: ImageManaging {
         return requestOptions
     }
     
+    public enum ScreenshotFetchOption {
+        case url(URL)
+        case size(CGSize)
+        case latest
+    }
+    
     // MARK: - Initializer
     
     public init(client: PHImageClient = .live) {
@@ -33,88 +47,59 @@ public struct ImageManager: ImageManaging {
     }
     
     // MARK: - Public
-    public func latestScreenshot() async throws -> UIImage {
+    
+    /// Fetches the latest screenshot from the user's photo library based on the provided option.
+    ///
+    /// This function allows you to retrieve a screenshot from the user's photo library, either by a specified URL (representing an asset), by a specific size for the latest screenshot, or simply the most recent screenshot.
+    /// - Parameters:
+    ///   - option: An enum value of type `ScreenshotFetchOption` that determines how the screenshot is fetched. You can provide:
+    ///     - `.url(URL)`: Fetches the screenshot based on the asset ID derived from the given URL.
+    ///     - `.size(CGSize)`: Fetches the most recent screenshot with the given size.
+    ///     - `.latest`: Fetches the most recent screenshot.
+    /// - Returns: A tuple containing the fetched `UIImage` and the asset's local identifier (`String?`). The asset identifier may be `nil` if no asset is found.
+    /// - Throws:
+    ///   - `ImageManagerError.noImageData`: If no screenshot is available in the user's photo library.
+    ///   - `ImageManagerError.invalidImageSize`: If the target size for the image is invalid.
+    /// - Note: If no size is provided in the `.size` option, the asset's original size will be used.
+    public func latestScreenshot(using option: ScreenshotFetchOption) async throws -> (image: UIImage, assetID: String?) {
         let fetchOptions = PHFetchOptions()
         fetchOptions.fetchLimit = 1
-        fetchOptions.sortDescriptors = [creationDateSortDescriptor]
-        fetchOptions.predicate = typePredicate
         
-        let result = PHAsset.fetchAssets(
-            with: .image,
-            options: fetchOptions
-        )
+        let result: PHFetchResult<PHAsset>
+        var targetSize: CGSize?
+        
+        switch option {
+        case .url(let url):
+            let assetID = try deepLinkManager.deepLinkValue(from: url)
+            result = PHAsset.fetchAssets(withLocalIdentifiers: [assetID], options: fetchOptions)
+        case .size(let size):
+            fetchOptions.sortDescriptors = [creationDateSortDescriptor]
+            fetchOptions.predicate = typePredicate
+            result = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+            targetSize = size
+        case .latest:
+            fetchOptions.sortDescriptors = [creationDateSortDescriptor]
+            fetchOptions.predicate = typePredicate
+            result = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        }
         
         guard let latestScreenshotAsset = result.firstObject else {
             throw ImageManagerError.noImageData
         }
-                
-        let (image, _) = await client.requestImage(
-            latestScreenshotAsset,
-            .init(
+        
+        // If no provided size, use asset's original size
+        if targetSize == nil {
+            targetSize = .init(
                 width: latestScreenshotAsset.pixelWidth,
                 height: latestScreenshotAsset.pixelHeight
-            ),
-            .aspectFit,
-            imageRequestOptions
-        )
-        
-        guard let image else {
-            throw ImageManagerError.noImageData
+            )
         }
         
-        return image
-    }
-    
-    /// Gets the latest screenshot based on the assetID in the passed in URL.
-    public func latestScreenshot(from url: URL) async throws -> UIImage {
-        let assetID = try deepLinkManager.deepLinkValue(from: url)
-
-        let fetchOptions = PHFetchOptions()
-        fetchOptions.fetchLimit = 1
-        
-        let result = PHAsset.fetchAssets(
-            withLocalIdentifiers: [assetID],
-            options: fetchOptions
-        )
-        
-        guard let latestScreenshotAsset = result.firstObject else {
-            throw ImageManagerError.noImageData
-        }
-                
-        let (image, _) = await client.requestImage(
-            latestScreenshotAsset,
-            .init(
-                width: latestScreenshotAsset.pixelWidth,
-                height: latestScreenshotAsset.pixelHeight
-            ),
-            .aspectFit,
-            imageRequestOptions
-        )
-        
-        guard let image else {
-            throw ImageManagerError.noImageData
+        guard let targetSize else {
+            throw ImageManagerError.invalidImageSize
         }
         
-        return image
-    }
-    
-    /// Gets the latest screenshot with the target sized passed in.
-    /// Returns the image and the image assetID.
-    public func latestScreenshot(targetSize: CGSize) async throws -> (image: UIImage, assetID: String)  {
-        let fetchOptions = PHFetchOptions()
-        fetchOptions.fetchLimit = 1
-        fetchOptions.sortDescriptors = [creationDateSortDescriptor]
-        fetchOptions.predicate = typePredicate
-        
-        let result = PHAsset.fetchAssets(
-            with: .image,
-            options: fetchOptions
-        )
-        
-        guard let latestScreenshotAsset = result.firstObject else {
-            throw ImageManagerError.noImageData
-        }
-                
+        // Request the image
         let (image, _) = await client.requestImage(
             latestScreenshotAsset,
             targetSize,
@@ -128,19 +113,15 @@ public struct ImageManager: ImageManaging {
         
         return (image, latestScreenshotAsset.localIdentifier)
     }
-    
+        
     /// Gets the screenshots over the specified duration included in the passed in URL.
-    public func multipleScreenshots(within duration: Int) async throws -> [UIImage] {
-
-        guard
-            let option = DurationWidgetOption(rawValue: duration),
-            let startDate = Calendar.current.date(
-                byAdding: option.dateComponent,
-                value: -option.dateValue,
-                to: .now
-            )
-        else {
-            throw DeepLinkManager.DeepLinkManagerError.badDeepLinkURL
+    public func multipleScreenshots(for option: DurationWidgetOption) async throws -> [UIImage] {
+        guard let startDate = Calendar.current.date(
+            byAdding: option.dateComponent,
+            value: -option.dateValue,
+            to: .now
+        ) else {
+            throw ImageManagerError.invalidDate
         }
         
         let fetchOptions = PHFetchOptions()
@@ -186,6 +167,16 @@ public struct ImageManager: ImageManaging {
         public static let noImageData = Self(
             errorDescription: "No image data",
             recoverySuggestion: "The data for this image could not be fetched"
+        )
+        
+        public static let invalidImageSize = Self(
+            errorDescription: "Invalid Image Size",
+            recoverySuggestion: "There was a problems sizing the image"
+        )
+        
+        public static let invalidDate = Self(
+            errorDescription: "Invalid Date",
+            recoverySuggestion: "There was a problem with the specified date"
         )
     }
 }

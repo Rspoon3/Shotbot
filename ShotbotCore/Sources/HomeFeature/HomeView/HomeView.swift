@@ -374,12 +374,7 @@ public struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            HomeView(
-                viewModel: HomeViewModel(
-                    photoLibraryManager: .empty(status: .authorized),
-                    purchaseManager: MockPurchaseManager()
-                )
-            )
+            HomeView(viewModel: HomeViewModel(photoLibraryManager: .empty(status: .authorized)))
         }
     }
 }

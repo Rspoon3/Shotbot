@@ -9,7 +9,7 @@ import SwiftUI
 import PhotosUI
 
 /// The source of where a `Screenshot` is coming from
-public enum PhotoSource {
+public enum PhotoSource: Sendable {
     case photoPicker([PhotosPickerItem])
     case photoAssetID(URL)
     case filePicker([URL])

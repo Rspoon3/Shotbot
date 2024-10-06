@@ -9,7 +9,7 @@ import UIKit
 import OSLog
 import Models
 
-public protocol ImageCombining {
+public protocol ImageCombining: Sendable {
     func createCombinedImage(
         from images: [UIImage],
         imageQuality: Double

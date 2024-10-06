@@ -11,7 +11,7 @@ import OSLog
 import Models
 import WidgetFeature
 
-public protocol ScreenshotImporting {
+public protocol ScreenshotImporting: Sendable {
     func screenshots(from source: PhotoSource) async throws -> [UIScreenshot]
 }
 

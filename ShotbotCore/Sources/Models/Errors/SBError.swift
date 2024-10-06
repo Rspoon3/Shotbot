@@ -73,9 +73,4 @@ public struct SBError: LocalizedError, CustomLocalizedStringResourceConvertible,
         errorDescription: "Purchase Error",
         recoverySuggestion: "This purchase item could not be found"
     )
-    
-    public static let noSelf = Self(
-        errorDescription: "Memory Issue",
-        recoverySuggestion: "A memory issue occurred"
-    )
 }

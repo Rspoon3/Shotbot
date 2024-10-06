@@ -13,7 +13,8 @@ import SBFoundation
 import PhotosUI
 import Models
 
-public protocol AutoCRUDManaging {
+@MainActor
+public protocol AutoCRUDManaging: Sendable {
     func autoSaveIndividualImagesIfNeeded(
         using shareableImages: [ShareableImage],
         autoSave: @escaping ()-> Void
@@ -25,7 +26,8 @@ public protocol AutoCRUDManaging {
 
 /// An object thats responsible for auto saving individual and combined images as
 /// well as auto deleting screenshots. All actions are only applicable with
-/// certain user settings enabled.
+/// certain user settings enabled
+@MainActor
 public struct AutoCRUDManager: AutoCRUDManaging {
     private var persistenceManager: any PersistenceManaging
     private let logger = Logger(category: AutoCRUDManager.self)

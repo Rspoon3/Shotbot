@@ -61,9 +61,9 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
     // MARK: - Functions
     
     public func perform() async throws -> some IntentResult & ReturnsValue<[IntentFile]> {
-        let persistenceManager = PersistenceManager.shared
+        let persistenceManager = await PersistenceManager.shared
         
-        guard persistenceManager.canSaveFramedScreenshot else {
+        guard await persistenceManager.canSaveFramedScreenshot else {
             logger.error("pro subscription required to save screenshot")
             throw SBError.proSubscriptionRequired
         }
@@ -77,7 +77,9 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
             return file
         }
         
-        persistenceManager.deviceFrameCreations += screenshots.count
+        await MainActor.run {
+            persistenceManager.deviceFrameCreations += screenshots.count
+        }
         
         logger.debug("returning CreateFramedScreenshotsIntent result")
         return .result(value: screenshots)

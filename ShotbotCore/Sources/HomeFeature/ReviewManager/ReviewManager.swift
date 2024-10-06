@@ -10,13 +10,15 @@ import OSLog
 import Persistence
 import StoreKit
 
-public protocol ReviewManaging {
-    @MainActor func askForAReview()
+@MainActor
+public protocol ReviewManaging: Sendable {
+    func askForAReview()
 }
 
 /// An object that is responsible for prompting the user for a review if the acceptance criteria
 /// is met.
-public final class ReviewManager: ReviewManaging {
+@MainActor
+public struct ReviewManager: ReviewManaging {
     private var persistenceManager: any PersistenceManaging
     private var skStoreReviewController: any SKStoreReviewControlling.Type
     private let logger = Logger(category: ReviewManager.self)
@@ -34,7 +36,7 @@ public final class ReviewManager: ReviewManaging {
     // MARK: - Public
     
     /// Asks the user for a review if the acceptance criteria is met.
-    @MainActor public func askForAReview() {
+    public func askForAReview() {
         let deviceFrameCreations = persistenceManager.deviceFrameCreations
         let numberOfActivations = persistenceManager.numberOfActivations
         
@@ -56,7 +58,7 @@ public final class ReviewManager: ReviewManaging {
         }
         
         skStoreReviewController.requestReview(in: scene)
-        persistenceManager.lastReviewPromptDate = .now
+        persistenceManager.setLastReviewPromptDateToNow()
         logger.log("Prompting the user for a review")
     }
 }

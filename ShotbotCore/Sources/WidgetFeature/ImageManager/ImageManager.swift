@@ -50,7 +50,7 @@ public struct ImageManager: ImageManaging {
             throw ImageManagerError.noImageData
         }
                 
-        let (image, _) = await client.requestImage(
+        let image = await client.requestImage(
             latestScreenshotAsset,
             .init(
                 width: latestScreenshotAsset.pixelWidth,
@@ -84,7 +84,7 @@ public struct ImageManager: ImageManaging {
             throw ImageManagerError.noImageData
         }
                 
-        let (image, _) = await client.requestImage(
+        let image = await client.requestImage(
             latestScreenshotAsset,
             targetSize,
             .aspectFit,
@@ -129,7 +129,7 @@ public struct ImageManager: ImageManaging {
         let result = PHAsset.fetchAssets(with: .image, options: fetchOptions)
         
         let images = await result.phAssets.asyncCompactMap { asset in
-            let (image, _) = await client.requestImage(
+            let image = await client.requestImage(
                 asset,
                 .init(
                     width: asset.pixelWidth,

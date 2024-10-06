@@ -27,7 +27,7 @@ public struct MockImageManager: ImageManaging {
         return (random, UUID().uuidString)
     }
     
-    public func multipleScreenshots(from url: URL) async throws -> [UIImage] {
+    public func multipleScreenshots(within duration: Int) async throws -> [UIImage] {
         return []
     }
 }

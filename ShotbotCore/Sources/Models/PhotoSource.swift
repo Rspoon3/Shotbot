@@ -15,4 +15,5 @@ public enum PhotoSource {
     case filePicker([URL])
     case dropItems([Data])
     case existingScreenshots([UIScreenshot])
+    case controlCenter(Int)
 }

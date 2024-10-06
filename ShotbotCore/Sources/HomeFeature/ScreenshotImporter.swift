@@ -44,7 +44,9 @@ public struct ScreenshotImporter: ScreenshotImporting {
                 return [screenshot]
             case .multipleScreenshots:
                 logger.info("Fetching multiple screenshots.")
-                let screenshots = try await imageManager.multipleScreenshots(from: url)
+                let durationString = try deepLinkManager.deepLinkValue(from: url)
+                let duration = Int(durationString)!
+                let screenshots = try await imageManager.multipleScreenshots(within: duration)
                 logger.info("Retrieved (\(screenshots.count, privacy: .public)) screenshots.")
                 return screenshots
             }
@@ -68,6 +70,24 @@ public struct ScreenshotImporter: ScreenshotImporting {
         case .existingScreenshots(let existing):
             logger.info("Using existing screenshots (\(existing.count, privacy: .public)).")
             return existing
+        case .controlCenter(let id):
+            let imageManager = ImageManager()
+
+            switch id {
+            case 0:
+                let screenshot = try await imageManager.latestScreenshot()
+                return [screenshot]
+            case 1:
+                return try await imageManager.multipleScreenshots(within: 0)
+            case 2:
+                return try await imageManager.multipleScreenshots(within: 1)
+            case 3:
+                return try await imageManager.multipleScreenshots(within: 2)
+            case 4:
+                return try await imageManager.multipleScreenshots(within: 3)
+            default:
+                throw SBError.lowMemoryWarning
+            }
         }
     }
 }

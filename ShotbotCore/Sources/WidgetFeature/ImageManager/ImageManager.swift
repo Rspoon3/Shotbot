@@ -33,6 +33,37 @@ public struct ImageManager: ImageManaging {
     }
     
     // MARK: - Public
+    public func latestScreenshot() async throws -> UIImage {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.fetchLimit = 1
+        fetchOptions.sortDescriptors = [creationDateSortDescriptor]
+        fetchOptions.predicate = typePredicate
+        
+        let result = PHAsset.fetchAssets(
+            with: .image,
+            options: fetchOptions
+        )
+        
+        guard let latestScreenshotAsset = result.firstObject else {
+            throw ImageManagerError.noImageData
+        }
+                
+        let (image, _) = await client.requestImage(
+            latestScreenshotAsset,
+            .init(
+                width: latestScreenshotAsset.pixelWidth,
+                height: latestScreenshotAsset.pixelHeight
+            ),
+            .aspectFit,
+            imageRequestOptions
+        )
+        
+        guard let image else {
+            throw ImageManagerError.noImageData
+        }
+        
+        return image
+    }
     
     /// Gets the latest screenshot based on the assetID in the passed in URL.
     public func latestScreenshot(from url: URL) async throws -> UIImage {
@@ -99,11 +130,9 @@ public struct ImageManager: ImageManaging {
     }
     
     /// Gets the screenshots over the specified duration included in the passed in URL.
-    public func multipleScreenshots(from url: URL) async throws -> [UIImage] {
-        let durationString = try deepLinkManager.deepLinkValue(from: url)
+    public func multipleScreenshots(within duration: Int) async throws -> [UIImage] {
 
         guard
-            let duration = Int(durationString),
             let option = DurationWidgetOption(rawValue: duration),
             let startDate = Calendar.current.date(
                 byAdding: option.dateComponent,

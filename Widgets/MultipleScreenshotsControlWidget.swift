@@ -17,7 +17,7 @@ struct MultipleScreenshotsControlWidget: ControlWidget {
             kind: "MultipleScreenshotsControlWidget",
             provider: ConfigurableProvider()
         ) { option in
-            ControlWidgetButton(action: SelectDurationIntent()) {
+            ControlWidgetButton(action: SelectDurationIntent(durationOption: option)) {
                 Label(
                     "Frame screenshots - \(option.title)",
                     systemImage: "apps.iphone.badge.plus"
@@ -34,13 +34,12 @@ struct MultipleScreenshotsControlWidget: ControlWidget {
 struct ConfigurableProvider: AppIntentControlValueProvider {
     func previewValue(configuration: SelectDurationIntent) -> DurationWidgetAppEntity {
         configuration.durationOption ?? .latestScreenshot
-   }
-   
-   func currentValue(configuration: SelectDurationIntent) async throws -> DurationWidgetAppEntity {
-//       AppIntentManager.shared.selectDurationIntentID = configuration.durationOption?.id
-       return configuration.durationOption ?? .latestScreenshot
-   }
- }
+    }
+    
+    func currentValue(configuration: SelectDurationIntent) async throws -> DurationWidgetAppEntity {
+        configuration.durationOption ?? .latestScreenshot
+    }
+}
 
 public enum DurationWidgetAppEntity: Int, CaseIterable, AppEntity {
     case latestScreenshot = 0
@@ -75,6 +74,7 @@ struct SelectDurationIntent: ControlConfigurationIntent {
     static let title: LocalizedStringResource = "Select Duration"
     static let description: IntentDescription = "Used to frame your latest screenshot or screenshots from the past specified amount of minutes."
     static var openAppWhenRun: Bool = true
+    
     @Parameter(title: "Duration", optionsProvider: OptionsProvider())
     var durationOption: DurationWidgetAppEntity?
     
@@ -84,22 +84,14 @@ struct SelectDurationIntent: ControlConfigurationIntent {
         }
     }
     
-    init() {
-        durationOption = .latestScreenshot
+    init() { }
+    init(durationOption: DurationWidgetAppEntity) {
+        self.durationOption = durationOption
     }
     
     @MainActor
-    func perform() async throws -> some IntentResult {
-        AppIntentManager.shared.selectDurationIntentID = 100
-        
-        // You can add more functionality here like a deep link into your app either using a result type that opens a url or write an extension that routes to a screen.
+    func perform() async throws -> some IntentResult & OpensIntent {
+        AppIntentManager.shared.selectDurationIntentID = durationOption?.rawValue
         return .result()
     }
-    
-//    @MainActor
-//    func perform() async throws -> some IntentResult & OpensIntent {
-//        let url = URL(string: "myapp://myappintent")!
-//        
-//        return .result(opensIntent: OpenURLIntent(url))
-//    }
 }

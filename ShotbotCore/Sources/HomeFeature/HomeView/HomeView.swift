@@ -110,6 +110,14 @@ public struct HomeView: View {
             guard newValue == .background || newValue == .active else { return }
             viewModel.clearImagesOnAppBackground()
         }
+        .onReceive(AppIntentManager.shared.$selectDurationIntentID) { value in
+            guard let value else { return }
+            AppIntentManager.shared.selectDurationIntentID = nil
+            tabManager.selectedTab = .home
+            Task {
+                await viewModel.didOpenViaControlCenter(id: value)
+            }
+        }
         .onOpenURL { url in
             tabManager.selectedTab = .home
             Task {

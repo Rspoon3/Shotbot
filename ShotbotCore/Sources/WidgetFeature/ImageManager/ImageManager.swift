@@ -20,7 +20,6 @@ public struct ImageManager: ImageManaging {
     private let typePredicate = NSPredicate(format: "mediaSubtype = %d", PHAssetMediaSubtype.photoScreenshot.rawValue)
 #endif
     
-    
     private let creationDateSortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
     
     private var imageRequestOptions: PHImageRequestOptions {
@@ -34,9 +33,19 @@ public struct ImageManager: ImageManaging {
         return requestOptions
     }
     
+    /// An enumeration representing the options for fetching screenshots from the user's photo library.
+    ///
+    /// `ScreenshotFetchOption` defines the different ways to fetch screenshots, including fetching by a specific URL, a specific size, or simply retrieving the most recent screenshot.
+    ///
+    /// This enum is typically used in conjunction with methods that allow you to retrieve screenshots in various ways, based on the user's input or system configuration.
     public enum ScreenshotFetchOption {
+        /// Fetches a screenshot based on the asset ID derived from the provided URL.
         case url(URL)
+        
+        /// Fetches the most recent screenshot scaled to the provided size.
         case size(CGSize)
+        
+        /// Fetches the most recent screenshot without any additional size adjustments.
         case latest
     }
     
@@ -114,7 +123,18 @@ public struct ImageManager: ImageManaging {
         return (image, latestScreenshotAsset.localIdentifier)
     }
         
-    /// Gets the screenshots over the specified duration included in the passed in URL.
+    /// Fetches multiple screenshots from the user's photo library based on the specified time interval.
+    ///
+    /// This function retrieves all screenshots taken within a specified time interval, defined by the provided `DurationWidgetOption`.
+    /// The screenshots are fetched asynchronously from the photo library and returned as an array of `UIImage`.
+    ///
+    /// - Parameter option: A `DurationWidgetOption` that determines the time interval for fetching screenshots. This includes the date component (such as minutes or hours) and the value (how far back to look).
+    ///
+    /// - Returns: An array of `UIImage` representing the screenshots taken within the specified time interval.
+    ///
+    /// - Throws:
+    ///   - `ImageManagerError.invalidDate`: If the calculated start date is invalid.
+    ///   - `WidgetError.noImages(for:)`: If no images are found within the specified time interval.
     public func multipleScreenshots(for option: DurationWidgetOption) async throws -> [UIImage] {
         guard let startDate = Calendar.current.date(
             byAdding: option.dateComponent,
@@ -160,6 +180,14 @@ public struct ImageManager: ImageManaging {
     
     // MARK: - Errors
     
+    /// A custom error type used by `ImageManager` to represent errors related to image handling and fetching.
+    ///
+    /// The `ImageManagerError` struct conforms to `LocalizedError` and provides detailed error descriptions and recovery suggestions
+    /// for specific image-related problems, such as missing image data, invalid image sizes, or date-related issues.
+    ///
+    /// - Properties:
+    ///   - `errorDescription`: A localized description of the error.
+    ///   - `recoverySuggestion`: A suggestion for the user to recover from the error.
     public struct ImageManagerError: LocalizedError {
         public let errorDescription: String?
         public let recoverySuggestion: String?

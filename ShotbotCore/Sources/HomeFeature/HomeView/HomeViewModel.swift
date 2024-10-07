@@ -18,6 +18,7 @@ import Photos
 import CollectionConcurrencyKit
 import WidgetFeature
 import Combine
+import CreateCombinedImageFeature
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
@@ -321,6 +322,17 @@ import Combine
     
     // MARK: - Public
     
+    /// Checks if the user has permission to save screenshot, and if so starts
+    /// the file importing process. If not, it shows the purchase sheet.
+    public func attemptToImportFile() {
+        guard persistenceManager.canSaveFramedScreenshot else {
+            showPurchaseView = true
+            return
+        }
+        
+        isImportingFile = true
+    }
+    
     /// Updates the `defaultHomeView` in the persistence manger and then updates
     /// `showGridView`.
     public func toggleIndividualViewType() {
@@ -491,5 +503,29 @@ import Combine
             logger.error("File import error: \(error.localizedDescription, privacy: .public).")
             self.error = error
         }
+    }
+    
+    /// Re-runs the image pipeline with the images reversed.
+    ///
+    /// This will change the order of both the individual and combined images.
+    public func reverseImages() async {
+        logger.info("Re-running pipeline to reverse combined images.")
+
+        isLoading = true
+        defer { isLoading = false }
+        
+        await combinedImageTask?.value
+        imageResults.reverseImages()
+        await combineDeviceFrames()
+        try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
+        
+        guard let combined = imageResults.combined else {
+            logger.fault("Processing selected photos returning early because combined image results has no image.")
+            error = SBError.unsupportedImage
+            return
+        }
+        
+        logger.fault("Setting viewState to combinedImages")
+        viewState = .combinedImages(combined)
     }
 }

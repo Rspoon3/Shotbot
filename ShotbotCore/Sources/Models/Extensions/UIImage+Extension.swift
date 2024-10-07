@@ -15,12 +15,12 @@ public extension UIImage {
     
     /// Resizes an image to a specified size
     func resized(to size: CGSize) -> UIImage {
-        let render = UIGraphicsImageRenderer(
+        let renderer = UIGraphicsImageRenderer(
             size: size,
             format: .singleScale
         )
         
-        return render.image { _ in
+        return renderer.image { _ in
             draw(in: CGRect(origin: .zero, size: size))
         }
     }
@@ -32,12 +32,12 @@ public extension UIImage {
         let scaledSize = CGSize(width: size.width * percentage, height: size.height * percentage)
         let availableRect = AVMakeRect(aspectRatio: size, insideRect: .init(origin: .zero, size: scaledSize))
         let targetSize = availableRect.size
-        let render = UIGraphicsImageRenderer(
+        let renderer = UIGraphicsImageRenderer(
             size: targetSize,
             format: .singleScale
         )
             
-        return render.image { _ in
+        return renderer.image { _ in
             draw(in: CGRect(origin: .zero, size: targetSize))
         }
     }
@@ -48,12 +48,12 @@ public extension UIImage {
         offset: CGPoint,
         alpha: CGFloat = 1
     ) -> UIImage {
-        let render = UIGraphicsImageRenderer(
+        let renderer = UIGraphicsImageRenderer(
             size: size,
             format: .singleScale
         )
         
-        return render.image { _ in
+        return renderer.image { _ in
             let rect = CGRect(
                 origin: .zero,
                 size: size
@@ -72,14 +72,57 @@ public extension UIImage {
         }
     }
     
+    func overlayWithLargerCenteredImage(_ largerImage: UIImage) -> UIImage? {
+        let largerSize = largerImage.size
+        
+        // Determine the canvas size to fit both images
+        let canvasSize = CGSize(
+            width: max(size.width, largerSize.width),
+            height: max(size.height, largerSize.height)
+        )
+        
+        let renderer = UIGraphicsImageRenderer(
+            size: canvasSize,
+            format: .singleScale
+        )
+        
+        return renderer.image { context in
+            // Calculate the origin points to center the images
+            let smallerOrigin = CGPoint(
+                x: (canvasSize.width - size.width) / 2,
+                y: (canvasSize.height - size.height) / 2
+            )
+            let largerOrigin = CGPoint(
+                x: (canvasSize.width - largerSize.width) / 2,
+                y: (canvasSize.height - largerSize.height) / 2
+            )
+            
+            // Draw the smaller image first
+            draw(
+                in: CGRect(
+                    origin: smallerOrigin,
+                    size: size
+                )
+            )
+            
+            // Draw the larger image on top
+            largerImage.draw(
+                in: CGRect(
+                    origin: largerOrigin,
+                    size: largerSize
+                )
+            )
+        }
+    }
+    
     /// Clips the four corners of an image by a specified amount
     func clipEdges(amount: CGFloat) -> UIImage {
-        let render = UIGraphicsImageRenderer(
+        let renderer = UIGraphicsImageRenderer(
             size: size,
             format: .singleScale
         )
             
-        return render.image { _ in
+        return renderer.image { _ in
             let rect = CGRect(origin: .zero, size: size)
             let path = UIBezierPath()
             
@@ -102,6 +145,33 @@ public extension UIImage {
             path.close()
             
             path.addClip()
+            draw(in: rect)
+        }
+    }
+    
+    /// Adds a corner radius to the image.
+    func withRoundedCorners(radius: CGFloat) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(
+            size: size,
+            format: .singleScale
+        )
+        
+        return renderer.image { context in
+            let rect = CGRect(
+                origin: .zero,
+                size: size
+            )
+            
+            // Create a rounded path with the given radius
+            let path = UIBezierPath(
+                roundedRect: rect,
+                cornerRadius: radius
+            )
+            
+            // Clip the context to the rounded path
+            path.addClip()
+            
+            // Draw the image inside the clipped context
             draw(in: rect)
         }
     }
@@ -129,9 +199,9 @@ public extension Array where Element: UIImage {
         let maxSize = CGSize(width: maxWidth ?? 0, height: maxHeight)
         let totalSpacing = spacing * CGFloat(count - 1)
         let size = CGSize(width: imagesWidth + totalSpacing, height: maxSize.height)
-        let renderer = UIGraphicsImageRenderer(size: size, format: .singleScale)
+        let rendererer = UIGraphicsImageRenderer(size: size, format: .singleScale)
         
-        return renderer.image { context in
+        return rendererer.image { context in
             var previousX: CGFloat = 0
             
             for (index, image) in self.enumerated() {

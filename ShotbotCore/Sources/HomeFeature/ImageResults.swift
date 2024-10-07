@@ -26,4 +26,9 @@ public struct ImageResults {
         individual.removeAll()
         combined = nil
     }
+    
+    mutating func reverseImages() {
+        originalScreenshots.reverse()
+        individual.reverse()
+    }
 }

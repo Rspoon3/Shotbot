@@ -11,9 +11,10 @@ public struct DeviceInfo: Decodable {
     public let deviceFrame: String
     public let mergeMethod: MergeMethod
     public let clipEdgesAmount: CGFloat?
+    public let cornerRadius: CGFloat?
     public let inputSize: CGSize
     public let scaledSize: CGSize?
-    public let offSet: CGPoint
+    public let offSet: CGPoint?
     
     // MARK: - Initializer
     
@@ -21,9 +22,10 @@ public struct DeviceInfo: Decodable {
         deviceFrame: String,
         mergeMethod: MergeMethod,
         clipEdgesAmount: CGFloat?,
+        cornerRadius: CGFloat?,
         inputSize: CGSize,
         scaledSize: CGSize?,
-        offSet: CGPoint
+        offSet: CGPoint?
     ) {
         self.deviceFrame = deviceFrame
         self.mergeMethod = mergeMethod
@@ -31,12 +33,14 @@ public struct DeviceInfo: Decodable {
         self.inputSize = inputSize
         self.scaledSize = scaledSize
         self.offSet = offSet
+        self.cornerRadius = cornerRadius
     }
     
     // MARK: - Functions
     
     public func framed(using screenshot: UIImage) -> UIImage? {
         var screenshot = screenshot
+        let offSet = offSet ?? .zero
         
         guard let frameImage = UIImage(named: deviceFrame, in: .module, with: nil) else {
             return nil
@@ -44,6 +48,8 @@ public struct DeviceInfo: Decodable {
         
         if let clipEdgesAmount {
             screenshot = screenshot.clipEdges(amount: clipEdgesAmount)
+        } else if let cornerRadius {
+            screenshot = screenshot.withRoundedCorners(radius: cornerRadius)
         }
         
         if let scaledSize {
@@ -53,6 +59,8 @@ public struct DeviceInfo: Decodable {
         switch mergeMethod {
         case .singleOverlay:
             return frameImage.merge(with: screenshot, offset: offSet)
+        case .singleOverlayV2:
+            return screenshot.overlayWithLargerCenteredImage(frameImage)
         case .doubleOverlay:
             let image = frameImage.merge(with: screenshot, offset: offSet)
             return image.merge(with: frameImage, offset: .zero)

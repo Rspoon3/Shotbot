@@ -5,20 +5,23 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
+
 jobs:
-  create-release:
+  release:
+    name: Release pushed tag
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Create GitHub Release
-      uses: actions/create-release@v1.2.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref_name }}
-        release_name: "${{ github.ref_name }}"
-        draft: false
-        prerelease: false
-        generate_release_notes: true
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${GITHUB_REPOSITORY#*/} $tag" \
+              --generate-notes

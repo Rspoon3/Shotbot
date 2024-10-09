@@ -12,7 +12,7 @@ import Models
 struct SelectScreenshotTimeIntervalIntent: ControlConfigurationIntent {
     static let title: LocalizedStringResource = "Select Time Interval"
     static let description: IntentDescription = "Used to frame your latest screenshot or screenshots from the past specified amount of minutes."
-    static var openAppWhenRun: Bool = true
+    static let openAppWhenRun: Bool = true
     
     @Parameter(title: "Time Interval", optionsProvider: OptionsProvider())
     var entity: ScreenshotTimeIntervalEntity?

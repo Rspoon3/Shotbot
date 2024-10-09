@@ -109,7 +109,7 @@ public struct ImageManager: ImageManaging {
         }
         
         // Request the image
-        let (image, _) = await client.requestImage(
+        let image = await client.requestImage(
             latestScreenshotAsset,
             targetSize,
             .aspectFit,

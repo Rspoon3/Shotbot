@@ -17,7 +17,7 @@ public enum ScreenshotTimeIntervalEntity: Int, CaseIterable, AppEntity {
     case thirtyMinutes = 3
     case sixtyMinutes = 4
     
-    public static var typeDisplayRepresentation: TypeDisplayRepresentation = "Screenshot Time Interval"
+    public static let typeDisplayRepresentation: TypeDisplayRepresentation = "Screenshot Time Interval"
     public var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(title: "\(title)")
     }

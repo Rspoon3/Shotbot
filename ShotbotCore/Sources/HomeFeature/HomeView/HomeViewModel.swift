@@ -355,6 +355,14 @@ import CreateCombinedImageFeature
         }
     }
     
+    public func didOpenViaControlCenter(id: Int) async {
+        do {
+            try await processSelectedPhotos(source: .controlCenter(id))
+        } catch {
+            self.error = error
+        }
+    }
+    
     /// Triggered by a widget deep link to kick off the image pipeline using `photoAssetID` as the image source
     public func didOpenViaDeepLink(_ url: URL) async {
         do {

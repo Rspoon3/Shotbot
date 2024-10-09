@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -121,6 +121,23 @@
 		94E20BBC2C4ADDE000C11043 /* CGSize+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		941E88172CB234DC00038489 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ConfigurableProvider.swift,
+				FramedScreenshotsControlWidget.swift,
+				ScreenshotTimeIntervalEntity.swift,
+				SelectScreenshotTimeIntervalIntent.swift,
+			);
+			target = 94BD65C52A44B28700D0CE61 /* Shotbot */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		941E88162CB234C100038489 /* FramedScreenshotsControlWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (941E88172CB234DC00038489 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = FramedScreenshotsControlWidget; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		94453E422C4AAD7800B15690 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -161,6 +178,7 @@
 			children = (
 				9482BE742C51401900881181 /* Preview Content */,
 				94453E4B2C4AAD7900B15690 /* WidgetsBundle.swift */,
+				941E88162CB234C100038489 /* FramedScreenshotsControlWidget */,
 				946E7FBF2C4C3333001E4C46 /* MultipleScreenshotsProvider */,
 				94C4E2662C4B063D0017C18E /* LatestScreenshotWidget */,
 				94C4E2702C4B25810017C18E /* Extensions */,
@@ -310,6 +328,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				941E88162CB234C100038489 /* FramedScreenshotsControlWidget */,
 			);
 			name = WidgetsExtension;
 			packageProductDependencies = (

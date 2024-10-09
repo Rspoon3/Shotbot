@@ -80,7 +80,6 @@ struct LatestScreenshotView : View {
                     )
                 }
                 .widgetURL(nil)
-            
         }
     }
 }

@@ -14,6 +14,7 @@ import Purchases
 import MediaManager
 
 public struct HomeView: View {
+    @StateObject var manager = AppIntentManager.shared
     @StateObject var viewModel = HomeViewModel()
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
@@ -107,6 +108,14 @@ public struct HomeView: View {
         .onChange(of: scenePhase) { newValue in
             guard newValue == .background || newValue == .active else { return }
             viewModel.clearImagesOnAppBackground()
+        }
+        .onReceive(manager.$selectTimeIntervalIntentID) { value in
+            guard let value else { return }
+            manager.selectTimeIntervalIntentID = nil
+            tabManager.selectedTab = .home
+            Task {
+                await viewModel.didOpenViaControlCenter(id: value)
+            }
         }
         .onOpenURL { url in
             tabManager.selectedTab = .home

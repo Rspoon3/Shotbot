@@ -15,4 +15,5 @@ public enum PhotoSource: Sendable {
     case filePicker([URL])
     case dropItems([Data])
     case existingScreenshots([UIScreenshot])
+    case controlCenter(Int)
 }

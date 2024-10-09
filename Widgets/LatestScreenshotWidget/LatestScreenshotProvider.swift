@@ -52,14 +52,20 @@ struct LatestScreenshotProvider: TimelineProvider {
     
     private func timeline(in context: Context) async -> Timeline<LatestScreenshotEntry> {
         do {
-            let (image, assetID) = try await imageManager.latestScreenshot(targetSize: context.displaySize * 3)
+            let scaledSize = await context.displaySize * UIScreen.main.scale
+            let (image, assetID) = try await imageManager.latestScreenshot(using: .size(scaledSize))
             let currentDate = Date()
             let entries = (0..<6).compactMap { hourOffset -> LatestScreenshotEntry? in
-                guard let entryDate = Calendar.current.date(
-                    byAdding: .hour,
-                    value: hourOffset,
-                    to: currentDate
-                ) else { return nil }
+                guard
+                    let entryDate = Calendar.current.date(
+                        byAdding: .hour,
+                        value: hourOffset,
+                        to: currentDate
+                    ),
+                    let assetID
+                else {
+                    return nil
+                }
                 
                 return LatestScreenshotEntry(
                     date: entryDate,

@@ -6,7 +6,8 @@
 //
 import Foundation
 
-public final class AppIntentManager: ObservableObject {
+@MainActor
+public final class AppIntentManager: ObservableObject, Sendable {
     public static let shared = AppIntentManager()
     
     @Published public var selectTimeIntervalIntentID: Int?

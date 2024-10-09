@@ -24,7 +24,6 @@ import CreateCombinedImageFeature
     private var cancellables = Set<AnyCancellable>()
     private var persistenceManager: any PersistenceManaging
     private let photoLibraryManager: PhotoLibraryManager
-    private let purchaseManager: any PurchaseManaging
     private let fileManager: any FileManaging
     private let imageCombiner: any ImageCombining
     private let reviewManager: any ReviewManaging
@@ -94,7 +93,6 @@ import CreateCombinedImageFeature
     public init(
         persistenceManager: any PersistenceManaging = PersistenceManager.shared,
         photoLibraryManager: PhotoLibraryManager = .live,
-        purchaseManager: any PurchaseManaging = PurchaseManager.shared,
         fileManager: any FileManaging = FileManager.default,
         notificationCenter: any NotificationCenterProtocol = NotificationCenter.default,
         screenshotImporter: any ScreenshotImporting = ScreenshotImporter(),
@@ -104,7 +102,6 @@ import CreateCombinedImageFeature
     ) {
         self.persistenceManager = persistenceManager
         self.photoLibraryManager = photoLibraryManager
-        self.purchaseManager = purchaseManager
         self.fileManager = fileManager
         self.reviewManager = reviewManager
         self.screenshotImporter = screenshotImporter

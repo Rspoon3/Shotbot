@@ -11,7 +11,8 @@ import Persistence
 import OSLog
 import Models
 
-public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging, PurchasesDelegate {
+@MainActor
+public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging, @preconcurrency PurchasesDelegate {
     public static let shared = PurchaseManager()
     private let purchases = Purchases.shared
     private let persistenceManager = PersistenceManager.shared
@@ -22,12 +23,7 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
     @Published var customerInfo: CustomerInfo? {
         didSet {
             Task {
-                await MainActor.run {
-                    let pro = customerInfo?.entitlements["Pro"]
-                    let isSubscribed = pro?.isActive == true
-                    persistenceManager.isSubscribed = isSubscribed
-                    logger.notice("Did update customer info. Is isSubscribed: \(isSubscribed, privacy: .public)")
-                }
+                await updateSubscriptionStatus(customerInfo)
             }
         }
     }
@@ -98,9 +94,21 @@ public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging
                 return
             }
             
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.customerInfo = info
             }
+        }
+    }
+    
+    // MARK: - Private Helpers
+    
+    @MainActor
+    private func updateSubscriptionStatus(_ customerInfo: CustomerInfo?) async {
+        await MainActor.run {
+            let pro = customerInfo?.entitlements["Pro"]
+            let isSubscribed = pro?.isActive == true
+            persistenceManager.isSubscribed = isSubscribed
+            logger.notice("Did update customer info. Is isSubscribed: \(isSubscribed, privacy: .public)")
         }
     }
 }

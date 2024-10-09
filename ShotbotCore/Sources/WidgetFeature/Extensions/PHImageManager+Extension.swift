@@ -14,7 +14,9 @@ extension PHImageManager {
         targetSize: CGSize,
         contentMode: PHImageContentMode,
         options: PHImageRequestOptions?
-    ) async -> (UIImage?, [AnyHashable : Any]?) {
+    ) async -> UIImage? {
+        options?.isSynchronous = false
+        
         var callCount = 0
         
         return await withCheckedContinuation { continuation in
@@ -23,10 +25,10 @@ extension PHImageManager {
                 targetSize: targetSize,
                 contentMode: contentMode,
                 options: options
-            ) { image, dict in
+            ) { image, _ in
                 guard callCount == 0 else { return }
                 callCount += 1
-                continuation.resume(returning: (image, dict))
+                continuation.resume(returning: image)
             }
         }
     }

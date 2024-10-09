@@ -23,8 +23,7 @@ public struct PurchaseView: View {
     // MARK: - Initializer
     
     public init(purchaseManager: PurchaseManaging = PurchaseManager.shared) {
-        let vm = PurchaseViewModel(purchaseManager: purchaseManager)
-        _viewModel = StateObject(wrappedValue: vm)
+        _viewModel = StateObject(wrappedValue: .init(purchaseManager: purchaseManager))
     }
     
     // MARK: - Body

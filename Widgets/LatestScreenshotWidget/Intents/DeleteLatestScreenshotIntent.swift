@@ -8,8 +8,8 @@ import AppIntents
 import MediaManager
 
 struct DeleteLatestScreenshotIntent: AppIntent {
-    static var title: LocalizedStringResource = "Delete"
-    static var isDiscoverable: Bool = false
+    static let title: LocalizedStringResource = "Delete"
+    static let isDiscoverable: Bool = false
     
     @Parameter(title: "AssetID")
     var assetID: String?

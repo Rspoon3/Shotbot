@@ -10,19 +10,19 @@ import Photos
 import PhotosUI
 import Models
 
-public struct PhotoLibraryManager {
+public struct PhotoLibraryManager: Sendable {
     public let photoAdditionStatus: PHAuthorizationStatus
-    public var requestPhotoLibraryAdditionAuthorization: () async -> Void
-    public var savePhoto: (URL) async throws -> Void
-    public var save: (_ at: UIImage) async throws -> Void
-    public var delete: ([String]) async throws -> Void
+    public var requestPhotoLibraryAdditionAuthorization: @Sendable () async -> Void
+    public var savePhoto: @Sendable(URL) async throws -> Void
+    public var save: @Sendable(_ at: UIImage) async throws -> Void
+    public var delete: @Sendable ([String]) async throws -> Void
     
     public init(
         photoAdditionStatus: PHAuthorizationStatus,
-        requestPhotoLibraryAdditionAuthorization: @escaping () async -> Void,
-        savePhoto: @escaping (URL) async throws -> Void,
-        save: @escaping (UIImage) async throws -> Void,
-        delete: @escaping ([String]) async throws -> Void
+        requestPhotoLibraryAdditionAuthorization: @escaping @Sendable () async -> Void,
+        savePhoto: @escaping @Sendable (URL) async throws -> Void,
+        save: @escaping @Sendable (UIImage) async throws -> Void,
+        delete: @escaping @Sendable ([String]) async throws -> Void
     ) {
         self.photoAdditionStatus = photoAdditionStatus
         self.requestPhotoLibraryAdditionAuthorization = requestPhotoLibraryAdditionAuthorization

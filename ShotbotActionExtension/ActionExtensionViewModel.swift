@@ -5,6 +5,7 @@
 //  Created by Richard Witherspoon on 4/30/23.
 //
 
+@preconcurrency import Foundation
 import MobileCoreServices
 import UniformTypeIdentifiers
 import CollectionConcurrencyKit
@@ -133,8 +134,9 @@ import CreateCombinedImageFeature
     
     private func createIndividualImages() async {
         var count = 1
+        var loopedImages: [ShareableImage] = []
         
-        shareableImages = await attachments.asyncCompactMap { attachment -> ShareableImage? in
+        for attachment in attachments {
             let path = "\(imageTitle) \(count).png"
             let temporaryURL = URL.temporaryDirectory.appending(path: path)
             count += 1
@@ -147,16 +149,20 @@ import CreateCombinedImageFeature
                 let framedImageData = framedScreenshot.pngData(),
                 let _ = try? framedImageData.write(to: temporaryURL)
             else {
-                return nil
+                return
             }
             
             persistenceManager.deviceFrameCreations += 1
             
-            return ShareableImage(
+            let sharableImage = ShareableImage(
                 framedScreenshot: framedScreenshot,
                 url: temporaryURL
             )
+            
+            loopedImages.append(sharableImage)
         }
+        
+        shareableImages = loopedImages
     }
     
     private func getImage(from result: any NSSecureCoding) -> UIImage? {

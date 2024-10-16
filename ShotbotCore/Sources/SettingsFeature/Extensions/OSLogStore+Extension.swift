@@ -6,18 +6,13 @@
 //
 
 import Foundation
-import OSLog
+@preconcurrency import OSLog
 import Models
 
 extension OSLogStore {
     func generateLogAttachments(startDate: Date) async throws -> [SBLog] {
         try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInteractive).async { [weak self] in
-                guard let self else {
-                    continuation.resume(throwing: SBError.noSelf)
-                    return
-                }
-                
+            DispatchQueue.global(qos: .userInteractive).async {
                 let position = self.position(date: startDate)
                 
                 do {

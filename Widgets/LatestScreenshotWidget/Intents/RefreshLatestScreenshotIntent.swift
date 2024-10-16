@@ -8,8 +8,8 @@
 import AppIntents
 
 struct RefreshLatestScreenshotIntent: AppIntent {
-    static var title: LocalizedStringResource = "Refresh"
-    static var isDiscoverable: Bool = false
+    static let title: LocalizedStringResource = "Refresh"
+    static let isDiscoverable: Bool = false
 
     func perform() async throws -> some IntentResult {
         return .result()

@@ -8,6 +8,7 @@
 import Foundation
 import RevenueCat
 
+@MainActor
 public protocol PurchaseManaging {
     var offerings: Offerings? { get }
     var paymentIsInProgress: Bool { get set }

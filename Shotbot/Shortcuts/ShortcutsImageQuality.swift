@@ -11,8 +11,8 @@ import AppIntents
 public enum ShortcutsImageQuality: String, AppEnum {
     case original, high, medium, low, poor
     
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Image Quality")
-    public static var caseDisplayRepresentations: [ShortcutsImageQuality: DisplayRepresentation] = [
+    public static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Image Quality")
+    public static let caseDisplayRepresentations: [ShortcutsImageQuality: DisplayRepresentation] = [
         .original: "Original",
         .high: "High",
         .medium: "Medium",

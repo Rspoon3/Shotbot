@@ -7,9 +7,23 @@
 
 import Foundation
 
-public struct SBError: LocalizedError, Equatable {
+public struct SBError: LocalizedError, CustomLocalizedStringResourceConvertible, Equatable {
     public let errorDescription: String?
     public let recoverySuggestion: String?
+    public var localizedStringResource: LocalizedStringResource
+    
+    // MARK: - Initializer
+    
+    public init(
+        errorDescription: String? = nil,
+        recoverySuggestion: String? = nil
+    ) {
+        self.errorDescription = errorDescription
+        self.recoverySuggestion = recoverySuggestion
+        self.localizedStringResource = .init(stringLiteral: errorDescription ?? "")
+    }
+
+    // MARK: - Static Errors
     
     public static let lowMemoryWarning = Self(
         errorDescription: "Low Memory",
@@ -58,10 +72,5 @@ public struct SBError: LocalizedError, Equatable {
     public static let noAnnualPackage = Self(
         errorDescription: "Purchase Error",
         recoverySuggestion: "This purchase item could not be found"
-    )
-    
-    public static let noSelf = Self(
-        errorDescription: "Memory Issue",
-        recoverySuggestion: "A memory issue occurred"
     )
 }

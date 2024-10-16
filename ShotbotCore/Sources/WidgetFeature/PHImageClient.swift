@@ -14,26 +14,13 @@ public struct PHImageClient {
         _ targetSize: CGSize,
         _ contentMode: PHImageContentMode,
         _ options: PHImageRequestOptions?
-    ) async -> (UIImage?, [AnyHashable : Any]?)
-    
-    // MARK: - Initializer
-    
-    public init(
-        requestImage: @escaping (
-            _ asset: PHAsset,
-            _ targetSize: CGSize,
-            _ contentMode: PHImageContentMode,
-            _ options: PHImageRequestOptions?
-        ) async -> (UIImage?, [AnyHashable : Any]?)
-    ) {
-        self.requestImage = requestImage
-    }
+    ) async throws -> UIImage
 }
 
 public extension PHImageClient {
     static var live: Self {
         return Self { asset, targetSize, contentMode, options in
-            await PHImageManager.default().requestImage(
+            try await PHImageManager.default().requestImage(
                 for: asset,
                 targetSize: targetSize,
                 contentMode: contentMode,
@@ -45,7 +32,7 @@ public extension PHImageClient {
     #if DEBUG
     static var mockImage: Self {
         return Self { asset, targetSize, contentMode, options in
-            (UIImage(systemName: "star"), nil)
+            UIImage(systemName: "star")!
         }
     }
     #endif

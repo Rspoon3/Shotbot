@@ -8,7 +8,7 @@
 import Foundation
 import PhotosUI
 
-public enum ImageSelectionType: Int, CaseIterable, Identifiable {
+public enum ImageSelectionType: Int, CaseIterable, Identifiable, Sendable {
     case screenshots, all
     
     public var id: Int { rawValue }

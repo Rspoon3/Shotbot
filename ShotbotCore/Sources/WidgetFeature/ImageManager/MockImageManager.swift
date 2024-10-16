@@ -16,18 +16,14 @@ public struct MockImageManager: ImageManaging {
     
     // MARK: - Public
     
-    public func latestScreenshot(from url: URL) async throws -> UIImage {
-        return UIImage(systemName: "star")!
-    }
-    
-    public func latestScreenshot(targetSize: CGSize) async throws -> (image: UIImage, assetID: String) {
+    public func latestScreenshot(using option: ImageManager.ScreenshotFetchOption) async throws -> (image: UIImage, assetID: String?) {
         let names = ["car", "house", "star", "circle"]
         let random = UIImage(systemName: names.randomElement()!)!
         
         return (random, UUID().uuidString)
     }
     
-    public func multipleScreenshots(from url: URL) async throws -> [UIImage] {
+    public func multipleScreenshots(for option: DurationWidgetOption) async throws -> [UIImage] {
         return []
     }
 }

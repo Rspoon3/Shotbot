@@ -5,6 +5,7 @@
 //  Created by Ricky on 10/5/24.
 //
 
+#if canImport(WidgetKit)
 import AppIntents
 import Models
 
@@ -34,3 +35,4 @@ struct SelectScreenshotTimeIntervalIntent: ControlConfigurationIntent {
         return .result()
     }
 }
+#endif

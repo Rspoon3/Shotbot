@@ -5,6 +5,7 @@
 //  Created by Ricky on 10/1/24.
 //
 
+#if canImport(WidgetKit)
 import SwiftUI
 import WidgetKit
 
@@ -44,3 +45,4 @@ extension BackDeployedWidgetAccentedRenderingMode {
         }
     }
 }
+#endif

@@ -6,9 +6,11 @@
 //
 import AppIntents
 import WidgetFeature
-import WidgetKit
 import SwiftUI
 import Models
+
+#if canImport(WidgetKit)
+import WidgetKit
 
 @available(iOS 18.0, *)
 struct FramedScreenshotsControlWidget: ControlWidget {
@@ -27,3 +29,4 @@ struct FramedScreenshotsControlWidget: ControlWidget {
         .promptsForUserConfiguration()
     }
 }
+#endif

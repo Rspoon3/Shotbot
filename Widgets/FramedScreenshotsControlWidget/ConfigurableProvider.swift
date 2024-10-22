@@ -5,6 +5,7 @@
 //  Created by Ricky on 10/5/24.
 //
 
+#if canImport(WidgetKit)
 import WidgetKit
 
 @available(iOS 18.0, *)
@@ -19,3 +20,4 @@ extension FramedScreenshotsControlWidget {
         }
     }
 }
+#endif

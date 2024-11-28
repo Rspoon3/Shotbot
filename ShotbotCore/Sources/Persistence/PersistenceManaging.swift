@@ -12,6 +12,7 @@ import Models
 public protocol PersistenceManaging: Sendable {
     var canSaveFramedScreenshot: Bool  { get }
     var isSubscribed: Bool { get set }
+    var autoCopy: Bool  { get set }
     var autoSaveToFiles: Bool { get set }
     var autoSaveToPhotos: Bool  { get set }
     var autoDeleteScreenshots: Bool  { get set }

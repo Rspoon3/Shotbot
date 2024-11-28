@@ -30,6 +30,7 @@ public struct HomeView: View {
     @Environment(\.scenePhase) var scenePhase
     @State private var color = Color.blue
     @State private var backgroundType: BackgroundType = .angularGradient
+    @Environment(\.displayScale) var displayScale
 
     // MARK: - Initializer
     
@@ -273,6 +274,42 @@ public struct HomeView: View {
             }
         }
     }
+    
+    @ViewBuilder
+     private var backgroundView: some View {
+         switch backgroundType {
+         case .image:
+             Image(uiImage: viewModel.imageResults.originalScreenshots.first!)
+                 .resizable()
+                 .scaledToFill()
+                 .blur(radius: 20)
+         case .solidColor:
+             color
+         case .linearGradient:
+             Rectangle().fill(color.gradient)
+         case .radialGradient:
+             RadialGradient(
+                 gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
+                 center: .center,
+                 startRadius: 50,
+                 endRadius: 1000
+             )
+         case .angularGradient:
+             AngularGradient(
+                 gradient: Gradient(
+                     colors: [
+                         .red,
+                         .yellow,
+                         .green,
+                         .blue,
+                         .purple,
+                         .red
+                     ]
+                 ),
+                 center: .center
+             )
+         }
+     }
     
     private var placeholder: some View {
         Image(systemName: "photo")

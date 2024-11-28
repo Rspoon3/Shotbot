@@ -22,14 +22,14 @@ enum BackgroundType: String, CaseIterable, Identifiable {
     case image
 }
 
+
 public struct HomeView: View {
+    @StateObject var manager = AppIntentManager.shared
     @StateObject var viewModel = HomeViewModel()
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
     @State private var color = Color.blue
     @State private var backgroundType: BackgroundType = .angularGradient
-    @State private var renderedImage = Image(systemName: "photo")
-    @Environment(\.displayScale) var displayScale
 
     // MARK: - Initializer
     
@@ -40,134 +40,137 @@ public struct HomeView: View {
     // MARK: - Body
     
     public var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                picker
-                
-                Picker("Background Type", selection: $backgroundType) {
-                    ForEach(BackgroundType.allCases) { type in
-                        Text(type.rawValue).tag(type)
-                    }
+        VStack(spacing: 0) {
+            picker
+            
+            Picker("Background Type", selection: $backgroundType) {
+                ForEach(BackgroundType.allCases) { type in
+                    Text(type.rawValue).tag(type)
                 }
-                .pickerStyle(.segmented)
-                
-                ColorPicker("Color", selection: $color)
-                
-                mainContent
-                pickerMenu
             }
-            #if os(iOS)
-            .navigationTitle("Shotbot")
-            #endif
-            .onChange(of: backgroundType) { _ in
-                render()
+            .pickerStyle(.segmented)
+            
+            ColorPicker("Color", selection: $color)
+            
+            mainContent
+            selectionButtons
+        }
+#if os(iOS)
+        .navigationTitle("Shotbot")
+#endif
+        .photosPicker(
+            isPresented: $viewModel.showPhotosPicker,
+            selection: $viewModel.imageSelections,
+            matching: viewModel.photoFilter,
+            photoLibrary: .shared()
+        )
+        .onChange(of: viewModel.imageSelections) { newValue in
+            Task(priority: .userInitiated) {
+                await viewModel.imageSelectionsDidChange()
             }
-            .photosPicker(
-                isPresented: $viewModel.showPhotosPicker,
-                selection: $viewModel.imageSelections,
-                matching: viewModel.photoFilter,
-                photoLibrary: .shared()
+        }
+        .contentShape(Rectangle())
+        .dropDestination(for: Data.self) { items, location in
+            Task(priority: .userInitiated) {
+                await viewModel.didDropItem(items)
+            }
+            return true
+        }
+        .alert(error: $viewModel.error) {
+            viewModel.clearContent()
+        }
+        .toast(isPresenting: $viewModel.showQuickSaveToast, duration: 2) {
+            AlertToast(
+                displayMode: .hud,
+                type: .regular,
+                title: "Image Saved",
+                style: .style(
+                    backgroundColor: .blue,
+                    titleColor: .white
+                )
             )
-            .onChange(of: viewModel.imageSelections) { newValue in
-                Task(priority: .userInitiated) {
-                    await viewModel.imageSelectionsDidChange()
-                }
-            }
-            .contentShape(Rectangle())
-            .dropDestination(for: Data.self) { items, location in
-                Task(priority: .userInitiated) {
-                    await viewModel.didDropItem(items)
-                }
-                return true
-            }
-            .alert(error: $viewModel.error) {
-                viewModel.clearContent()
-            }
-            .toast(isPresenting: $viewModel.showQuickSaveToast, duration: 2) {
-                AlertToast(
-                    displayMode: .hud,
-                    type: .regular,
-                    title: "Image Saved",
-                    style: .style(
-                        backgroundColor: .blue,
-                        titleColor: .white
-                    )
+        }
+        .toast(isPresenting: $viewModel.showCopyToast, duration: 2) {
+            AlertToast(
+                displayMode: .hud,
+                type: .regular,
+                title: "Image Copied",
+                style: .style(
+                    backgroundColor: .blue,
+                    titleColor: .white
                 )
-            }
-            .toast(isPresenting: $viewModel.showCopyToast, duration: 2) {
-                AlertToast(
-                    displayMode: .hud,
-                    type: .regular,
-                    title: "Image Copied",
-                    style: .style(
-                        backgroundColor: .blue,
-                        titleColor: .white
-                    )
+            )
+        }
+        .toast(isPresenting: $viewModel.showAutoSaveToast, duration: 3) {
+            AlertToast(
+                displayMode: .hud,
+                type: .regular,
+                title: viewModel.toastText,
+                style: .style(
+                    backgroundColor: .blue,
+                    titleColor: .white
                 )
-            }
-            .toast(isPresenting: $viewModel.showAutoSaveToast, duration: 3) {
-                AlertToast(
-                    displayMode: .hud,
-                    type: .regular,
-                    title: viewModel.toastText,
-                    style: .style(
-                        backgroundColor: .blue,
-                        titleColor: .white
+            )
+        }
+        .overlay {
+            if viewModel.showLoadingSpinner {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .padding(.all, 20)
+                    .background(
+                        .thinMaterial,
+                        in: RoundedRectangle(cornerRadius: 8)
                     )
-                )
             }
-            .overlay {
-                if viewModel.showLoadingSpinner {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .padding(.all, 20)
-                        .background(
-                            .thinMaterial,
-                            in: RoundedRectangle(cornerRadius: 8)
-                        )
-                }
+        }
+        .task {
+            await viewModel.requestPhotoLibraryAdditionAuthorization()
+            await viewModel.changeImageQualityIfNeeded()
+        }
+        .onChange(of: scenePhase) { newValue in
+            guard newValue == .background || newValue == .active else { return }
+            viewModel.clearImagesOnAppBackground()
+        }
+        .onReceive(manager.$selectTimeIntervalIntentID) { value in
+            guard let value else { return }
+            manager.selectTimeIntervalIntentID = nil
+            tabManager.selectedTab = .home
+            Task {
+                await viewModel.didOpenViaControlCenter(id: value)
             }
-            .task {
-                await viewModel.requestPhotoLibraryAdditionAuthorization()
-                await viewModel.changeImageQualityIfNeeded()
+        }
+        .onOpenURL { url in
+            tabManager.selectedTab = .home
+            Task {
+                await viewModel.didOpenViaDeepLink(url)
             }
-            .onChange(of: scenePhase) { newValue in
-                guard newValue == .background || newValue == .active else { return }
-                viewModel.clearImagesOnAppBackground()
-            }
-            .onOpenURL { url in
-                tabManager.selectedTab = .home
-                Task {
-                    await viewModel.didOpenViaDeepLink(url)
-                }
-            }
-            .sheet(isPresented: $viewModel.showPurchaseView) {
-                NavigationView {
-                    PurchaseView()
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button("Dismiss") {
-                                    viewModel.showPurchaseView = false
-                                }
+        }
+        .sheet(isPresented: $viewModel.showPurchaseView) {
+            NavigationView {
+                PurchaseView()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Dismiss") {
+                                viewModel.showPurchaseView = false
                             }
                         }
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    if viewModel.canShowClearButton {
-                        Button("Clear", role: .destructive) {
-                            viewModel.clearContent()
-                        }.foregroundColor(.red)
                     }
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                if viewModel.canShowClearButton {
+                    Button("Clear", role: .destructive) {
+                        viewModel.clearContent()
+                    }.foregroundColor(.red)
                 }
             }
-            .fileImporter(
-                isPresented: $viewModel.isImportingFile,
-                allowedContentTypes: [.image, .png, .jpeg],
-                allowsMultipleSelection: true
-            ) { viewModel.fileImportCompletion(result: $0) }
         }
+        .fileImporter(
+            isPresented: $viewModel.isImportingFile,
+            allowedContentTypes: [.image, .png, .jpeg],
+            allowsMultipleSelection: true
+        ) { viewModel.fileImportCompletion(result: $0) }
     }
     
     @ViewBuilder
@@ -195,7 +198,7 @@ public struct HomeView: View {
         case .individualImages(let shareableImages):
             individualImagesView(shareableImages)
         case .combinedImages(let shareableImage):
-            Image(uiImage: shareableImage.framedBackgroundScreenshot)
+            Image(uiImage: shareableImage.framedScreenshot)
                 .resizable()
                 .scaledToFit()
                 .draggable(Image(uiImage: shareableImage.framedScreenshot))
@@ -205,7 +208,7 @@ public struct HomeView: View {
                 .padding()
                 .frame(maxHeight: .infinity, alignment: .center)
                 .onTapGesture(count: 2) {
-                    viewModel.copy(shareableImage.framedBackgroundScreenshot)
+                    viewModel.copy(shareableImage.framedScreenshot)
                 }
                 .toolbar {
                     ToolbarItemGroup(placement: .primaryAction) {
@@ -227,11 +230,44 @@ public struct HomeView: View {
         }
     }
     
-    private var importFileButton: some View {
-        Button {
-            viewModel.isImportingFile = true
-        } label: {
-            Label("Select From Files", systemImage: "doc")
+    private var selectionButtons: some View {
+        VStack(spacing: 16) {
+            if ProcessInfo.processInfo.isiOSAppOnMac {
+                PrimaryButton(title: "Select From Files") {
+                    viewModel.attemptToImportFile()
+                }
+                Button("Select Photos") {
+                    viewModel.selectPhotos()
+                }
+                .font(.headline)
+            } else {
+                PrimaryButton(title: "Select Photos") {
+                    viewModel.selectPhotos()
+                }
+                Button("Select From Files") {
+                    viewModel.attemptToImportFile()
+                }
+                .font(.headline)
+            }
+        }
+        .disabled(viewModel.isLoading)
+        .padding([.bottom, .horizontal])
+    }
+    
+    @ViewBuilder
+    private var placeholderContextButton: some View {
+        if ProcessInfo.processInfo.isiOSAppOnMac {
+            Button {
+                viewModel.selectPhotos()
+            } label: {
+                Label("Select Photos", systemImage: "photo")
+            }
+        } else {
+            Button {
+                viewModel.attemptToImportFile()
+            } label: {
+                Label("Select From Files", systemImage: "doc")
+            }
         }
     }
     
@@ -239,7 +275,7 @@ public struct HomeView: View {
         Image(systemName: "photo")
             .resizable()
             .scaledToFit()
-            .contextMenu { importFileButton }
+            .contextMenu { placeholderContextButton }
             .frame(maxWidth: 200)
             .padding()
             .contentShape(
@@ -252,85 +288,27 @@ public struct HomeView: View {
             .hoverEffect()
             .foregroundColor(.secondary)
             .frame(maxHeight: .infinity)
-            .onTapGesture { viewModel.selectPhotos() }
-    }
-    
-    private var pickerMenu: some View {
-        Button {
-            viewModel.selectPhotos()
-        } label:{
-            Text("Select Photos")
-                .font(.headline)
-                .frame(maxWidth: 300)
-        }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
-        .disabled(viewModel.isLoading)
-        .contextMenu { importFileButton }
-        .padding([.bottom, .horizontal])
-    }
-    
-    @ViewBuilder
-    private var backgroundView: some View {
-        switch backgroundType {
-        case .image:
-            Image(uiImage: viewModel.imageResults.originalScreenshots.first!)
-                .resizable()
-                .scaledToFill()
-                .blur(radius: 20)
-        case .solidColor:
-            color
-        case .linearGradient:
-            Rectangle().fill(color.gradient)
-        case .radialGradient:
-            RadialGradient(
-                gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
-                center: .center,
-                startRadius: 50,
-                endRadius: 1000
-            )
-        case .angularGradient:
-            AngularGradient(
-                gradient: Gradient(
-                    colors: [
-                        .red,
-                        .yellow,
-                        .green,
-                        .blue,
-                        .purple,
-                        .red
-                    ]
-                ),
-                center: .center
-            )
-        }
-    }
-    
-    fileprivate func rendered(_ shareableImage: ShareableImage) -> some View {
-        return Image(uiImage: shareableImage.framedScreenshot)
-            .resizable()
-            .scaledToFit()
-            .padding(100)
-            .background {
-                backgroundView
-                    .animation(.default, value: backgroundType)
-                    .animation(.default, value: color)
-                    .scaledToFit()
+            .onTapGesture {
+                if ProcessInfo.processInfo.isiOSAppOnMac {
+                    viewModel.attemptToImportFile()
+                } else {
+                    viewModel.selectPhotos()
+                }
             }
-            .clipped()
-            .cornerRadius(20)
     }
     
     private func tabView(shareableImages: [ShareableImage]) -> some View {
         TabView {
             ForEach(shareableImages) { shareableImage in
-                rendered(shareableImage)
+                Image(uiImage: shareableImage.framedScreenshot)
+                    .resizable()
+                    .scaledToFit()
                     .contextMenu {
                         contextMenu(shareableImage: shareableImage)
                     }
                     .padding([.horizontal, .top])
                     .padding(.bottom, 40)
-                    .draggable(renderedImage)
+                    .draggable(Image(uiImage: shareableImage.framedScreenshot))
                     .onTapGesture(count: 2) {
                         viewModel.copy(shareableImage.framedScreenshot)
                     }
@@ -351,13 +329,13 @@ public struct HomeView: View {
                 spacing: 20
             ) {
                 ForEach(shareableImages) { shareableImage in
-                    Image(uiImage: shareableImage.framedBackgroundScreenshot)
+                    Image(uiImage: shareableImage.framedScreenshot)
                         .resizable()
                         .scaledToFit()
                         .contextMenu {
                             contextMenu(shareableImage: shareableImage)
                         }
-                        .draggable(renderedImage)
+                        .draggable(Image(uiImage: shareableImage.framedScreenshot))
                         .onTapGesture(count: 2) {
                             viewModel.copy(shareableImage.framedScreenshot)
                         }
@@ -421,30 +399,15 @@ public struct HomeView: View {
             }
         }
     }
-    
-    @MainActor func render() {
-        let renderer = ImageRenderer(content: rendered(viewModel.imageResults.individual.first!))
-        
-        // make sure and use the correct display scale for this device
-        renderer.scale = displayScale
-        
-        if let uiImage = renderer.uiImage {
-            renderedImage = Image(uiImage: uiImage)
-        }
-    }
 }
 
 #if DEBUG
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            HomeView(
-                viewModel: HomeViewModel(
-                    photoLibraryManager: .empty(status: .authorized),
-                    purchaseManager: MockPurchaseManager()
-                )
-            )
+            HomeView(viewModel: HomeViewModel(photoLibraryManager: .empty(status: .authorized)))
         }
     }
 }
 #endif
+

@@ -14,5 +14,7 @@ extension UIGraphicsImageRendererFormat {
         self.scale = 1
     }
     
-    static let singleScale = UIGraphicsImageRendererFormat(scale: 1)
+    static var singleScale: UIGraphicsImageRendererFormat {
+        UIGraphicsImageRendererFormat(scale: 1)
+    }
 }

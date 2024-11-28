@@ -19,7 +19,8 @@ struct MultipleScreenshotsView : View {
             Text("Multiple Screenshots")
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+                .widgetAccentable()
+
             HStack(spacing: 16) {
                 ForEach(DurationWidgetOption.allCases) { option in
                     Link(destination: entry.url(for: option)) {
@@ -34,6 +35,7 @@ struct MultipleScreenshotsView : View {
                                     endPoint: .bottom
                                 )
                             )
+                            .widgetAccentable()
                             .overlay {
                                 Text(option.title)
                                     .foregroundStyle(.white)

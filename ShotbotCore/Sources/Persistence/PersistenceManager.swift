@@ -9,7 +9,8 @@ import SwiftUI
 import Models
 import OSLog
 
-public final class PersistenceManager: ObservableObject, PersistenceManaging {
+@MainActor
+public final class PersistenceManager: ObservableObject, PersistenceManaging, Sendable {
     public static let shared = PersistenceManager()
     private let logger = Logger(category: PersistenceManager.self)
 
@@ -55,10 +56,10 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
     @AppStorage("autoDeleteScreenshots")
     public var autoDeleteScreenshots: Bool = false
     
-    @AppStorage("defaultHomeTab")
+    @AppStorage("defaultHomeTab", store: .shared)
     public var defaultHomeTab: ImageType = .individual
     
-    @AppStorage("defaultHomeView")
+    @AppStorage("defaultHomeView", store: .shared)
     public var defaultHomeView: HomeViewType = .tabbed
     
     @AppStorage("clearImagesOnAppBackground")
@@ -95,6 +96,10 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging {
     @AppStorage("subscriptionOverride", store: .shared)
     public var subscriptionOverride: SubscriptionOverrideMethod = .appStore
 #endif
+    
+    public func setLastReviewPromptDateToNow() {
+        lastReviewPromptDate = .now
+    }
 }
 
 public class MockPersistenceManager: PersistenceManaging {
@@ -130,5 +135,9 @@ public class MockPersistenceManager: PersistenceManaging {
         deviceFrameCreations = 0
         imageSelectionType = .all
         imageQuality = .original
+    }
+    
+    public func setLastReviewPromptDateToNow() {
+        lastReviewPromptDate = .now
     }
 }

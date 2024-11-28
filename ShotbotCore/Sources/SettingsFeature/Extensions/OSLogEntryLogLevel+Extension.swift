@@ -28,14 +28,3 @@ extension OSLogEntryLog.Level {
         }
     }
 }
-
-extension OSLogEntryLog.Level: CaseIterable {
-    public static var allCases: [OSLogEntryLog.Level] = [
-        .undefined,
-        .debug,
-        .info,
-        .notice,
-        .error,
-        .fault,
-    ]
-}

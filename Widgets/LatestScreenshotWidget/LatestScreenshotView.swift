@@ -21,6 +21,7 @@ struct LatestScreenshotView : View {
                 GeometryReader { geo in
                     Image(uiImage: image)
                         .resizable()
+                        .backDeployedWidgetAccentedRenderingMode(.fullColor)
                         .scaledToFit()
                         .frame(
                             size: entry.frameSize(
@@ -48,6 +49,7 @@ struct LatestScreenshotView : View {
                 }
                 .labelStyle(.adaptive)
                 .font(.footnote)
+                .widgetAccentable()
             }
             .widgetURL(entry.url)
             .containerBackground(for: .widget) {
@@ -66,6 +68,7 @@ struct LatestScreenshotView : View {
                 .multilineTextAlignment(.center)
                 .font(.headline)
                 .foregroundStyle(.white)
+                .widgetAccentable()
                 .containerBackground(for: .widget) {
                     LinearGradient(
                         colors: [

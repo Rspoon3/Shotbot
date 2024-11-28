@@ -9,6 +9,7 @@ import Foundation
 
 public enum MergeMethod: String, Decodable {
     case singleOverlay
+    case singleOverlayV2
     case doubleOverlay
     case islandOverlay
 }

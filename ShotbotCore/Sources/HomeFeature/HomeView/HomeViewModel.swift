@@ -18,12 +18,12 @@ import Photos
 import CollectionConcurrencyKit
 import WidgetFeature
 import Combine
+import CreateCombinedImageFeature
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var persistenceManager: any PersistenceManaging
     private let photoLibraryManager: PhotoLibraryManager
-    private let purchaseManager: any PurchaseManaging
     private let fileManager: any FileManaging
     private let imageCombiner: any ImageCombining
     private let reviewManager: any ReviewManaging
@@ -93,7 +93,6 @@ import Combine
     public init(
         persistenceManager: any PersistenceManaging = PersistenceManager.shared,
         photoLibraryManager: PhotoLibraryManager = .live,
-        purchaseManager: any PurchaseManaging = PurchaseManager.shared,
         fileManager: any FileManaging = FileManager.default,
         notificationCenter: any NotificationCenterProtocol = NotificationCenter.default,
         screenshotImporter: any ScreenshotImporting = ScreenshotImporter(),
@@ -103,7 +102,6 @@ import Combine
     ) {
         self.persistenceManager = persistenceManager
         self.photoLibraryManager = photoLibraryManager
-        self.purchaseManager = purchaseManager
         self.fileManager = fileManager
         self.reviewManager = reviewManager
         self.screenshotImporter = screenshotImporter
@@ -355,6 +353,17 @@ import Combine
     
     // MARK: - Public
     
+    /// Checks if the user has permission to save screenshot, and if so starts
+    /// the file importing process. If not, it shows the purchase sheet.
+    public func attemptToImportFile() {
+        guard persistenceManager.canSaveFramedScreenshot else {
+            showPurchaseView = true
+            return
+        }
+        
+        isImportingFile = true
+    }
+    
     /// Updates the `defaultHomeView` in the persistence manger and then updates
     /// `showGridView`.
     public func toggleIndividualViewType() {
@@ -372,6 +381,14 @@ import Combine
     public func didDropItem(_ items: [Data]) async {
         do {
             try await processSelectedPhotos(source: .dropItems(items))
+        } catch {
+            self.error = error
+        }
+    }
+    
+    public func didOpenViaControlCenter(id: Int) async {
+        do {
+            try await processSelectedPhotos(source: .controlCenter(id))
         } catch {
             self.error = error
         }
@@ -532,13 +549,23 @@ import Combine
     /// This will change the order of both the individual and combined images.
     public func reverseImages() async {
         logger.info("Re-running pipeline to reverse combined images.")
+
+        isLoading = true
+        defer { isLoading = false }
         
         await combinedImageTask?.value
-        imageResults.originalScreenshots.reverse()
+        imageResults.reverseImages()
+        await combineDeviceFrames()
+        try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
         
-        try? await processSelectedPhotos(
-            source: .existingScreenshots(imageResults.originalScreenshots)
-        )
+        guard let combined = imageResults.combined else {
+            logger.fault("Processing selected photos returning early because combined image results has no image.")
+            error = SBError.unsupportedImage
+            return
+        }
+        
+        logger.fault("Setting viewState to combinedImages")
+        viewState = .combinedImages(combined)
     }
 }
 

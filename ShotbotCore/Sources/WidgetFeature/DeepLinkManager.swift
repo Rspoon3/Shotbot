@@ -29,7 +29,7 @@ public struct DeepLinkManager {
         
     // MARK: - Internal
     
-    internal func deepLinkValue(from url: URL) throws -> String {
+    public func deepLinkValue(from url: URL) throws -> String {
         guard
             let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
             let value = components.queryItems?.first?.value

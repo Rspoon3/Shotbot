@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "Apple Watch S10 - 46mm - Aluminum Jet Black + Black Sport Band.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

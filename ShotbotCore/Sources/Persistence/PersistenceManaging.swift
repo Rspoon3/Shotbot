@@ -8,7 +8,8 @@
 import Foundation
 import Models
 
-public protocol PersistenceManaging {
+@MainActor
+public protocol PersistenceManaging: Sendable {
     var canSaveFramedScreenshot: Bool  { get }
     var isSubscribed: Bool { get set }
     var autoSaveToFiles: Bool { get set }
@@ -23,4 +24,5 @@ public protocol PersistenceManaging {
     var imageSelectionType: ImageSelectionType  { get set }
     var imageQuality: ImageQuality  { get set }
     var lastReviewPromptDate: Date? { get set }
+    func setLastReviewPromptDateToNow()
 }

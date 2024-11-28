@@ -114,5 +114,29 @@
         "clipEdgesAmount": 75,
         "inputSize": [2796, 1290],
         "offSet": [70, 80],
+    },
+    {
+        "deviceFrame": "iPhone 16 Pro - Black Titanium - Portrait",
+        "mergeMethod": "singleOverlayV2",
+        "cornerRadius": 100,
+        "inputSize": [1206, 2622]
+    },
+    {
+        "deviceFrame": "iPhone 16 Pro - Black Titanium - Landscape",
+        "mergeMethod": "singleOverlayV2",
+        "cornerRadius": 100,
+        "inputSize": [2622, 1206]
+    },
+    {
+        "deviceFrame": "iPhone 16 Pro Max - Black Titanium - Portrait",
+        "mergeMethod": "singleOverlayV2",
+        "cornerRadius": 100,
+        "inputSize": [1320, 2868]
+    },
+    {
+        "deviceFrame": "iPhone 16 Pro Max - Black Titanium - Landscape",
+        "mergeMethod": "singleOverlayV2",
+        "cornerRadius": 100,
+        "inputSize": [2868, 1320]
     }
 ]

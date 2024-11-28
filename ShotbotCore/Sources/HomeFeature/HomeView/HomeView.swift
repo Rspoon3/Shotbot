@@ -341,15 +341,13 @@ public struct HomeView: View {
     private func tabView(shareableImages: [ShareableImage]) -> some View {
         TabView {
             ForEach(shareableImages) { shareableImage in
-                Image(uiImage: shareableImage.framedScreenshot)
-                    .resizable()
-                    .scaledToFit()
+                rendered(shareableImage)
                     .contextMenu {
                         contextMenu(shareableImage: shareableImage)
                     }
                     .padding([.horizontal, .top])
                     .padding(.bottom, 40)
-                    .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                    .draggable(renderedImage)
                     .onTapGesture(count: 2) {
                         viewModel.copy(shareableImage.framedScreenshot)
                     }

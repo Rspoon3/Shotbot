@@ -64,6 +64,9 @@ public struct HomeView: View {
             matching: viewModel.photoFilter,
             photoLibrary: .shared()
         )
+        .onChange(of: backgroundType) { _ in
+                 render()
+             }
         .onChange(of: viewModel.imageSelections) { newValue in
             Task(priority: .userInitiated) {
                 await viewModel.imageSelectionsDidChange()
@@ -321,6 +324,33 @@ public struct HomeView: View {
             appearance.pageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.33)
         }
     }
+    
+    fileprivate func rendered(_ shareableImage: ShareableImage) -> some View {
+        return Image(uiImage: shareableImage.framedScreenshot)
+            .resizable()
+            .scaledToFit()
+            .padding(100)
+            .background {
+                backgroundView
+                    .animation(.default, value: backgroundType)
+                    .animation(.default, value: color)
+                    .scaledToFit()
+            }
+            .clipped()
+            .cornerRadius(20)
+    }
+    
+    @MainActor func render() {
+        let renderer = ImageRenderer(content: rendered(viewModel.imageResults.individual.first!))
+        
+        // make sure and use the correct display scale for this device
+        renderer.scale = displayScale
+        
+        if let uiImage = renderer.uiImage {
+            renderedImage = Image(uiImage: uiImage)
+        }
+    }
+    
     
     private func gridView(shareableImages: [ShareableImage]) -> some View {
         ScrollView {

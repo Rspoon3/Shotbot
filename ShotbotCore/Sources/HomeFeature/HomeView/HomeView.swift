@@ -31,6 +31,7 @@ public struct HomeView: View {
     @State private var color = Color.blue
     @State private var backgroundType: BackgroundType = .angularGradient
     @Environment(\.displayScale) var displayScale
+    @State private var renderedImage = Image(systemName: "photo")
 
     // MARK: - Initializer
     
@@ -205,7 +206,7 @@ public struct HomeView: View {
             Image(uiImage: shareableImage.framedScreenshot)
                 .resizable()
                 .scaledToFit()
-                .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                .draggable(renderedImage)
                 .contextMenu {
                     contextMenu(shareableImage: shareableImage)
                 }
@@ -402,7 +403,7 @@ public struct HomeView: View {
                         .contextMenu {
                             contextMenu(shareableImage: shareableImage)
                         }
-                        .draggable(Image(uiImage: shareableImage.framedScreenshot))
+                        .draggable(renderedImage)
                         .onTapGesture(count: 2) {
                             viewModel.copy(shareableImage.framedScreenshot)
                         }

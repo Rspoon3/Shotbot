@@ -47,6 +47,9 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     @AppStorage("isSubscribed", store: .shared)
     public var isSubscribed = false
     
+    @AppStorage("autoCopy")
+    public var autoCopy: Bool = false
+    
     @AppStorage("autoSaveToFiles")
     public var autoSaveToFiles: Bool = false
     
@@ -109,6 +112,7 @@ public class MockPersistenceManager: PersistenceManaging {
     public var numberOfLaunches: Int = 0
     public var numberOfActivations: Int = 0
     public var deviceFrameCreations: Int = 0
+    public var autoCopy: Bool = false
     public var autoSaveToFiles: Bool = false
     public var autoSaveToPhotos: Bool = false
     public var autoDeleteScreenshots: Bool = false
@@ -124,6 +128,7 @@ public class MockPersistenceManager: PersistenceManaging {
         lastReviewPromptDate = nil
         canSaveFramedScreenshot = false
         isSubscribed = false
+        autoCopy = false
         autoSaveToFiles = false
         autoSaveToPhotos = false
         autoDeleteScreenshots = false

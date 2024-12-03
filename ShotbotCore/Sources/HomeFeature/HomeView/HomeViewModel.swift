@@ -265,7 +265,8 @@ import CreateCombinedImageFeature
             await combineDeviceFrames()
             try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
             
-            if imageType == .combined {
+            switch imageType {
+            case .combined:
                 isLoading = false
                 
                 guard let combined = imageResults.combined else {
@@ -275,6 +276,14 @@ import CreateCombinedImageFeature
                 
                 logger.fault("Setting viewState to combinedImages")
                 viewState = .combinedImages(combined)
+                
+                if persistenceManager.autoCopy {
+                    copy(combined.framedScreenshot)
+                }
+            case .individual:
+                if persistenceManager.autoCopy, let first = imageResults.individual.first?.framedScreenshot {
+                    copy(first)
+                }
             }
             
             // Post FramedScreenshot generation

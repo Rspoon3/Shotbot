@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MediaManager
+import SwiftTools
 
 struct AppPermissionsView: View {
     @Environment(\.openURL) var openURL

@@ -1,6 +1,6 @@
 //
 //  HomeViewModel.swift
-//  Shot Bot
+//  Shotbot
 //
 //  Created by Richard Witherspoon on 4/20/23.
 //
@@ -19,6 +19,7 @@ import CollectionConcurrencyKit
 import WidgetFeature
 import Combine
 import CreateCombinedImageFeature
+import SwiftTools
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()

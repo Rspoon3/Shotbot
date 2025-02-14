@@ -10,6 +10,7 @@ import RevenueCat
 import Persistence
 import Models
 import OSLog
+import SwiftTools
 
 @MainActor final class PurchaseViewModel: ObservableObject {
     private let purchaseManager: PurchaseManaging

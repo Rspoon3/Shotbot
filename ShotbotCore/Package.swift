@@ -6,7 +6,7 @@
 let package = Package(
     name: "ShotbotCore",
     platforms: [
-        .iOS(.v16),
+        .iOS(.v17),
         .visionOS(.v1)
     ],
     products: [
@@ -24,7 +24,8 @@ let package = Package(
     dependencies: [
         .collectionConcurrencyKit,
         .alertToast,
-        .revenueCat
+        .revenueCat,
+        .swiftTools
     ],
     targets: [
         .appFeature,
@@ -96,7 +97,8 @@ extension Target {
     static let persistence: Target = .target(
         name: "Persistence",
         dependencies: [
-            .target(.models)
+            .target(.models),
+            .swiftTools
         ]
     )
     
@@ -125,7 +127,8 @@ extension Target {
     static let models: Target = .target(
         name: "Models",
         dependencies: [
-            .collectionConcurrencyKit
+            .collectionConcurrencyKit,
+            .swiftTools
         ],
         resources: [
             .process("Resources"),
@@ -136,7 +139,8 @@ extension Target {
         name: "Purchases",
         dependencies: [
             .target(.persistence),
-            .revenueCat
+            .revenueCat,
+            .swiftTools
         ]
     )
     
@@ -169,7 +173,8 @@ extension Target {
             .target(.sbFoundation),
             .target(.widgetFeature),
             .target(.createCombinedImageFeature),
-            .alertToast
+            .alertToast,
+            .swiftTools
         ]
     )
     
@@ -203,6 +208,12 @@ extension Target.Dependency {
         name: "RevenueCat",
         package: "purchases-ios"
     )
+    
+    
+    static let swiftTools: Target.Dependency = .product(
+        name: "SwiftTools",
+        package: "SwiftTools"
+    )
 }
 
 extension Package.Dependency {
@@ -219,5 +230,10 @@ extension Package.Dependency {
     static let revenueCat: Package.Dependency = .package(
         url: "https://github.com/RevenueCat/purchases-ios.git",
         exact: .init("5.2.2")!
+    )
+    
+    static let swiftTools: Package.Dependency = .package(
+        url: "https://github.com/Rspoon3/SwiftTools",
+        exact: "2.0.0"
     )
 }

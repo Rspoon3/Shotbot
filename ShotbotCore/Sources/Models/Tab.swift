@@ -1,6 +1,6 @@
 //
 //  Tab.swift
-//  Shot Bot
+//  Shotbot
 //
 //  Created by Richard Witherspoon on 4/20/23.
 //

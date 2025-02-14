@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftTools
 
 public struct DeviceInfo: Decodable {
     public let deviceFrame: String
@@ -80,10 +81,10 @@ public struct DeviceInfo: Decodable {
     public static func all() -> [DeviceInfo] {
         let bundle = Bundle.module
         
-        let iPhoneFrames = bundle.decode([DeviceInfo].self, from: "iPhoneFrames.json")
-        let iPadFrames = bundle.decode([DeviceInfo].self, from: "iPadFrames.json")
-        let macFrames = bundle.decode([DeviceInfo].self, from: "MacFrames.json")
-        let AppleWatchFrames = bundle.decode([DeviceInfo].self, from: "AppleWatchFrames.json")
+        let iPhoneFrames = try! bundle.decode([DeviceInfo].self, from: "iPhoneFrames.json")
+        let iPadFrames = try! bundle.decode([DeviceInfo].self, from: "iPadFrames.json")
+        let macFrames = try! bundle.decode([DeviceInfo].self, from: "MacFrames.json")
+        let AppleWatchFrames = try! bundle.decode([DeviceInfo].self, from: "AppleWatchFrames.json")
         
         return iPhoneFrames + iPadFrames + macFrames + AppleWatchFrames
     }

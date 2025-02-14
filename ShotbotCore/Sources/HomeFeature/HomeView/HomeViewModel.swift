@@ -1,6 +1,6 @@
 //
 //  HomeViewModel.swift
-//  Shot Bot
+//  Shotbot
 //
 //  Created by Richard Witherspoon on 4/20/23.
 //
@@ -19,6 +19,7 @@ import CollectionConcurrencyKit
 import WidgetFeature
 import Combine
 import CreateCombinedImageFeature
+import SwiftTools
 
 @MainActor public final class HomeViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
@@ -293,7 +294,8 @@ import CreateCombinedImageFeature
             await combineDeviceFrames()
             try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
             
-            if imageType == .combined {
+            switch imageType {
+            case .combined:
                 isLoading = false
                 
                 guard let combined = imageResults.combined else {
@@ -303,6 +305,14 @@ import CreateCombinedImageFeature
                 
                 logger.fault("Setting viewState to combinedImages")
                 viewState = .combinedImages(combined)
+                
+                if persistenceManager.autoCopy {
+                    copy(combined.framedScreenshot)
+                }
+            case .individual:
+                if persistenceManager.autoCopy, let first = imageResults.individual.first?.framedScreenshot {
+                    copy(first)
+                }
             }
             
             // Post FramedScreenshot generation
@@ -321,8 +331,6 @@ import CreateCombinedImageFeature
     /// Will auto save to files or photos if necessary
     private func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> ShareableImage {
         let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality)
-        
-        
         let color = UIColor.random().image(size:framedScreenshot.size + 400)!
         let framedBackgroundScreenshot = color.overlayWith(image: framedScreenshot)!
         

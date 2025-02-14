@@ -10,6 +10,7 @@ import PhotosUI
 import OSLog
 import Models
 import WidgetFeature
+import SwiftTools
 
 public protocol ScreenshotImporting: Sendable {
     func screenshots(from source: PhotoSource) async throws -> [UIScreenshot]

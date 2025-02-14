@@ -9,6 +9,7 @@ import UIKit
 import OSLog
 import Persistence
 import StoreKit
+import SwiftTools
 
 @MainActor
 public protocol ReviewManaging: Sendable {
@@ -50,8 +51,8 @@ public struct ReviewManager: ReviewManaging {
             return
         }
         
-        if let date = persistenceManager.lastReviewPromptDate {
-            guard date >= Date.now.adding(3, .day) else {
+        if let date = persistenceManager.lastReviewPromptDate, let future = Date.now.adding(3, .day) {
+            guard date >= future else {
                 logger.debug("Last review prompt date to recent: \(date, privacy: .public).")
                 return
             }

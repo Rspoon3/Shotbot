@@ -1,6 +1,6 @@
 //
 //  HomeView.swift
-//  Shot Bot
+//  Shotbot
 //
 //  Created by Richard Witherspoon on 4/20/23.
 //
@@ -66,10 +66,10 @@ public struct HomeView: View {
             matching: viewModel.photoFilter,
             photoLibrary: .shared()
         )
-        .onChange(of: backgroundType) { _ in
+        .onChange(of: backgroundType) { _, _ in
                  render()
              }
-        .onChange(of: viewModel.imageSelections) { newValue in
+        .onChange(of: viewModel.imageSelections) { _, _ in
             Task(priority: .userInitiated) {
                 await viewModel.imageSelectionsDidChange()
             }
@@ -132,7 +132,7 @@ public struct HomeView: View {
             await viewModel.requestPhotoLibraryAdditionAuthorization()
             await viewModel.changeImageQualityIfNeeded()
         }
-        .onChange(of: scenePhase) { newValue in
+        .onChange(of: scenePhase) { _, newValue in
             guard newValue == .background || newValue == .active else { return }
             viewModel.clearImagesOnAppBackground()
         }

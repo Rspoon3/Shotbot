@@ -70,9 +70,9 @@ public struct HomeView: View {
             photoLibrary: .shared()
         )
         .onChange(of: backgroundType) { _, _ in
-            Task {
-                await render()
-            }
+//            Task {
+//                await render()
+//            }
         }
         .onChange(of: viewModel.imageSelections) { _, _ in
             Task(priority: .userInitiated) {
@@ -240,10 +240,16 @@ public struct HomeView: View {
                         }
                         .disabled(viewModel.isLoading)
 
-                        PurchaseShareLink(
-                            items: [shareableImage.url],
-                            showPurchaseView: $viewModel.showPurchaseView
-                        )
+                        let _photo = renderTest(value: 1)
+                        let image = Image(uiImage: _photo)
+                        ShareLink(item: image, preview: SharePreview("Image", image: image))
+                            .id(Date())
+
+                        
+//                        PurchaseShareLink(
+//                            items: [renderTest()],
+//                            showPurchaseView: $viewModel.showPurchaseView
+//                        )
                     }
                 }
         }
@@ -432,7 +438,8 @@ public struct HomeView: View {
     }
     
     @MainActor func render() async {
-        try! await Task.sleep(for: .seconds(1))
+        let _ = print("Rendering...")
+        
         let view = rendered(viewModel.imageResults.individual.first!)
             .frame(widthAndHeight: 3000)
         let renderer = ImageRenderer(content: view)
@@ -443,6 +450,19 @@ public struct HomeView: View {
         if let uiImage = renderer.uiImage {
             renderedImage = Image(uiImage: uiImage)
         }
+    }
+    
+    func renderTest(value: Int) -> UIImage {
+        let _ = print("Rendering test...", value ?? -1)
+        
+        let view = rendered(viewModel.imageResults.individual.first!)
+            .frame(widthAndHeight: 3000)
+        let renderer = ImageRenderer(content: view)
+        
+        // make sure and use the correct display scale for this device
+        renderer.scale = displayScale
+        
+        return renderer.uiImage!
     }
     
     
@@ -492,10 +512,14 @@ public struct HomeView: View {
             Label("Copy", systemImage: "doc.on.doc")
         }
         
-        PurchaseShareLink(
-            items: [shareableImage.url],
-            showPurchaseView: $viewModel.showPurchaseView
-        )
+        let _photo = renderTest(value: 42)
+        let image = Image(symbol: .star).resizable() //Image(uiImage: _photo)
+        ShareLink(item: image, preview: SharePreview("Image CM", image: image))
+        
+        //        PurchaseShareLink(
+//            items: [shareableImage.url],
+//            showPurchaseView: $viewModel.showPurchaseView
+//        )
     }
     
     private func individualImagesView(_ shareableImages: [ShareableImage]) -> some View {
@@ -515,11 +539,17 @@ public struct HomeView: View {
                         Label("Individual View Type", systemImage: name)
                     }
                 }
+                
+                let _photo = renderTest(value: 3)
+//                let image = Image(uiImage: _photo)
+                let image = Image(uiImage: viewModel.imageResults.individual.first!.framedScreenshot)
+                ShareLink(item: image, preview: SharePreview("Image 3", image: image))
+                    .id(Date())
 
-                PurchaseShareLink(
-                    items: shareableImages.map(\.url),
-                    showPurchaseView: $viewModel.showPurchaseView
-                )
+//                PurchaseShareLink(
+//                    items: shareableImages.map(\.url),
+//                    showPurchaseView: $viewModel.showPurchaseView
+//                )
             }
         }
     }

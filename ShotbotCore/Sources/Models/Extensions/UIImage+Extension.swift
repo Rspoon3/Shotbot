@@ -187,10 +187,12 @@ public extension UIImage {
         
         return framedScreenshot
         
-        print(framedScreenshot.size)
-//        (1339.0, 2716.0)
+        let squareSize = max(framedScreenshot.size.width, framedScreenshot.size.height)
+        let backgroundSize = squareSize * 1.1
         
-        let color = UIColor.random().image(size:framedScreenshot.size + 400)!
+        let color = UIColor.random().image(size: .init(width: backgroundSize, height: backgroundSize))!
+        
+        print(framedScreenshot.size, backgroundSize)
         
         return color.overlayWith(image: framedScreenshot)!
         

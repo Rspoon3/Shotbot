@@ -32,6 +32,7 @@ public struct HomeView: View {
     @State private var backgroundType: BackgroundType = .angularGradient
     @Environment(\.displayScale) var displayScale
     @State private var renderedImage = Image(systemName: "photo")
+    @State private var padding: CGFloat = 0
 
     // MARK: - Initializer
     
@@ -52,6 +53,8 @@ public struct HomeView: View {
             }
             .pickerStyle(.segmented)
             
+            Slider(value: $padding, in: 0...100)
+            
             ColorPicker("Color", selection: $color)
             
             mainContent
@@ -67,8 +70,10 @@ public struct HomeView: View {
             photoLibrary: .shared()
         )
         .onChange(of: backgroundType) { _, _ in
-                 render()
-             }
+            Task {
+                await render()
+            }
+        }
         .onChange(of: viewModel.imageSelections) { _, _ in
             Task(priority: .userInitiated) {
                 await viewModel.imageSelectionsDidChange()
@@ -206,6 +211,15 @@ public struct HomeView: View {
             Image(uiImage: shareableImage.framedScreenshot)
                 .resizable()
                 .scaledToFit()
+                .padding(padding)
+                .border(Color.red)
+                .background {
+                    backgroundView
+                        .animation(.default, value: backgroundType)
+                        .animation(.default, value: color)
+                        .border(Color.blue)
+                }
+                .border(Color.green)
                 .draggable(renderedImage)
                 .contextMenu {
                     contextMenu(shareableImage: shareableImage)
@@ -345,8 +359,8 @@ public struct HomeView: View {
                     .contextMenu {
                         contextMenu(shareableImage: shareableImage)
                     }
-                    .padding([.horizontal, .top])
-                    .padding(.bottom, 40)
+//                    .padding([.horizontal, .top])
+//                    .padding(.bottom, 40)
                     .draggable(renderedImage)
                     .onTapGesture(count: 2) {
                         viewModel.copy(shareableImage.framedScreenshot)
@@ -361,23 +375,67 @@ public struct HomeView: View {
         }
     }
     
-    fileprivate func rendered(_ shareableImage: ShareableImage) -> some View {
-        return Image(uiImage: shareableImage.framedScreenshot)
-            .resizable()
-            .scaledToFit()
-            .padding(100)
-            .background {
-                backgroundView
-                    .animation(.default, value: backgroundType)
-                    .animation(.default, value: color)
+    fileprivate func renderedV1(_ shareableImage: ShareableImage) -> some View {
+        backgroundView
+            .clipShape(Square())
+            .overlay {
+                Image(uiImage: shareableImage.framedScreenshot)
+                    .resizable()
                     .scaledToFit()
+                //            .padding()
             }
-            .clipped()
-            .cornerRadius(20)
     }
     
-    @MainActor func render() {
-        let renderer = ImageRenderer(content: rendered(viewModel.imageResults.individual.first!))
+    fileprivate func rendered(_ shareableImage: ShareableImage) -> some View {
+        backgroundView
+            .aspectRatio(1, contentMode: .fit)
+            .animation(.default, value: backgroundType)
+            .animation(.default, value: color)
+            .cornerRadius(20)
+            .overlay {
+                GeometryReader { proxy in
+                    Image(uiImage: shareableImage.framedScreenshot)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: proxy.size.height * 0.9)
+                        .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+                }
+            }
+            .padding(padding)
+    }
+    
+    fileprivate func renderedV2(_ shareableImage: ShareableImage) -> some View {
+        GeometryReader { proxy in
+            let squareSize = min(proxy.size.width, proxy.size.height)
+            let imageSize = max(0, squareSize * 0.9)
+            
+            ZStack {
+                backgroundView
+                    .frame(width: squareSize, height: squareSize)
+                    .animation(.default, value: backgroundType)
+                    .animation(.default, value: color)
+                    .border(Color.red)
+                    .cornerRadius(20)
+                
+                Image(uiImage: shareableImage.framedScreenshot)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: imageSize, height: imageSize)
+                    .border(Color.green)
+                let _ = print(imageSize)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        }
+        .border(Color.yellow)
+        .padding()
+        .border(Color.blue)
+    }
+    
+    @MainActor func render() async {
+        try! await Task.sleep(for: .seconds(1))
+        let view = rendered(viewModel.imageResults.individual.first!)
+            .frame(widthAndHeight: 3000)
+        let renderer = ImageRenderer(content: view)
         
         // make sure and use the correct display scale for this device
         renderer.scale = displayScale
@@ -477,3 +535,37 @@ struct HomeView_Previews: PreviewProvider {
 }
 #endif
 
+
+
+
+struct Square: Shape {
+    func path(in rect: CGRect) -> Path {
+        let side = min(rect.width, rect.height) // Ensures it's always a square
+        let originX = rect.midX - side / 2
+        let originY = rect.midY - side / 2
+        
+        return Path { path in
+            path.addRect(CGRect(x: originX, y: originY, width: side, height: side))
+        }
+    }
+}
+
+struct SquareView: View {
+    var body: some View {
+        Square()
+            .fill(Color.blue)
+            .frame(width: 100, height: 100) // Example size
+    }
+}
+
+struct ContentView: View {
+    var body: some View {
+        SquareView()
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}

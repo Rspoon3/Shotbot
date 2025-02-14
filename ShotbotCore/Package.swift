@@ -234,6 +234,6 @@ extension Package.Dependency {
     
     static let swiftTools: Package.Dependency = .package(
         url: "https://github.com/Rspoon3/SwiftTools",
-        branch: "2.0"
+        exact: "2.0.0"
     )
 }

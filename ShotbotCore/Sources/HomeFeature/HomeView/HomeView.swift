@@ -71,7 +71,7 @@ public struct HomeView: View {
         )
         .onChange(of: backgroundType) { _, _ in
             Task {
-                await render()
+                await viewModel.imageSelectionsDidChange()
             }
         }
         .onChange(of: viewModel.imageSelections) { _, _ in
@@ -212,14 +212,6 @@ public struct HomeView: View {
                 .resizable()
                 .scaledToFit()
                 .padding(padding)
-                .border(Color.red)
-                .background {
-                    backgroundView
-                        .animation(.default, value: backgroundType)
-                        .animation(.default, value: color)
-                        .border(Color.blue)
-                }
-                .border(Color.green)
                 .draggable(renderedImage)
                 .contextMenu {
                     contextMenu(shareableImage: shareableImage)
@@ -290,42 +282,6 @@ public struct HomeView: View {
         }
     }
     
-    @ViewBuilder
-     private var backgroundView: some View {
-         switch backgroundType {
-         case .image:
-             Image(uiImage: viewModel.imageResults.originalScreenshots.first!)
-                 .resizable()
-                 .scaledToFill()
-                 .blur(radius: 20)
-         case .solidColor:
-             color
-         case .linearGradient:
-             Rectangle().fill(color.gradient)
-         case .radialGradient:
-             RadialGradient(
-                 gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
-                 center: .center,
-                 startRadius: 50,
-                 endRadius: 1000
-             )
-         case .angularGradient:
-             AngularGradient(
-                 gradient: Gradient(
-                     colors: [
-                         .red,
-                         .yellow,
-                         .green,
-                         .blue,
-                         .purple,
-                         .red
-                     ]
-                 ),
-                 center: .center
-             )
-         }
-     }
-    
     private var placeholder: some View {
         Image(systemName: "photo")
             .resizable()
@@ -355,12 +311,14 @@ public struct HomeView: View {
     private func tabView(shareableImages: [ShareableImage]) -> some View {
         TabView {
             ForEach(shareableImages) { shareableImage in
-                rendered(shareableImage)
+                Image(uiImage: shareableImage.framedScreenshot)
+                    .resizable()
+                    .scaledToFit()
                     .contextMenu {
                         contextMenu(shareableImage: shareableImage)
                     }
-//                    .padding([.horizontal, .top])
-//                    .padding(.bottom, 40)
+                    .padding([.horizontal, .top])
+                    .padding(.bottom, 40)
                     .draggable(renderedImage)
                     .onTapGesture(count: 2) {
                         viewModel.copy(shareableImage.framedScreenshot)
@@ -374,77 +332,6 @@ public struct HomeView: View {
             appearance.pageIndicatorTintColor = UIColor.gray.withAlphaComponent(0.33)
         }
     }
-    
-    fileprivate func renderedV1(_ shareableImage: ShareableImage) -> some View {
-        backgroundView
-            .clipShape(Square())
-            .overlay {
-                Image(uiImage: shareableImage.framedScreenshot)
-                    .resizable()
-                    .scaledToFit()
-                //            .padding()
-            }
-    }
-    
-    fileprivate func rendered(_ shareableImage: ShareableImage) -> some View {
-        backgroundView
-            .aspectRatio(1, contentMode: .fit)
-            .animation(.default, value: backgroundType)
-            .animation(.default, value: color)
-            .cornerRadius(20)
-            .overlay {
-                GeometryReader { proxy in
-                    Image(uiImage: shareableImage.framedScreenshot)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: proxy.size.height * 0.9)
-                        .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                }
-            }
-            .padding(padding)
-    }
-    
-    fileprivate func renderedV2(_ shareableImage: ShareableImage) -> some View {
-        GeometryReader { proxy in
-            let squareSize = min(proxy.size.width, proxy.size.height)
-            let imageSize = max(0, squareSize * 0.9)
-            
-            ZStack {
-                backgroundView
-                    .frame(width: squareSize, height: squareSize)
-                    .animation(.default, value: backgroundType)
-                    .animation(.default, value: color)
-                    .border(Color.red)
-                    .cornerRadius(20)
-                
-                Image(uiImage: shareableImage.framedScreenshot)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: imageSize, height: imageSize)
-                    .border(Color.green)
-                let _ = print(imageSize)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        }
-        .border(Color.yellow)
-        .padding()
-        .border(Color.blue)
-    }
-    
-    @MainActor func render() async {
-        try! await Task.sleep(for: .seconds(1))
-        let view = rendered(viewModel.imageResults.individual.first!)
-            .frame(widthAndHeight: 3000)
-        let renderer = ImageRenderer(content: view)
-        
-        // make sure and use the correct display scale for this device
-        renderer.scale = displayScale
-        
-        if let uiImage = renderer.uiImage {
-            renderedImage = Image(uiImage: uiImage)
-        }
-    }
-    
     
     private func gridView(shareableImages: [ShareableImage]) -> some View {
         ScrollView {

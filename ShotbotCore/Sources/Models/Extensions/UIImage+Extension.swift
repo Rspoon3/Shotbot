@@ -7,6 +7,7 @@
 
 import UIKit
 import AVFoundation
+import SwiftUI
 
 public extension UIImage {
     convenience init?(named name: String, in bundle: Bundle) {
@@ -177,6 +178,7 @@ public extension UIImage {
     }
     
     /// Creates a framed screenshot based on the image quality passed in
+    @MainActor
     func framedScreenshot(quality: ImageQuality) throws -> UIFramedScreenshot {
         guard
             let device = DeviceInfo.all().first(where: {$0.inputSize == size}),
@@ -185,16 +187,22 @@ public extension UIImage {
             throw SBError.unsupportedImage
         }
         
-        return framedScreenshot
+//        return framedScreenshot
         
         let squareSize = max(framedScreenshot.size.width, framedScreenshot.size.height)
         let backgroundSize = squareSize * 1.1
         
-        let color = UIColor.random().image(size: .init(width: backgroundSize, height: backgroundSize))!
+        //        let color = UIColor.random().image(size: .init(width: backgroundSize, height: backgroundSize))!
+        
+        let view = BackgroundView(value: Int.random(in: 0...4))
+            .frame(widthAndHeight: backgroundSize)
+        
+        let renderer = ImageRenderer(content: view)
+        let backgroundImage = renderer.uiImage!
         
         print(framedScreenshot.size, backgroundSize)
         
-        return color.overlayWith(image: framedScreenshot)!
+        return backgroundImage.overlayWith(image: framedScreenshot)!
         
         // Add a background
 //        let backgroundImage = framedScreenshot.redrawing(overColor: .systemRed)
@@ -206,6 +214,51 @@ public extension UIImage {
 //        return backgroundImage
     }
 }
+
+
+
+struct BackgroundView: View {
+    let value: Int
+    
+    var body: some View {
+        switch value {
+        case 0:
+            Image(uiImage: .init(symbol: .star))
+                .resizable()
+                .scaledToFill()
+                .blur(radius: 20)
+        case 1:
+            Color.red
+        case 2:
+            Rectangle().fill(Color.blue.gradient)
+        case 3:
+            RadialGradient(
+                gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
+                center: .center,
+                startRadius: 50,
+                endRadius: 1000
+            )
+        default:
+            AngularGradient(
+                gradient: Gradient(
+                    colors: [
+                        .red,
+                        .yellow,
+                        .green,
+                        .blue,
+                        .purple,
+                        .red
+                    ]
+                ),
+                center: .center
+            )
+        }
+    }
+ }
+
+
+
+
 
 import UIKit
 

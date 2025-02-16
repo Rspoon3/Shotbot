@@ -56,6 +56,11 @@ public struct HomeView: View {
             Slider(value: $padding, in: 0...100)
             
             ColorPicker("Color", selection: $color)
+                .onChange(of: color) { _, _ in
+                    Task {
+                        await viewModel.didChangeBackground()
+                    }
+                }
             
             mainContent
             selectionButtons
@@ -71,7 +76,7 @@ public struct HomeView: View {
         )
         .onChange(of: backgroundType) { _, _ in
             Task {
-                await viewModel.imageSelectionsDidChange()
+                await viewModel.didChangeBackground()
             }
         }
         .onChange(of: viewModel.imageSelections) { _, _ in
@@ -311,7 +316,7 @@ public struct HomeView: View {
     private func tabView(shareableImages: [ShareableImage]) -> some View {
         TabView {
             ForEach(shareableImages) { shareableImage in
-                Image(uiImage: shareableImage.framedScreenshot)
+                Image(uiImage: shareableImage.framedBackgroundScreenshot)
                     .resizable()
                     .scaledToFit()
                     .contextMenu {

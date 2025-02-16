@@ -331,8 +331,6 @@ import SwiftTools
     /// Will auto save to files or photos if necessary
     private func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> ShareableImage {
         let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality)
-        let color = UIColor.random().image(size:framedScreenshot.size + 400)!
-        let framedBackgroundScreenshot = color.overlayWith(image: framedScreenshot)!
         
         let path = "Framed Screenshot \(count)_\(UUID()).png"
         let temporaryURL = URL.temporaryDirectory.appending(path: path)
@@ -347,7 +345,7 @@ import SwiftTools
         
         return ShareableImage(
             framedScreenshot: framedScreenshot,
-            framedBackgroundScreenshot: framedBackgroundScreenshot,
+            framedBackgroundScreenshot: framedScreenshot,
             url: temporaryURL
         )
     }
@@ -419,6 +417,24 @@ import SwiftTools
         } catch {
             self.error = error
         }
+    }
+    
+    public func didChangeBackground() async {
+        print(#function)
+        let framedScreenshot = imageResults.individual.first!.framedScreenshot
+        let squareSize = max(framedScreenshot.size.width, framedScreenshot.size.height)
+        let backgroundSize = squareSize * 1.1
+        
+        let view = BackgroundView(value: Int.random(in: 0...4))
+            .frame(widthAndHeight: backgroundSize)
+        
+        let renderer = ImageRenderer(content: view)
+        let backgroundImage = renderer.uiImage!
+        
+        let withBackground = backgroundImage.overlayWith(image: framedScreenshot)!
+        
+        imageResults.individual[0].framedBackgroundScreenshot = withBackground
+        viewState = .individualImages(imageResults.individual)
     }
     
     /// If not loading, show the photo picker.
@@ -583,3 +599,48 @@ extension ImageRenderer {
         self.init(content: content())
     }
 }
+
+
+
+import SwiftUI
+
+
+struct BackgroundView: View {
+    let value: Int
+    
+    var body: some View {
+        switch value {
+        case 0:
+            Image(uiImage: .init(symbol: .star))
+                .resizable()
+                .scaledToFill()
+                .blur(radius: 20)
+        case 1:
+            Color.red
+        case 2:
+            Rectangle().fill(Color.blue.gradient)
+        case 3:
+            RadialGradient(
+                gradient: Gradient(colors: [.red, .yellow, .green, .blue, .purple]),
+                center: .center,
+                startRadius: 50,
+                endRadius: 1000
+            )
+        default:
+            AngularGradient(
+                gradient: Gradient(
+                    colors: [
+                        .red,
+                        .yellow,
+                        .green,
+                        .blue,
+                        .purple,
+                        .red
+                    ]
+                ),
+                center: .center
+            )
+        }
+    }
+ }
+

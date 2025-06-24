@@ -166,25 +166,26 @@ import CreateCombinedImageFeature
     }
     
     private func getImage(from result: any NSSecureCoding) -> UIImage? {
-        if let image = result as? UIImage {
-            let size = CGSize(
-                width: image.size.width * image.scale,
-                height: image.size.height * image.scale
-            )
-            
-            return image.resized(to: size)
-        } else if let imageURL = result as? URL {
-            guard
-                let data = try? Data(contentsOf: imageURL),
-                let screenshotFromData = UIImage(data: data)
-            else {
-                return nil
-            }
-            
-            return screenshotFromData
+        let image: UIImage?
+        
+        if let uiImage = result as? UIImage {
+            image = uiImage
+        } else if let imageURL = result as? URL, let data = try? Data(contentsOf: imageURL) {
+            image = UIImage(data: data)
+        } else if let data = result as? Data {
+            image = UIImage(data: data)
         } else {
             return nil
         }
+        
+        guard let image else { return nil }
+        
+        let size = CGSize(
+            width: image.size.width * image.scale,
+            height: image.size.height * image.scale
+        )
+        
+        return image.resized(to: size)
     }
     
     private func createCombineImageIfNeeded() async {

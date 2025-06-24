@@ -48,7 +48,7 @@ struct ShotbotApp: App {
                     performLogging()
                 }
         }
-        .onChange(of: scenePhase) { phase in
+        .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:
                 persistenceManager.numberOfActivations += 1

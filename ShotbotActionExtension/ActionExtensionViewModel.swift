@@ -182,6 +182,12 @@ import CreateCombinedImageFeature
             }
             
             return screenshotFromData
+        } else if let data = result as? Data, let image = UIImage(data: data) {
+            let size = CGSize(
+                width: image.size.width * image.scale,
+                height: image.size.height * image.scale
+            )
+            return image.resized(to: size)
         } else {
             return nil
         }

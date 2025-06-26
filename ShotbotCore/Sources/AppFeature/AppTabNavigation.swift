@@ -23,7 +23,7 @@ public struct AppTabNavigation: View {
         TabView(selection: $tabManager.selectedTab) {
             NavigationStack {
                 HomeView(viewModel: .init())
-                    .toolbar(ProcessInfo.processInfo.isiOSAppOnMac ? .hidden : .automatic)
+                    .navigationBarTitleDisplayMode(ProcessInfo.processInfo.isiOSAppOnMac ? .inline : .automatic)
             }
             .tabItem {
                 Label("Home", systemImage: "house")

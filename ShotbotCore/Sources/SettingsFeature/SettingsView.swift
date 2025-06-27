@@ -1,6 +1,6 @@
 //
 //  SettingsView.swift
-//  Shot Bot
+//  Shotbot
 //
 //  Created by Richard Witherspoon on 4/20/23.
 //
@@ -9,9 +9,11 @@ import SwiftUI
 import Persistence
 import Models
 import Purchases
+import SwiftTools
 
 public struct SettingsView: View {
-    @StateObject private var viewModel = SettingsViewModel()
+    let appID = 6450552843
+    @State private var logExporter = LogExporter()
     @Environment(\.openURL) var openURL
     @EnvironmentObject private var persistenceManager: PersistenceManager
     
@@ -59,9 +61,9 @@ public struct SettingsView: View {
 
             Section("Feedback") {
                 Button {
-                    openURL(.mastodon)
+                    openURL(.personalMastodon)
                 } label: {
-                    Label("Mastodon", systemImage: "link")
+                    Label("Mastodon", symbol: .link)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
@@ -69,56 +71,53 @@ public struct SettingsView: View {
                 Button {
                     openURL(.twitter(username: "Rspoon3"))
                 } label: {
-                    Label("Twitter", systemImage: "link")
+                    Label("Twitter", symbol: .link)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
 
                 Button {
-                    viewModel.emailFeedbackButtonTapped()
+                    Task {
+                        try? await logExporter.emailFeedbackButtonTapped()
+                    }
                 } label: {
                     Label {
-                        Text(viewModel.emailButtonText)
+                        Text(logExporter.emailButtonText)
                     } icon: {
-                        if viewModel.isGeneratingLogs {
+                        if logExporter.isGeneratingLogs {
                             ProgressView()
                         } else {
-                            Image(systemName: "envelope")
+                            Image(symbol: .envelope)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
                 }
-                .disabled(viewModel.isGeneratingLogs)
-                .alert(isPresented: $viewModel.showEmailAlert) {
+                .animation(.default, value: logExporter.isGeneratingLogs)
+                .disabled(logExporter.isGeneratingLogs)
+                .alert(isPresented: $logExporter.showEmailAlert) {
                     Alert(
                         title: Text("Email Error"),
                         message: Text("Email services are not available on this device")
                     )
                 }
-                .alert(isPresented: $viewModel.showEmailFailedAlert) {
-                    Alert(
-                        title: Text("Email Error"),
-                        message: Text("An error occurred sending your email")
-                    )
-                }
-                .sheet(isPresented: $viewModel.showEmail) {
+                .sheet(isPresented: $logExporter.showEmail) {
                     MailView(
-                        recipients: ["richardwitherspoon3@gmail.com"],
-                        subject: "Shot Bot Feedback",
-                        message: viewModel.createFeedbackMessage(),
-                        attachments: viewModel.attachments
+                        recipients: logExporter.recipients,
+                        subject: "Shotbot Feedback",
+                        message: logExporter.createFeedbackMessage(),
+                        attachments: logExporter.attachments
                     ) { result in
                         if case .failure = result {
-                            viewModel.showEmailFailedAlert = true
+                            logExporter.showEmailAlert = true
                         }
                     }
                 }
 
                 Button {
-                    openURL(.appStore(appID: viewModel.appID))
+                    openURL(.appStore(appID: appID))
                 } label: {
-                    Label("Leave a review", systemImage: "star")
+                    Label("Leave a review", symbol: .star)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
@@ -138,26 +137,26 @@ public struct SettingsView: View {
                             }
                         }
                     } icon: {
-                        Image(systemName: "heart")
+                        Image(symbol: .heart)
                     }
                 }
 
                 NavigationLink {
                     SupportedDevicesView()
                 } label: {
-                    Label("Supported Devices", systemImage: "macbook.and.iphone")
+                    Label("Supported Devices", symbol: .macbookAndIphone)
                 }
 
                 NavigationLink {
                     AppPermissionsView()
                 } label: {
-                    Label("App Permissions", systemImage: "lock.shield")
+                    Label("App Permissions", symbol: .lockShield)
                 }
 
                 Button {
                     openURL(.gitHub)
                 } label: {
-                    Label("Source Code", systemImage: "doc.plaintext")
+                    Label("Source Code", symbol: .docPlaintext)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
@@ -165,7 +164,7 @@ public struct SettingsView: View {
                 Button {
                     openURL(.privacyPolicy)
                 } label: {
-                    Label("Privacy Policy", systemImage: "hand.raised")
+                    Label("Privacy Policy", symbol: .handRaised)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
@@ -173,7 +172,7 @@ public struct SettingsView: View {
                 Button {
                     openURL(.termsAndConditions)
                 } label: {
-                    Label("Terms & Conditions", systemImage: "exclamationmark.triangle")
+                    Label("Terms & Conditions", symbol: .exclamationmarkTriangle)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
@@ -213,7 +212,7 @@ public struct SettingsView: View {
             }
 #endif
 
-            SettingsMadeBy(appID: viewModel.appID)
+            SettingsMadeBy(appID: appID)
         }
         #if os(iOS)
         .navigationTitle("Settings")

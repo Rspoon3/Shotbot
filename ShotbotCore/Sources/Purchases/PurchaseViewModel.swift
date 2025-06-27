@@ -10,6 +10,7 @@ import RevenueCat
 import Persistence
 import Models
 import OSLog
+import SwiftTools
 
 @MainActor final class PurchaseViewModel: ObservableObject {
     private let purchaseManager: PurchaseManaging
@@ -56,9 +57,10 @@ import OSLog
     
     func restorePurchase() {
         userAction = .restoring
-        defer { userAction = nil }
         
         Task {
+            defer { userAction = nil }
+            
             do {
                 try await purchaseManager.restorePurchases()
             } catch {
@@ -76,9 +78,10 @@ import OSLog
         
         Task {
             userAction = .purchasing
-            defer { userAction = nil }
             
             do {
+                defer { userAction = nil }
+
                 try await purchaseManager.purchase(annualPackage)
             } catch {
                 self.error = error

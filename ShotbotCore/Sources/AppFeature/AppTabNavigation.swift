@@ -1,6 +1,6 @@
 //
 //  AppTabNavigation.swift
-//  Shot Bot
+//  Shotbot
 //
 //  Created by Richard Witherspoon on 4/20/23.
 //
@@ -23,7 +23,7 @@ public struct AppTabNavigation: View {
         TabView(selection: $tabManager.selectedTab) {
             NavigationStack {
                 HomeView(viewModel: .init())
-                    .toolbar(ProcessInfo.processInfo.isiOSAppOnMac ? .hidden : .automatic)
+                    .navigationBarTitleDisplayMode(ProcessInfo.processInfo.isiOSAppOnMac ? .inline : .automatic)
             }
             .tabItem {
                 Label("Home", systemImage: "house")

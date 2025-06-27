@@ -12,6 +12,7 @@ import MediaManager
 import SBFoundation
 import PhotosUI
 import Models
+import SwiftTools
 
 @MainActor
 public protocol AutoCRUDManaging: Sendable {

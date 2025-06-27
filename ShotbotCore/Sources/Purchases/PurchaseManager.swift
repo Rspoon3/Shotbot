@@ -10,6 +10,7 @@ import RevenueCat
 import Persistence
 import OSLog
 import Models
+import SwiftTools
 
 @MainActor
 public final class PurchaseManager: NSObject, ObservableObject, PurchaseManaging, @preconcurrency PurchasesDelegate {

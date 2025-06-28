@@ -11,6 +11,7 @@ import Models
 import MediaManager
 
 public struct HomeViewV2: View {
+    @Environment(\.displayScale) private var displayScale
     @State private var selectedImages: [UIImage] = []
     @State private var imageSelections: [PhotosPickerItem] = []
     @State private var showPhotosPicker = false
@@ -70,16 +71,12 @@ public struct HomeViewV2: View {
     
     private func framedImagesView(_ images: [UIImage]) -> some View {
         VStack(spacing: 16) {
-            HStack(spacing: 16) {
-                ForEach(Array(images.enumerated()), id: \.offset) { _, image in
-                    FramedScreenshotView(screenshot: image)
-                        .scaledToFit()
-                        .border(Color.gray, width: 1)
-                }
-            }
-            .padding()
+            FramedScreenshotsComposition(
+                screenshots: images,
+                showBorder: true
+            )
             .frame(maxHeight: .infinity)
-            
+
             PrimaryButton(title: "Export All") {
                 Task {
                     await exportImages()
@@ -147,27 +144,28 @@ public struct HomeViewV2: View {
         isExporting = true
         defer { isExporting = false }
         
-        do {
-            if selectedImages.count == 1 {
-                // Single image export - use original high-quality method
-                let framedImage = try selectedImages[0].framedScreenshot(quality: .original)
-                exportedImage = framedImage
-                showShareSheet = true
-            } else {
-                // Multiple images - frame each one then combine horizontally
-                var framedImages: [UIImage] = []
-                
-                for image in selectedImages {
-                    let framed = try image.framedScreenshot(quality: .original)
-                    framedImages.append(framed)
-                }
-                
-                let combinedImage = framedImages.combineHorizontally()
-                exportedImage = combinedImage
-                showShareSheet = true
-            }
-        } catch {
-            print("Export failed: \(error)")
+        let exportView: FramedScreenshotsComposition
+        
+        if selectedImages.count == 1 {
+            // Single image export - use fixed size for high quality
+            exportView = FramedScreenshotsComposition(
+                screenshots: selectedImages,
+                frameSize: CGSize(width: 400, height: 800)
+            )
+        } else {
+            // Multiple images export - use fixed size for consistent output
+            exportView = FramedScreenshotsComposition(
+                screenshots: selectedImages,
+                frameSize: CGSize(width: 400, height: 800)
+            )
+        }
+        
+        let renderer = ImageRenderer(content: exportView)
+        renderer.scale = displayScale
+        
+        if let image = renderer.uiImage {
+            exportedImage = image
+            showShareSheet = true
         }
     }
 }

@@ -90,26 +90,41 @@ public struct FramedScreenshotView: View {
                 geometry.size.height / frameImage.size.height
             )
             
-            // Calculate screenshot size and position
+            // Calculate screenshot size
             let screenshotSize = CGSize(
                 width: processed.size.width * frameScale,
                 height: processed.size.height * frameScale
             )
             
-            // Calculate center position, then apply the scaled offset
-            let centerX = geometry.size.width / 2
-            let centerY = geometry.size.height / 2
+            // Check if this is a landscape frame (width > height)
+            let isLandscape = frameImage.size.width > frameImage.size.height
             
-            let screenshotOffset = CGPoint(
-                x: centerX + (offset.x * frameScale) - (screenshotSize.width / 2),
-                y: centerY + (offset.y * frameScale) - (screenshotSize.height / 2)
-            )
-            
-            Image(uiImage: processed)
-                .resizable()
-                .frame(width: screenshotSize.width, height: screenshotSize.height)
-                .position(x: screenshotOffset.x + screenshotSize.width/2, y: screenshotOffset.y + screenshotSize.height/2)
-                .allowsHitTesting(false)
+            if isLandscape {
+                // Landscape positioning (current working logic)
+                let topLeftX = offset.x * frameScale
+                let topLeftY = offset.y * frameScale
+                let centerX = topLeftX + screenshotSize.width / 2
+                let centerY = topLeftY + screenshotSize.height / 2
+                
+                Image(uiImage: processed)
+                    .resizable()
+                    .frame(width: screenshotSize.width, height: screenshotSize.height)
+                    .position(x: centerX, y: centerY)
+                    .allowsHitTesting(false)
+            } else {
+                // Portrait positioning (previous working logic)
+                let scaledOffset = CGPoint(
+                    x: offset.x * frameScale,
+                    y: offset.y * frameScale
+                )
+                
+                Image(uiImage: processed)
+                    .resizable()
+                    .frame(width: screenshotSize.width, height: screenshotSize.height)
+                    .offset(x: scaledOffset.x, y: scaledOffset.y)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .allowsHitTesting(false)
+            }
         }
     }
 }

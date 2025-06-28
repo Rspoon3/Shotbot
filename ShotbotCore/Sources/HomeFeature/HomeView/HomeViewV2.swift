@@ -189,16 +189,20 @@ public struct HomeViewV2: View {
         isExporting = true
         defer { isExporting = false }
         
-        let exportView = FramedScreenshotsComposition(screenshots: selectedImages)
+        let exportView = FramedScreenshotsComposition(
+            screenshots: selectedImages,
+            spacing: spacing,
+            padding: padding
+        )
         let renderer = ImageRenderer(content: exportView)
-        renderer.scale = displayScale
+//        renderer.scale = displayScale
         
         if let image = renderer.uiImage {
             exportedImage = image
             showShareSheet = true
         }
         
-//        1902 × 2620 frame but a 3932 x 5368 export
+//        1902 × 2620 frame but a 3804 x 5240 export
     }
 }
 

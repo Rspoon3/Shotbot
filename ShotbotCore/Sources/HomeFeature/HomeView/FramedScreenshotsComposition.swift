@@ -8,12 +8,12 @@
 import SwiftUI
 
 public struct FramedScreenshotsComposition: View {
-    public let screenshots: [UIImage]
+    public let screenshots: [ProcessedScreenshot]
     public let spacing: CGFloat
     public let padding: CGFloat
     
     public init(
-        screenshots: [UIImage],
+        screenshots: [ProcessedScreenshot],
         spacing: CGFloat = 16,
         padding: CGFloat = 32
     ) {
@@ -24,8 +24,8 @@ public struct FramedScreenshotsComposition: View {
     
     public var body: some View {
         HStack(spacing: spacing) {
-            ForEach(screenshots, id: \.self) { screenshot in
-                FramedScreenshotView(screenshot: screenshot)
+            ForEach(screenshots) { processedScreenshot in
+                FramedScreenshotView(processedScreenshot: processedScreenshot)
             }
         }
         .padding(padding)
@@ -44,13 +44,16 @@ public struct FramedScreenshotsComposition: View {
 #if DEBUG
 struct FramedScreenshotsComposition_Previews: PreviewProvider {
     static var previews: some View {
-        if let testImage = UIImage(systemName: "photo")?.withConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 400)
-        ) {
-            FramedScreenshotsComposition(
-                screenshots: [testImage, testImage]
-            )
-        }
+        let processedScreenshot = ProcessedScreenshot(
+            image: UIImage(symbol: .star),
+            deviceInfo: .mock
+        )
+        FramedScreenshotsComposition(
+            screenshots: [
+                processedScreenshot,
+                processedScreenshot
+            ]
+        )
     }
 }
 #endif

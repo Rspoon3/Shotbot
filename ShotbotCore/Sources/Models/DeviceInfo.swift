@@ -8,7 +8,7 @@
 import UIKit
 import SwiftTools
 
-public struct DeviceInfo: Decodable {
+public struct DeviceInfo: Decodable, Sendable {
     public let deviceFrame: String
     public let mergeMethod: MergeMethod
     public let clipEdgesAmount: CGFloat?
@@ -96,4 +96,16 @@ public struct DeviceInfo: Decodable {
         
         return iPhoneFrames + iPadFrames + macFrames + AppleWatchFrames
     }
+    
+    // MARK: - Mock
+    
+    public static let mock = DeviceInfo(
+        deviceFrame: "iPhone 12 Pro Max",
+        mergeMethod: .singleOverlay,
+        clipEdgesAmount: nil,
+        cornerRadius: nil,
+        inputSize: .init(width: 1920, height: 1080),
+        scaledSize: nil,
+        offSet: nil
+    )
 }

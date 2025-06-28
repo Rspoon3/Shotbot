@@ -10,19 +10,23 @@ import Models
 
 public struct FramedScreenshotView: View {
     @Environment(\.displayScale) private var displayScale
-    public let screenshot: UIImage
+    public let processedScreenshot: ProcessedScreenshot
     @State private var opacity: CGFloat = 1
     
-    public init(screenshot: UIImage) {
-        self.screenshot = screenshot
+    public init(processedScreenshot: ProcessedScreenshot) {
+        self.processedScreenshot = processedScreenshot
     }
     
-    private var deviceInfo: DeviceInfo? {
-        DeviceInfo.all().first { $0.inputSize == screenshot.size }
+    private var screenshot: UIImage {
+        processedScreenshot.image
+    }
+    
+    private var deviceInfo: DeviceInfo {
+        processedScreenshot.deviceInfo
     }
     
     private var frameImage: UIImage? {
-        deviceInfo?.frameImage()
+        deviceInfo.frameImage()
     }
     
     private var frameSize: CGSize {
@@ -67,8 +71,13 @@ struct FramedScreenshotView_Previews: PreviewProvider {
     static var previews: some View {
         if let testImage = UIImage(systemName: "photo")?.withConfiguration(
             UIImage.SymbolConfiguration(pointSize: 400)
-        ) {
-            FramedScreenshotView(screenshot: testImage)
+        ),
+        let deviceInfo = DeviceInfo.all().first {
+            let processedScreenshot = ProcessedScreenshot(
+                image: testImage,
+                deviceInfo: deviceInfo
+            )
+            FramedScreenshotView(processedScreenshot: processedScreenshot)
                 .padding()
         }
     }

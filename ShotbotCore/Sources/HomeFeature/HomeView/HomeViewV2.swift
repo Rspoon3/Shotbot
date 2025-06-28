@@ -12,7 +12,7 @@ import MediaManager
 
 public struct HomeViewV2: View {
     @Environment(\.displayScale) private var displayScale
-    @State private var selectedImages: [UIImage] = []
+    @State private var selectedImages: [ProcessedScreenshot] = []
     @State private var imageSelections: [PhotosPickerItem] = []
     @State private var showPhotosPicker = false
     @State private var showShareSheet = false
@@ -83,7 +83,7 @@ public struct HomeViewV2: View {
         }
     }
     
-    private func framedImagesView(_ images: [UIImage]) -> some View {
+    private func framedImagesView(_ images: [ProcessedScreenshot]) -> some View {
         VStack(spacing: 16) {
             GeometryReader { geometry in
                 FramedScreenshotsComposition(
@@ -161,7 +161,7 @@ public struct HomeViewV2: View {
         exportedImageURL = nil
     }
     
-    private func scaledPadding(for availableSize: CGSize, images: [UIImage]) -> CGFloat {
+    private func scaledPadding(for availableSize: CGSize, images: [ProcessedScreenshot]) -> CGFloat {
         let baseWidth = calculateFrameWidth(for: images)
         let exportWidth = baseWidth + (2 * padding)
         let scale = availableSize.width / exportWidth
@@ -169,7 +169,7 @@ public struct HomeViewV2: View {
         return padding * scale
     }
     
-    private func scaledSpacing(for availableSize: CGSize, images: [UIImage]) -> CGFloat {
+    private func scaledSpacing(for availableSize: CGSize, images: [ProcessedScreenshot]) -> CGFloat {
         let baseWidth = calculateFrameWidth(for: images)
         let exportWidth = baseWidth + (2 * padding)
         let scale = availableSize.width / exportWidth
@@ -177,12 +177,11 @@ public struct HomeViewV2: View {
         return spacing * scale
     }
     
-    private func calculateFrameWidth(for images: [UIImage]) -> CGFloat {
+    private func calculateFrameWidth(for images: [ProcessedScreenshot]) -> CGFloat {
         var totalWidth: CGFloat = 0
         
-        for image in images {
-            if let deviceInfo = DeviceInfo.all().first(where: { $0.inputSize == image.size }),
-               let frameImage = deviceInfo.frameImage() {
+        for processedScreenshot in images {
+            if let frameImage = processedScreenshot.deviceInfo.frameImage() {
                 totalWidth += frameImage.size.width
             }
         }
@@ -196,11 +195,20 @@ public struct HomeViewV2: View {
     }
     
     private func handleDroppedItems(_ items: [Data]) async {
-        var droppedImages: [UIImage] = []
+        var droppedImages: [ProcessedScreenshot] = []
         
         for data in items {
-            if let image = UIImage(data: data) {
-                droppedImages.append(image)
+            if let image = UIImage(data: data),
+               let deviceInfo = DeviceInfo.all().first(where: { $0.inputSize == image.size }) {
+                
+                // Apply device-specific processing
+                var processedImage = image
+                if let cornerRadius = deviceInfo.cornerRadius {
+                    processedImage = image.withRoundedCorners(radius: cornerRadius)
+                }
+                
+                let processedScreenshot = ProcessedScreenshot(image: processedImage, deviceInfo: deviceInfo)
+                droppedImages.append(processedScreenshot)
             }
         }
         
@@ -210,13 +218,25 @@ public struct HomeViewV2: View {
     }
     
     private func loadSelectedImages(from items: [PhotosPickerItem]) async {
-        var loadedImages: [UIImage] = []
+        var loadedImages: [ProcessedScreenshot] = []
         
         for item in items {
             do {
                 if let data = try await item.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    loadedImages.append(image)
+                   let image = UIImage(data: data),
+                   let deviceInfo = DeviceInfo.all().first(where: { $0.inputSize == image.size }) {
+                    
+                    // Apply device-specific processing
+                    var processedImage = image
+                    if let cornerRadius = deviceInfo.cornerRadius {
+                        processedImage = image.withRoundedCorners(radius: cornerRadius)
+                    }
+                    
+                    let processedScreenshot = ProcessedScreenshot(
+                        image: processedImage,
+                        deviceInfo: deviceInfo
+                    )
+                    loadedImages.append(processedScreenshot)
                 }
             } catch {
                 print("Failed to load image: \(error)")

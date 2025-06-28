@@ -197,6 +197,8 @@ public struct HomeViewV2: View {
             exportedImage = image
             showShareSheet = true
         }
+        
+//        1902 × 2620 frame but a 3932 x 5368 export
     }
 }
 

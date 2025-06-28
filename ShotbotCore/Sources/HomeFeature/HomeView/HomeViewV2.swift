@@ -53,6 +53,13 @@ public struct HomeViewV2: View {
                     )
             }
         }
+        .contentShape(Rectangle())
+        .dropDestination(for: Data.self) { items, location in
+            Task(priority: .userInitiated) {
+                await handleDroppedItems(items)
+            }
+            return true
+        }
         .sheet(isPresented: $showShareSheet) {
             if let exportedImage {
                 ShareSheet(items: [exportedImage])
@@ -75,6 +82,23 @@ public struct HomeViewV2: View {
                 screenshots: images,
                 showBorder: true
             )
+            .onDrag {
+                if let exportedImage {
+                    return NSItemProvider(object: exportedImage)
+                } else {
+                    let exportView = FramedScreenshotsComposition(
+                        screenshots: images,
+                        frameSize: CGSize(width: 400, height: 800)
+                    )
+                    let renderer = ImageRenderer(content: exportView)
+                    renderer.scale = displayScale
+                    
+                    if let dragImage = renderer.uiImage {
+                        return NSItemProvider(object: dragImage)
+                    }
+                }
+                return NSItemProvider()
+            }
             .frame(maxHeight: .infinity)
 
             PrimaryButton(title: "Export All") {
@@ -117,6 +141,20 @@ public struct HomeViewV2: View {
     }
     
     // MARK: - Private Methods
+    
+    private func handleDroppedItems(_ items: [Data]) async {
+        var droppedImages: [UIImage] = []
+        
+        for data in items {
+            if let image = UIImage(data: data) {
+                droppedImages.append(image)
+            }
+        }
+        
+        await MainActor.run {
+            selectedImages = droppedImages
+        }
+    }
     
     private func loadSelectedImages(from items: [PhotosPickerItem]) async {
         var loadedImages: [UIImage] = []

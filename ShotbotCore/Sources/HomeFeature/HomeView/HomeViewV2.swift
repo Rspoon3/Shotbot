@@ -29,8 +29,8 @@ public struct HomeViewV2: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            Slider(value: $padding, in: 0...1000)
-            Slider(value: $spacing, in: 0...1000)
+            Slider(value: $padding, in: 0...1000, step: 1)
+            Slider(value: $spacing, in: 0...1000, step: 1)
             Button("Padding \(padding.formatted())") {
                 padding = padding > 0 ? 0 : 1000
             }

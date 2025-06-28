@@ -39,6 +39,7 @@ public struct FramedScreenshotView: View {
                     .resizable()
                     .scaledToFit()
                     .allowsHitTesting(false)
+                    .opacity(0.7)
             }
             .frame(
                 maxWidth: frameSize.width / displayScale,
@@ -81,7 +82,6 @@ public struct FramedScreenshotView: View {
     @ViewBuilder
     private func screenshotView(for deviceInfo: DeviceInfo, frameImage: UIImage) -> some View {
         GeometryReader { geometry in
-            let offset = deviceInfo.offSet ?? .zero
             let processed = processedScreenshot(for: deviceInfo)
             
             // Calculate the scale factor for the frame to fit in the view
@@ -103,17 +103,14 @@ public struct FramedScreenshotView: View {
             let positionY: CGFloat
             
             if isLandscape {
-                // Landscape positioning - top-left offset + center
-                let topLeftX = offset.x * frameScale
-                let topLeftY = offset.y * frameScale
-                positionX = topLeftX + screenshotSize.width / 2
-                positionY = topLeftY + screenshotSize.height / 2
+                positionX = frameScale + screenshotSize.width / 2
+                positionY = frameScale + screenshotSize.height / 2
             } else {
                 // Portrait positioning - centered with offset
                 let centerX = geometry.size.width / 2
                 let centerY = geometry.size.height / 2
-                positionX = centerX + (offset.x * frameScale)
-                positionY = centerY + (offset.y * frameScale)
+                positionX = centerX + frameScale
+                positionY = centerY + frameScale
             }
             
             return Image(uiImage: processed)

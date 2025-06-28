@@ -76,6 +76,14 @@ public struct DeviceInfo: Decodable {
         }
     }
     
+    public func frameImage() -> UIImage? {
+        return UIImage(named: deviceFrame, in: .module, with: nil)
+    }
+    
+    public func frameImageWithoutIsland() -> UIImage? {
+        return UIImage(named: "\(deviceFrame) Without Island", in: .module, with: nil)
+    }
+    
     // MARK: - Data
     
     public static func all() -> [DeviceInfo] {

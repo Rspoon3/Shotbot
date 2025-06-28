@@ -1,0 +1,197 @@
+//
+//  HomeViewV2.swift
+//  ShotbotCore
+//
+//  Created by Claude on 6/28/25.
+//
+
+import SwiftUI
+import PhotosUI
+import Models
+import MediaManager
+
+public struct HomeViewV2: View {
+    @State private var selectedImages: [UIImage] = []
+    @State private var imageSelections: [PhotosPickerItem] = []
+    @State private var showPhotosPicker = false
+    @State private var showShareSheet = false
+    @State private var exportedImage: UIImage?
+    @State private var isExporting = false
+    
+    // MARK: - Initializer
+    
+    public init() {}
+    
+    // MARK: - Body
+    
+    public var body: some View {
+        VStack(spacing: 0) {
+            mainContent
+            selectionButtons
+        }
+        .navigationTitle("Shotbot V2")
+        .photosPicker(
+            isPresented: $showPhotosPicker,
+            selection: $imageSelections,
+            matching: .images,
+            photoLibrary: .shared()
+        )
+        .onChange(of: imageSelections) { _, newValues in
+            Task {
+                await loadSelectedImages(from: newValues)
+            }
+        }
+        .overlay {
+            if isExporting {
+                ProgressView("Exporting...")
+                    .scaleEffect(1.5)
+                    .padding(.all, 20)
+                    .background(
+                        .thinMaterial,
+                        in: RoundedRectangle(cornerRadius: 8)
+                    )
+            }
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let exportedImage {
+                ShareSheet(items: [exportedImage])
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var mainContent: some View {
+        if !selectedImages.isEmpty {
+            framedImagesView(selectedImages)
+        } else {
+            placeholder
+        }
+    }
+    
+    private func framedImagesView(_ images: [UIImage]) -> some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 0) {
+                ForEach(Array(images.enumerated()), id: \.offset) { _, image in
+                    FramedScreenshotView(screenshot: image)
+                        .aspectRatio(contentMode: .fit)
+                        .border(Color.gray, width: 1)
+                }
+            }
+            .padding()
+            .frame(maxHeight: .infinity)
+            
+            PrimaryButton(title: "Export All") {
+                Task {
+                    await exportImages()
+                }
+            }
+            .disabled(isExporting)
+        }
+    }
+    
+    private var placeholder: some View {
+        Image(systemName: "photo")
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: 200)
+            .padding()
+            .contentShape(
+                .hoverEffect,
+                .rect(
+                    cornerRadius: 14,
+                    style: .continuous
+                )
+            )
+            .hoverEffect()
+            .foregroundColor(.secondary)
+            .frame(maxHeight: .infinity)
+            .onTapGesture {
+                showPhotosPicker = true
+            }
+    }
+    
+    private var selectionButtons: some View {
+        VStack(spacing: 16) {
+            PrimaryButton(title: "Select Photos") {
+                showPhotosPicker = true
+            }
+        }
+        .padding([.bottom, .horizontal])
+    }
+    
+    // MARK: - Private Methods
+    
+    private func loadSelectedImages(from items: [PhotosPickerItem]) async {
+        var loadedImages: [UIImage] = []
+        
+        for item in items {
+            do {
+                if let data = try await item.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    loadedImages.append(image)
+                }
+            } catch {
+                print("Failed to load image: \(error)")
+            }
+        }
+        
+        await MainActor.run {
+            selectedImages = loadedImages
+        }
+    }
+    
+    @MainActor
+    private func exportImages() async {
+        guard !selectedImages.isEmpty else { return }
+        
+        isExporting = true
+        defer { isExporting = false }
+        
+        do {
+            if selectedImages.count == 1 {
+                // Single image export - use original high-quality method
+                let framedImage = try selectedImages[0].framedScreenshot(quality: .original)
+                exportedImage = framedImage
+                showShareSheet = true
+            } else {
+                // Multiple images - frame each one then combine horizontally
+                var framedImages: [UIImage] = []
+                
+                for image in selectedImages {
+                    let framed = try image.framedScreenshot(quality: .original)
+                    framedImages.append(framed)
+                }
+                
+                let combinedImage = framedImages.combineHorizontally()
+                exportedImage = combinedImage
+                showShareSheet = true
+            }
+        } catch {
+            print("Export failed: \(error)")
+        }
+    }
+}
+
+// MARK: - ShareSheet
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// MARK: - Preview
+
+#if DEBUG
+struct HomeViewV2_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            HomeViewV2()
+        }
+    }
+}
+#endif

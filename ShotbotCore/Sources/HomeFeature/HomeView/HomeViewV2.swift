@@ -29,10 +29,10 @@ public struct HomeViewV2: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            Slider(value: $padding, in: 0...200)
-            Slider(value: $spacing, in: 0...200)
+            Slider(value: $padding, in: 0...1000)
+            Slider(value: $spacing, in: 0...1000)
             Button("Padding \(padding.formatted())") {
-                padding = padding > 0 ? 0 : 200
+                padding = padding > 0 ? 0 : 1000
             }
             mainContent
             selectionButtons
@@ -85,28 +85,31 @@ public struct HomeViewV2: View {
     
     private func framedImagesView(_ images: [UIImage]) -> some View {
         VStack(spacing: 16) {
-            FramedScreenshotsComposition(
-                screenshots: images,
-                spacing: spacing,
-                padding: padding
-            )
-            .onDrag {
-                if let exportedImage {
-                    return NSItemProvider(object: exportedImage)
-                } else {
-                    let exportView = FramedScreenshotsComposition(
-                        screenshots: images,
-                        spacing: spacing,
-                        padding: padding
-                    )
-                    let renderer = ImageRenderer(content: exportView)
-                    renderer.scale = displayScale
-                    
-                    if let dragImage = renderer.uiImage {
-                        return NSItemProvider(object: dragImage)
+            GeometryReader { geometry in
+                FramedScreenshotsComposition(
+                    screenshots: images,
+                    spacing: scaledSpacing(for: geometry.size, images: images),
+                    padding: scaledPadding(for: geometry.size, images: images)
+                )
+                .onDrag {
+                    if let exportedImage {
+                        return NSItemProvider(object: exportedImage)
+                    } else {
+                        let exportView = FramedScreenshotsComposition(
+                            screenshots: images,
+                            spacing: spacing,
+                            padding: padding
+                        )
+                        let renderer = ImageRenderer(content: exportView)
+                        renderer.scale = displayScale
+                        
+                        if let dragImage = renderer.uiImage {
+                            return NSItemProvider(object: dragImage)
+                        }
                     }
+                    return NSItemProvider()
                 }
-                return NSItemProvider()
+                .frame(width: geometry.size.width, height: geometry.size.height)
             }
             .frame(maxHeight: .infinity)
             
@@ -150,6 +153,40 @@ public struct HomeViewV2: View {
     }
     
     // MARK: - Private Methods
+    
+    private func scaledPadding(for availableSize: CGSize, images: [UIImage]) -> CGFloat {
+        let baseWidth = calculateFrameWidth(for: images)
+        let exportWidth = baseWidth + (2 * padding)
+        let scale = availableSize.width / exportWidth
+        
+        return padding * scale
+    }
+    
+    private func scaledSpacing(for availableSize: CGSize, images: [UIImage]) -> CGFloat {
+        let baseWidth = calculateFrameWidth(for: images)
+        let exportWidth = baseWidth + (2 * padding)
+        let scale = availableSize.width / exportWidth
+        
+        return spacing * scale
+    }
+    
+    private func calculateFrameWidth(for images: [UIImage]) -> CGFloat {
+        var totalWidth: CGFloat = 0
+        
+        for image in images {
+            if let deviceInfo = DeviceInfo.all().first(where: { $0.inputSize == image.size }),
+               let frameImage = deviceInfo.frameImage() {
+                totalWidth += frameImage.size.width
+            }
+        }
+        
+        // Add spacing between frames
+        if images.count > 1 {
+            totalWidth += spacing * CGFloat(images.count - 1)
+        }
+        
+        return totalWidth
+    }
     
     private func handleDroppedItems(_ items: [Data]) async {
         var droppedImages: [UIImage] = []

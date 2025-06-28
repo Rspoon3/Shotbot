@@ -11,38 +11,24 @@ public struct FramedScreenshotsComposition: View {
     public let screenshots: [UIImage]
     public let spacing: CGFloat
     public let padding: CGFloat
-    public let frameSize: CGSize?
-    public let showBorder: Bool
     
     public init(
         screenshots: [UIImage],
         spacing: CGFloat = 16,
-        padding: CGFloat = 32,
-        frameSize: CGSize? = nil,
-        showBorder: Bool = false
+        padding: CGFloat = 32
     ) {
         self.screenshots = screenshots
         self.spacing = spacing
         self.padding = padding
-        self.frameSize = frameSize
-        self.showBorder = showBorder
     }
     
     public var body: some View {
         HStack(spacing: spacing) {
             ForEach(screenshots, id: \.self) { screenshot in
-                Group {
-                    if let frameSize {
-                        FramedScreenshotView(screenshot: screenshot)
-                            .frame(width: frameSize.width, height: frameSize.height)
-                    } else {
-                        FramedScreenshotView(screenshot: screenshot)
-                            .scaledToFit()
-                    }
-                }
+                FramedScreenshotView(screenshot: screenshot)
             }
         }
-        .padding(padding)
+        //        .padding(padding)
         .background {
             LinearGradient(
                 colors: [.blue, .purple],
@@ -62,8 +48,7 @@ struct FramedScreenshotsComposition_Previews: PreviewProvider {
             UIImage.SymbolConfiguration(pointSize: 400)
         ) {
             FramedScreenshotsComposition(
-                screenshots: [testImage, testImage],
-                showBorder: true
+                screenshots: [testImage, testImage]
             )
         }
     }

@@ -9,6 +9,7 @@ import SwiftUI
 import Models
 
 public struct FramedScreenshotView: View {
+    @Environment(\.displayScale) private var displayScale
     public let screenshot: UIImage
     
     public init(screenshot: UIImage) {
@@ -23,6 +24,10 @@ public struct FramedScreenshotView: View {
         deviceInfo?.frameImage()
     }
     
+    private var frameSize: CGSize {
+        frameImage?.size ?? .zero
+    }
+    
     public var body: some View {
         if let deviceInfo, let frameImage {
             ZStack {
@@ -35,6 +40,10 @@ public struct FramedScreenshotView: View {
                     .scaledToFit()
                     .allowsHitTesting(false)
             }
+            .frame(
+                maxWidth: frameSize.width / displayScale,
+                maxHeight: frameSize.height / displayScale
+            )
             .aspectRatio(frameImage.size, contentMode: .fit)
         } else {
             // Fallback: show screenshot without frame

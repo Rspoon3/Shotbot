@@ -78,29 +78,23 @@ public struct HomeViewV2: View {
     
     private func framedImagesView(_ images: [UIImage]) -> some View {
         VStack(spacing: 16) {
-            FramedScreenshotsComposition(
-                screenshots: images,
-                showBorder: true
-            )
-            .onDrag {
-                if let exportedImage {
-                    return NSItemProvider(object: exportedImage)
-                } else {
-                    let exportView = FramedScreenshotsComposition(
-                        screenshots: images,
-                        frameSize: CGSize(width: 400, height: 800)
-                    )
-                    let renderer = ImageRenderer(content: exportView)
-                    renderer.scale = displayScale
-                    
-                    if let dragImage = renderer.uiImage {
-                        return NSItemProvider(object: dragImage)
+            FramedScreenshotsComposition(screenshots: images)
+                .onDrag {
+                    if let exportedImage {
+                        return NSItemProvider(object: exportedImage)
+                    } else {
+                        let exportView = FramedScreenshotsComposition(screenshots: images)
+                        let renderer = ImageRenderer(content: exportView)
+                        renderer.scale = displayScale
+                        
+                        if let dragImage = renderer.uiImage {
+                            return NSItemProvider(object: dragImage)
+                        }
                     }
+                    return NSItemProvider()
                 }
-                return NSItemProvider()
-            }
-            .frame(maxHeight: .infinity)
-
+                .frame(maxHeight: .infinity)
+            
             PrimaryButton(title: "Export All") {
                 Task {
                     await exportImages()
@@ -182,22 +176,7 @@ public struct HomeViewV2: View {
         isExporting = true
         defer { isExporting = false }
         
-        let exportView: FramedScreenshotsComposition
-        
-        if selectedImages.count == 1 {
-            // Single image export - use fixed size for high quality
-            exportView = FramedScreenshotsComposition(
-                screenshots: selectedImages,
-                frameSize: CGSize(width: 400, height: 800)
-            )
-        } else {
-            // Multiple images export - use fixed size for consistent output
-            exportView = FramedScreenshotsComposition(
-                screenshots: selectedImages,
-                frameSize: CGSize(width: 400, height: 800)
-            )
-        }
-        
+        let exportView = FramedScreenshotsComposition(screenshots: selectedImages)
         let renderer = ImageRenderer(content: exportView)
         renderer.scale = displayScale
         

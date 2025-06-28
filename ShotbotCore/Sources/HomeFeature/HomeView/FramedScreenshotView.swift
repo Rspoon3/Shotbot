@@ -24,46 +24,31 @@ public struct FramedScreenshotView: View {
     }
     
     public var body: some View {
-        GeometryReader { geometry in
+        if let deviceInfo, let frameImage {
             ZStack {
-                if let deviceInfo, let frameImage {
-                    // Calculate the scale to fit the frame within the available space
-                    let scale = min(
-                        geometry.size.width / frameImage.size.width,
-                        geometry.size.height / frameImage.size.height
-                    )
-                    
-                    let frameSize = CGSize(
-                        width: frameImage.size.width * scale,
-                        height: frameImage.size.height * scale
-                    )
-                    
-                    ZStack {
-                        // Screenshot layer (positioned using device info)
-                        screenshotView(for: deviceInfo, frameSize: frameSize, scale: scale)
-                        
-                        // Frame overlay
-                        Image(uiImage: frameImage)
-                            .resizable()
-                            .frame(width: frameSize.width, height: frameSize.height)
-                            .allowsHitTesting(false)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    // Fallback: show screenshot without frame
-                    Image(uiImage: screenshot)
-                        .resizable()
-                        .scaledToFit()
-                        .overlay(
-                            Text("Unsupported device size")
-                                .padding(8)
-                                .background(.ultraThinMaterial)
-                                .cornerRadius(8)
-                                .foregroundColor(.secondary),
-                            alignment: .topTrailing
-                        )
-                }
+                // Screenshot layer (positioned using device info)
+                screenshotView(for: deviceInfo, frameImage: frameImage)
+                
+                // Frame overlay
+                Image(uiImage: frameImage)
+                    .resizable()
+                    .scaledToFit()
+                    .allowsHitTesting(false)
             }
+            .aspectRatio(frameImage.size, contentMode: .fit)
+        } else {
+            // Fallback: show screenshot without frame
+            Image(uiImage: screenshot)
+                .resizable()
+                .scaledToFit()
+                .overlay(
+                    Text("Unsupported device size")
+                        .padding(8)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(8)
+                        .foregroundColor(.secondary),
+                    alignment: .topTrailing
+                )
         }
     }
     
@@ -85,22 +70,38 @@ public struct FramedScreenshotView: View {
     }
     
     @ViewBuilder
-    private func screenshotView(for deviceInfo: DeviceInfo, frameSize: CGSize, scale: CGFloat) -> some View {
-        let offset = deviceInfo.offSet ?? .zero
-        let scaledOffset = CGPoint(x: offset.x * scale, y: offset.y * scale)
-        let processed = processedScreenshot(for: deviceInfo)
-        
-        let screenshotScale = scale * (deviceInfo.scaledSize != nil ? 1.0 : 1.0)
-        let screenshotSize = CGSize(
-            width: processed.size.width * screenshotScale,
-            height: processed.size.height * screenshotScale
-        )
-        
-        Image(uiImage: processed)
-            .resizable()
-            .frame(width: screenshotSize.width, height: screenshotSize.height)
-            .offset(x: scaledOffset.x, y: scaledOffset.y)
-            .allowsHitTesting(false)
+    private func screenshotView(for deviceInfo: DeviceInfo, frameImage: UIImage) -> some View {
+        GeometryReader { geometry in
+            let offset = deviceInfo.offSet ?? .zero
+            let processed = processedScreenshot(for: deviceInfo)
+            
+            // Calculate the scale factor for the frame to fit in the view
+            let frameScale = min(
+                geometry.size.width / frameImage.size.width,
+                geometry.size.height / frameImage.size.height
+            )
+            
+            // Calculate screenshot size and position
+            let screenshotSize = CGSize(
+                width: processed.size.width * frameScale,
+                height: processed.size.height * frameScale
+            )
+            
+            // Calculate center position, then apply the scaled offset
+            let centerX = geometry.size.width / 2
+            let centerY = geometry.size.height / 2
+            
+            let screenshotOffset = CGPoint(
+                x: centerX + (offset.x * frameScale) - (screenshotSize.width / 2),
+                y: centerY + (offset.y * frameScale) - (screenshotSize.height / 2)
+            )
+            
+            Image(uiImage: processed)
+                .resizable()
+                .frame(width: screenshotSize.width, height: screenshotSize.height)
+                .position(x: screenshotOffset.x + screenshotSize.width/2, y: screenshotOffset.y + screenshotSize.height/2)
+                .allowsHitTesting(false)
+        }
     }
 }
 

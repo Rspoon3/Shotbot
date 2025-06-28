@@ -70,10 +70,10 @@ public struct HomeViewV2: View {
     
     private func framedImagesView(_ images: [UIImage]) -> some View {
         VStack(spacing: 16) {
-            HStack(spacing: 0) {
+            HStack(spacing: 16) {
                 ForEach(Array(images.enumerated()), id: \.offset) { _, image in
                     FramedScreenshotView(screenshot: image)
-                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
                         .border(Color.gray, width: 1)
                 }
             }

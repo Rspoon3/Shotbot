@@ -16,7 +16,7 @@ public struct HomeViewV2: View {
     @State private var imageSelections: [PhotosPickerItem] = []
     @State private var showPhotosPicker = false
     @State private var showShareSheet = false
-    @State private var exportedImage: UIImage?
+    @State private var exportedImageURL: URL?
     @State private var isExporting = false
     @State private var spacing: CGFloat = 0
     @State private var padding: CGFloat = 0
@@ -67,9 +67,9 @@ public struct HomeViewV2: View {
             }
             return true
         }
-        .sheet(isPresented: $showShareSheet) {
-            if let exportedImage {
-                ShareSheet(items: [exportedImage])
+        .sheet(isPresented: $showShareSheet, onDismiss: cleanupExportedImage) {
+            if let exportedImageURL {
+                ShareSheet(items: [exportedImageURL])
             }
         }
     }
@@ -92,8 +92,8 @@ public struct HomeViewV2: View {
                     padding: scaledPadding(for: geometry.size, images: images)
                 )
                 .onDrag {
-                    if let exportedImage {
-                        return NSItemProvider(object: exportedImage)
+                    if let exportedImageURL {
+                        return NSItemProvider(object: exportedImageURL as NSURL)
                     } else {
                         let exportView = FramedScreenshotsComposition(
                             screenshots: images,
@@ -153,6 +153,13 @@ public struct HomeViewV2: View {
     }
     
     // MARK: - Private Methods
+    
+    private func cleanupExportedImage() {
+        if let exportedImageURL {
+            try? FileManager.default.removeItem(at: exportedImageURL)
+        }
+        exportedImageURL = nil
+    }
     
     private func scaledPadding(for availableSize: CGSize, images: [UIImage]) -> CGFloat {
         let baseWidth = calculateFrameWidth(for: images)
@@ -236,9 +243,19 @@ public struct HomeViewV2: View {
         let renderer = ImageRenderer(content: exportView)
 //        renderer.scale = displayScale
         
-        if let image = renderer.uiImage {
-            exportedImage = image
-            showShareSheet = true
+        if let image = renderer.uiImage,
+           let imageData = image.pngData() {
+            
+            // Save to temporary file
+            let temporaryURL = URL.temporaryDirectory.appending(path: "FramedScreenshot_\(UUID().uuidString).png")
+            
+            do {
+                try imageData.write(to: temporaryURL)
+                exportedImageURL = temporaryURL
+                showShareSheet = true
+            } catch {
+                print("Failed to save image: \(error)")
+            }
         }
         
 //        1902 × 2620 frame and export too

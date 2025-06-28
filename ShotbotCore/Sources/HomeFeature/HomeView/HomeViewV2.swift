@@ -18,6 +18,8 @@ public struct HomeViewV2: View {
     @State private var showShareSheet = false
     @State private var exportedImage: UIImage?
     @State private var isExporting = false
+    @State private var spacing: CGFloat = 0
+    @State private var padding: CGFloat = 0
     
     // MARK: - Initializer
     
@@ -27,6 +29,8 @@ public struct HomeViewV2: View {
     
     public var body: some View {
         VStack(spacing: 0) {
+            Slider(value: $padding, in: 0...200)
+            Slider(value: $spacing, in: 0...200)
             mainContent
             selectionButtons
         }
@@ -78,22 +82,30 @@ public struct HomeViewV2: View {
     
     private func framedImagesView(_ images: [UIImage]) -> some View {
         VStack(spacing: 16) {
-            FramedScreenshotsComposition(screenshots: images)
-                .onDrag {
-                    if let exportedImage {
-                        return NSItemProvider(object: exportedImage)
-                    } else {
-                        let exportView = FramedScreenshotsComposition(screenshots: images)
-                        let renderer = ImageRenderer(content: exportView)
-                        renderer.scale = displayScale
-                        
-                        if let dragImage = renderer.uiImage {
-                            return NSItemProvider(object: dragImage)
-                        }
+            FramedScreenshotsComposition(
+                screenshots: images,
+                spacing: spacing,
+                padding: padding
+            )
+            .onDrag {
+                if let exportedImage {
+                    return NSItemProvider(object: exportedImage)
+                } else {
+                    let exportView = FramedScreenshotsComposition(
+                        screenshots: images,
+                        spacing: spacing,
+                        padding: padding
+                    )
+                    let renderer = ImageRenderer(content: exportView)
+                    renderer.scale = displayScale
+                    
+                    if let dragImage = renderer.uiImage {
+                        return NSItemProvider(object: dragImage)
                     }
-                    return NSItemProvider()
                 }
-                .frame(maxHeight: .infinity)
+                return NSItemProvider()
+            }
+            .frame(maxHeight: .infinity)
             
             PrimaryButton(title: "Export All") {
                 Task {

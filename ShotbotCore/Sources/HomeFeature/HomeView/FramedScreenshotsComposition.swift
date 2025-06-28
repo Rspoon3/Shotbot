@@ -28,7 +28,7 @@ public struct FramedScreenshotsComposition: View {
                 FramedScreenshotView(screenshot: screenshot)
             }
         }
-        //        .padding(padding)
+        .padding(padding)
         .background {
             LinearGradient(
                 colors: [.blue, .purple],

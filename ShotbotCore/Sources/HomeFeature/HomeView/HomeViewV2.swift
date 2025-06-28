@@ -31,6 +31,7 @@ public struct HomeViewV2: View {
         VStack(spacing: 0) {
             Slider(value: $padding, in: 0...200)
             Slider(value: $spacing, in: 0...200)
+            Button("Padding \(padding.formatted())") { padding = 0 }
             mainContent
             selectionButtons
         }

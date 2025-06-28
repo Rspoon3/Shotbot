@@ -99,32 +99,28 @@ public struct FramedScreenshotView: View {
             // Check if this is a landscape frame (width > height)
             let isLandscape = frameImage.size.width > frameImage.size.height
             
+            var positionX: CGFloat
+            let positionY: CGFloat
+            
             if isLandscape {
-                // Landscape positioning (current working logic)
+                // Landscape positioning - top-left offset + center
                 let topLeftX = offset.x * frameScale
                 let topLeftY = offset.y * frameScale
-                let centerX = topLeftX + screenshotSize.width / 2
-                let centerY = topLeftY + screenshotSize.height / 2
-                
-                Image(uiImage: processed)
-                    .resizable()
-                    .frame(width: screenshotSize.width, height: screenshotSize.height)
-                    .position(x: centerX, y: centerY)
-                    .allowsHitTesting(false)
+                positionX = topLeftX + screenshotSize.width / 2
+                positionY = topLeftY + screenshotSize.height / 2
             } else {
-                // Portrait positioning (previous working logic)
-                let scaledOffset = CGPoint(
-                    x: offset.x * frameScale,
-                    y: offset.y * frameScale
-                )
-                
-                Image(uiImage: processed)
-                    .resizable()
-                    .frame(width: screenshotSize.width, height: screenshotSize.height)
-                    .offset(x: scaledOffset.x, y: scaledOffset.y)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .allowsHitTesting(false)
+                // Portrait positioning - centered with offset
+                let centerX = geometry.size.width / 2
+                let centerY = geometry.size.height / 2
+                positionX = centerX + (offset.x * frameScale)
+                positionY = centerY + (offset.y * frameScale)
             }
+            
+            return Image(uiImage: processed)
+                .resizable()
+                .frame(width: screenshotSize.width, height: screenshotSize.height)
+                .position(x: positionX, y: positionY)
+                .allowsHitTesting(false)
         }
     }
 }

@@ -23,7 +23,6 @@ import WidgetKit
 
 @main
 struct ShotbotApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegateAdaptor.self) private var appDelegate
     @StateObject private var persistenceManager = PersistenceManager.shared
     @StateObject private var purchaseManager = PurchaseManager.shared
     @StateObject private var tabManager = TabManager()
@@ -37,22 +36,16 @@ struct ShotbotApp: App {
         Purchases.configure(withAPIKey: "appl_VOYNmwadBWEHBTYKlnZludJLwEX")
         
         do {
-            let schema = Schema([SDAnalyticEvent.self])
+            let schema = Schema([SDAnalyticEvent.self, SDAppVersion.self])
             let configuration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,
                 cloudKitDatabase: .none
             )
-            modelContainer = try ModelContainer(
-                for: schema,
-                configurations: configuration
-            )
+            modelContainer = try ModelContainer(for: schema, configurations: configuration)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
-        
-        // Set the shared model container for the app delegate to use
-//        AppDelegateAdaptor.shared = modelContainer
     }
     
     var body: some Scene {
@@ -62,16 +55,18 @@ struct ShotbotApp: App {
                 .environmentObject(purchaseManager)
                 .environmentObject(tabManager)
                 .modelContainer(modelContainer)
+                .onAppear {
+                    performLogging()
+                }
                 .task {
                     await purchaseManager.fetchOfferings()
-                    await performLogging()
                 }
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:
                 persistenceManager.numberOfActivations += 1
-                recordActivation()
+                recordAppActivation()
             case .background:
                 #if canImport(WidgetKit)
                 WidgetCenter.shared.reloadAllTimelines()
@@ -113,23 +108,44 @@ struct ShotbotApp: App {
             logger.notice("Screen width: \(screenWidth, privacy: .public). Screen height: \(screenHeight, privacy: .public).")
         }
         
-        // Log analytics counts using Swift Data
-        let context = modelContainer.mainContext
+        // Record app launch and increment counter
+        persistenceManager.numberOfLaunches += 1
+        recordAppLaunch()
         
+        // Log analytics counts using Swift Data
         do {
-            let launches = try SDAnalyticEvent.totalCount(for: .appLaunch, modelContext: context)
-            let activations = try SDAnalyticEvent.totalCount(for: .appActivation, modelContext: context)
-            let frameCreations = try SDAnalyticEvent.totalCount(for: .deviceFrameCreation, modelContext: context)
-                        
-            logger.notice("numberOfLaunches: \(launches.formatted(), privacy: .public)")
-            logger.notice("numberOfActivations: \(activations.formatted(), privacy: .public)")
-            logger.notice("deviceFrameCreations: \(frameCreations.formatted(), privacy: .public)")
+            let context = modelContainer.mainContext
+            let launchCount = try SDAnalyticEvent.totalCount(for: .appLaunch, modelContext: context)
+            let activationCount = try SDAnalyticEvent.totalCount(for: .appActivation, modelContext: context)
+            let frameCreationCount = try SDAnalyticEvent.totalCount(for: .deviceFrameCreation, modelContext: context)
+            
+            logger.notice("numberOfLaunches: \(launchCount.formatted(), privacy: .public)")
+            logger.notice("numberOfActivations: \(activationCount.formatted(), privacy: .public)")
+            logger.notice("deviceFrameCreations: \(frameCreationCount.formatted(), privacy: .public)")
         } catch {
             logger.warning("Failed to fetch launch/activation counts: \(error.localizedDescription, privacy: .public)")
         }
     }
     
-    private func recordActivation() {
+    // MARK: - Analytics Recording
+    
+    private func recordAppLaunch() {
+        let context = modelContainer.mainContext
+        let appVersion = SDAppVersion()
+        let analyticEvent = SDAnalyticEvent(event: .appLaunch, appVersion: appVersion)
+        
+        context.insert(appVersion)
+        context.insert(analyticEvent)
+        
+        do {
+            try context.save()
+            logger.info("Successfully saved app launch event")
+        } catch {
+            logger.error("Failed to save app launch event: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+    
+    private func recordAppActivation() {
         let context = modelContainer.mainContext
         let appVersion = SDAppVersion()
         let analyticEvent = SDAnalyticEvent(event: .appActivation, appVersion: appVersion)
@@ -139,37 +155,10 @@ struct ShotbotApp: App {
         
         do {
             try context.save()
+            logger.info("Successfully saved app activation event")
         } catch {
-            logger.error("Failed to save activation event: \(error.localizedDescription, privacy: .public)")
+            logger.error("Failed to save app activation event: \(error.localizedDescription, privacy: .public)")
         }
     }
 }
 
-final class AppDelegateAdaptor: NSObject, UIApplicationDelegate {
-//    let modelContainer: ModelContainer!
-//    
-//    init(modelContainer: ModelContainer!) {
-//        self.modelContainer = modelContainer
-//    }
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        PersistenceManager.shared.numberOfLaunches += 1
-        recordLaunch()
-        return true
-    }
-    
-    private func recordLaunch() {
-//        do {
-//            let context = modelContainer.mainContext
-//            let appVersion = SDAppVersion()
-//            let analyticEvent = SDAnalyticEvent(event: .appLaunch, appVersion: appVersion)
-//            
-//            context.insert(appVersion)
-//            context.insert(analyticEvent)
-//            
-//            try context.save()
-//        } catch {
-//            print("Failed to save launch event: \(error)")
-//        }
-    }
-}

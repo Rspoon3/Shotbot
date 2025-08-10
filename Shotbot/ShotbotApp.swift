@@ -31,6 +31,7 @@ struct ShotbotApp: App {
     private let logger = Logger(category: "ShotbotApp")
     private let modelContainer: ModelContainer
     
+    
     init() {
         Purchases.logLevel = .info
         Purchases.configure(withAPIKey: "appl_VOYNmwadBWEHBTYKlnZludJLwEX")

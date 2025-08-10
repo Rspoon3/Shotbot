@@ -9,6 +9,7 @@ import SwiftUI
 import Models
 import OSLog
 import SwiftTools
+import SwiftData
 
 @MainActor
 public final class PersistenceManager: ObservableObject, PersistenceManaging, Sendable {
@@ -103,6 +104,30 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     
     public func setLastReviewPromptDateToNow() {
         lastReviewPromptDate = .now
+    }
+    
+    public func recordDeviceFrameCreation() {
+        // This method should be called with a ModelContext from the calling code
+        // For now, we'll keep the existing counter approach
+        deviceFrameCreations += 1
+        logger.notice("Device frame creation recorded. Total: \(self.deviceFrameCreations.formatted(), privacy: .public)")
+    }
+    
+    public func recordDeviceFrameCreation(modelContext: ModelContext) {
+        do {
+            let appVersion = SDAppVersion()
+            let analyticEvent = SDAnalyticEvent(event: .deviceFrameCreation, appVersion: appVersion)
+            
+            modelContext.insert(appVersion)
+            modelContext.insert(analyticEvent)
+            
+            try modelContext.save()
+            
+            // Also update the counter for backward compatibility
+            deviceFrameCreations += 1
+        } catch {
+            logger.error("Failed to save device frame creation event: \(error.localizedDescription, privacy: .public)")
+        }
     }
 }
 

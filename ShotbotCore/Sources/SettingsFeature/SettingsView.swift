@@ -215,6 +215,12 @@ public struct SettingsView: View {
                 } label: {
                     Label("SwiftData Debug", systemImage: "externaldrive.connected.to.line.below")
                 }
+                
+                NavigationLink {
+                    SwiftDataModelDebugView()
+                } label: {
+                    Label("SwiftData DebugV2", systemImage: "externaldrive.connected.to.line.below")
+                }
             }
 #endif
 

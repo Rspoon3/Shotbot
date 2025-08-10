@@ -36,11 +36,6 @@ struct ShotbotApp: App {
         Purchases.logLevel = .info
         Purchases.configure(withAPIKey: "appl_VOYNmwadBWEHBTYKlnZludJLwEX")
         
-        #if DEBUG
-        // Register all models for debug indexing
-        SwiftDataRegistry.registerAllModels()
-        #endif
-        
         do {
             let schema = Schema([SDAnalyticEvent.self, SDAppVersion.self])
             let configuration = ModelConfiguration(

@@ -15,12 +15,13 @@ public class SDAppVersion: SwiftDataIndexable {
     public var patch: Int
     public var build: Int
     public var createdAt: Date
-    public var rawVersion: String
+    
+    @Attribute(.unique) public var rawVersion: String
     
     @Relationship(deleteRule: .cascade, inverse: \SDAnalyticEvent.appVersion)
     public var analyticsEvents: [SDAnalyticEvent] = []
     
-    private init() {
+    public init() {
         let versionString = Bundle.appVersion ?? "0.0.0"
         let components = versionString.split(separator: ".").compactMap { Int($0) }
         
@@ -71,43 +72,6 @@ public class SDAppVersion: SwiftDataIndexable {
         return version
     }
     
-    // MARK: - Find or Create
-    
-    public static func findOrCreate(modelContext: ModelContext) -> SDAppVersion {
-        let versionString = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
-        let buildString = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
-        let components = versionString.split(separator: ".").compactMap { Int($0) }
-        
-        let major = components.count > 0 ? components[0] : 0
-        let minor = components.count > 1 ? components[1] : 0
-        let patch = components.count > 2 ? components[2] : 0
-        let build = Int(buildString) ?? 0
-        
-        // Try to find existing version with same version numbers
-        let predicate = #Predicate<SDAppVersion> { version in
-            version.major == major &&
-            version.minor == minor &&
-            version.patch == patch &&
-            version.build == build &&
-            version.rawVersion == versionString
-        }
-        
-        let descriptor = FetchDescriptor<SDAppVersion>(predicate: predicate)
-        
-        do {
-            let existingVersions = try modelContext.fetch(descriptor)
-            if let existingVersion = existingVersions.first {
-                return existingVersion
-            }
-        } catch {
-            print("Error fetching existing app version: \(error)")
-        }
-        
-        // Create new version if none exists
-        let newVersion = SDAppVersion()
-        modelContext.insert(newVersion)
-        return newVersion
-    }
 }
 
 #if DEBUG

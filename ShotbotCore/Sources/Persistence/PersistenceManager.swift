@@ -115,7 +115,7 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     
     public func recordDeviceFrameCreation(modelContext: ModelContext) {
         do {
-            let appVersion = SDAppVersion.findOrCreate(modelContext: modelContext)
+            let appVersion = SDAppVersion()
             let analyticEvent = SDAnalyticEvent(event: .deviceFrameCreation, appVersion: appVersion)
             
             modelContext.insert(analyticEvent)

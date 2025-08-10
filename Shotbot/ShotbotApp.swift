@@ -137,9 +137,10 @@ struct ShotbotApp: App {
     
     private func recordAppLaunch() {
         let context = modelContainer.mainContext
-        let appVersion = SDAppVersion.findOrCreate(modelContext: context)
+        let appVersion = SDAppVersion()
         let analyticEvent = SDAnalyticEvent(event: .appLaunch, appVersion: appVersion)
         
+        context.insert(appVersion)
         context.insert(analyticEvent)
         
         do {
@@ -152,9 +153,10 @@ struct ShotbotApp: App {
     
     private func recordAppActivation() {
         let context = modelContainer.mainContext
-        let appVersion = SDAppVersion.findOrCreate(modelContext: context)
+        let appVersion = SDAppVersion()
         let analyticEvent = SDAnalyticEvent(event: .appActivation, appVersion: appVersion)
         
+        context.insert(appVersion)
         context.insert(analyticEvent)
         
         do {

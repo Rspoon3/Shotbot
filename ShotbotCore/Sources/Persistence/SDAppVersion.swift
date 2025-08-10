@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-public class SDAppVersion {
+public class SDAppVersion: SwiftDataIndexable {
     public var major: Int
     public var minor: Int
     public var patch: Int
@@ -109,3 +109,17 @@ public class SDAppVersion {
         return newVersion
     }
 }
+
+#if DEBUG
+extension SDAppVersion {
+    public func debugAttributes() -> [String: Any] {
+        return [
+            "version": "\(major).\(minor).\(patch)",
+            "build": build,
+            "rawVersion": rawVersion,
+            "createdAt": createdAt,
+            "eventsCount": analyticsEvents.count
+        ]
+    }
+}
+#endif

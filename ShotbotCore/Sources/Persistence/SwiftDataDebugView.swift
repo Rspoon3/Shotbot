@@ -95,7 +95,9 @@ struct DebugObjectRowView: View {
             attributesView
             persistentModelIDView
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .textSelection(.enabled)
     }
     
     private var attributesView: some View {
@@ -109,11 +111,12 @@ struct DebugObjectRowView: View {
     }
     
     private func attributeRow(for key: String) -> some View {
-        HStack {
+        HStack(alignment: .top) {
             keyText(key)
             Spacer()
             valueText(for: key)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func keyText(_ key: String) -> some View {
@@ -127,16 +130,19 @@ struct DebugObjectRowView: View {
         Text(String(describing: object.attributes[key] ?? "nil"))
             .font(.caption)
             .foregroundColor(.primary)
+            .multilineTextAlignment(.trailing)
+            .lineLimit(nil)
     }
     
     @ViewBuilder
     private var persistentModelIDView: some View {
         if let persistentModelID = object.persistentModelID {
-            HStack {
+            HStack(alignment: .top) {
                 idKeyText
                 Spacer()
                 idValueText(persistentModelID)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     
@@ -148,11 +154,33 @@ struct DebugObjectRowView: View {
     }
     
     private func idValueText(_ id: PersistentIdentifier) -> some View {
-        Text(String(describing: id))
+        Text(formatPersistentIdentifier(id))
             .font(.caption2)
             .foregroundColor(.blue)
-            .lineLimit(1)
-            .truncationMode(.middle)
+            .lineLimit(nil)
+            .multilineTextAlignment(.trailing)
+    }
+    
+    private func formatPersistentIdentifier(_ id: PersistentIdentifier) -> String {
+        let fullDescription = String(describing: id)
+        
+        // Extract the Core Data URL if present
+        if let urlRange = fullDescription.range(of: "<x-coredata://[^>]+>", options: .regularExpression) {
+            let url = String(fullDescription[urlRange])
+            // Extract just the entity and unique part
+            if let entityMatch = url.range(of: "/([^/]+)/p\\d+", options: .regularExpression) {
+                let entityPart = String(url[entityMatch])
+                return "CoreData: \(entityPart)"
+            }
+            return "CoreData: \(url)"
+        }
+        
+        // Fallback to a shortened version
+        if fullDescription.count > 50 {
+            return "\(fullDescription.prefix(25))...\(fullDescription.suffix(25))"
+        }
+        
+        return fullDescription
     }
 }
 

@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-public class SDAnalyticEvent {
+public class SDAnalyticEvent: SwiftDataIndexable {
     public var name: String
     public var createdAt: Date
     
@@ -71,3 +71,15 @@ public class SDAnalyticEvent {
         return results.count
     }
 }
+
+#if DEBUG
+extension SDAnalyticEvent {
+    public func debugAttributes() -> [String: Any] {
+        return [
+            "name": name,
+            "createdAt": createdAt,
+            "appVersion": "\(appVersion.rawVersion) (\(appVersion.build))"
+        ]
+    }
+}
+#endif

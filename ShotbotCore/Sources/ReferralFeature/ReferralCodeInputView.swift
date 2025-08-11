@@ -7,7 +7,7 @@ import SwiftUI
 import Persistence
 
 struct ReferralCodeInputView: View {
-    @EnvironmentObject private var viewModel: ReferralViewModel
+    @ObservedObject var viewModel: ReferralViewModel
     @EnvironmentObject private var persistenceManager: PersistenceManager
     @Environment(\.dismiss) private var dismiss
     @State private var inputText = ""

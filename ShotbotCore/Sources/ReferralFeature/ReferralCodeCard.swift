@@ -8,8 +8,8 @@ import ReferralService
 
 struct ReferralCodeCard: View {
     let code: ReferralCode
+    @ObservedObject var viewModel: ReferralViewModel
     @State private var isCopied = false
-    @EnvironmentObject private var viewModel: ReferralViewModel
     
     var body: some View {
         VStack(spacing: 16) {
@@ -55,6 +55,7 @@ struct ReferralCodeCard: View {
         .cornerRadius(10)
         .sheet(isPresented: $viewModel.showingShareSheet) {
             ShareSheet(items: viewModel.createShareContent())
+                .environmentObject(viewModel)
         }
     }
     

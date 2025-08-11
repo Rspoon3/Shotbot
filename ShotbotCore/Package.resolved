@@ -1,5 +1,5 @@
 {
-  "originHash" : "262c1d6c4cb7e465d5009a33daa14302706e58d62337b40730291043348204ba",
+  "originHash" : "98e22325f843c7b7c3276fe367087c3bb2874b9b392829eb1d7974a24635379c",
   "pins" : [
     {
       "identity" : "alerttoast",
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rspoon3/ReferralService-iOS.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "8886fb4d06c5674afc788e051ff1b5563a0e22e5"
+        "branch" : "swift-6",
+        "revision" : "4f96d944968c930d1260fd01aa15a3dea25c7dc3"
       }
     },
     {

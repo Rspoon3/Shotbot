@@ -60,8 +60,7 @@ public struct ReferralView: View {
             }
         }
         .sheet(isPresented: $viewModel.showingCodeInput) {
-            ReferralCodeInputView()
-                .environmentObject(viewModel)
+            ReferralCodeInputView(viewModel: viewModel)
         }
         .alert("Success!", isPresented: $viewModel.showingSuccessMessage) {
             Button("OK") {
@@ -114,9 +113,7 @@ public struct ReferralView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 if viewModel.referralCodes.count > 1 {
-                    NavigationLink(destination: AllReferralCodesView()
-                        .environmentObject(viewModel)
-                    ) {
+                    NavigationLink(destination: AllReferralCodesView(viewModel: viewModel)) {
                         HStack(spacing: 4) {
                             Text("See All")
                                 .font(.caption)
@@ -131,7 +128,7 @@ public struct ReferralView: View {
             }
             
             if let code = viewModel.primaryReferralCode {
-                ReferralCodeCard(code: code)
+                ReferralCodeCard(code: code, viewModel: viewModel)
             } else {
                 NoReferralCodeCard()
             }
@@ -182,10 +179,7 @@ public struct ReferralView: View {
     }
     
     private var redemptionSection: some View {
-        NavigationLink(destination: RewardsView()
-            .environmentObject(viewModel)
-            .environmentObject(persistenceManager)
-        ) {
+        NavigationLink(destination: RewardsView(viewModel: viewModel)) {
             VStack(spacing: 16) {
                 HStack {
                     Image(systemName: "gift.fill")

@@ -9,7 +9,7 @@ import Persistence
 import OSLog
 
 struct RedemptionOptionsView: View {
-    @EnvironmentObject private var viewModel: ReferralViewModel
+    @ObservedObject var viewModel: ReferralViewModel
     @EnvironmentObject private var persistenceManager: PersistenceManager
     @State private var selectedOption: AvailablePurchase?
     @State private var isRedeeming = false

@@ -275,6 +275,7 @@ public struct HomeView: View {
                 }
             
             ReferralBanner()
+                .environmentObject(PersistenceManager.shared)
         }
         .padding()
         .frame(maxHeight: .infinity)

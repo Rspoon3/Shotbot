@@ -8,13 +8,17 @@ import ReferralService
 import Persistence
 
 struct RewardsView: View {
-    @EnvironmentObject private var viewModel: ReferralViewModel
+    @ObservedObject var viewModel: ReferralViewModel
     @EnvironmentObject private var persistenceManager: PersistenceManager
     @Environment(\.dismiss) private var dismiss
     
     private let isModal: Bool
     
-    init(isModal: Bool = false) {
+    init(
+        viewModel: ReferralViewModel,
+        isModal: Bool = false
+    ) {
+        self.viewModel = viewModel
         self.isModal = isModal
     }
     
@@ -158,9 +162,7 @@ struct RewardsView: View {
                     .foregroundColor(.secondary)
                     .frame(height: 100)
             } else {
-                RedemptionOptionsView()
-                    .environmentObject(viewModel)
-                    .environmentObject(persistenceManager)
+                RedemptionOptionsView(viewModel: viewModel)
             }
         }
         .padding()

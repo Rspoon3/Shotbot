@@ -11,34 +11,38 @@ import SwiftData
 
 public struct SwiftDataRuntimeView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var debugEntities: [RuntimeDebugEntity] = []
+    @State private var debugEntities: [DebugEntity] = []
     @State private var errorMessage: String?
     @State private var isLoading = false
     
+    // MARK: - Initializer
+    
     public init() {}
     
+    // MARK: - Body
+    
     public var body: some View {
-        NavigationView {
-            contentView
-                .navigationTitle("SwiftData Runtime Debug")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        refreshButton
-                    }
+        contentView
+            .navigationTitle("SwiftData Runtime Debug")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    refreshButton
                 }
-        }
-        .onAppear {
-            loadDebugData()
-        }
+            }
+            .task {
+                await loadDebugData()
+            }
     }
+    
+    // MARK: - Private Views
     
     @ViewBuilder
     private var contentView: some View {
         if isLoading {
             ProgressView("Loading...")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let errorMessage = errorMessage {
+        } else if let errorMessage {
             errorView(errorMessage)
         } else if debugEntities.isEmpty {
             emptyStateView
@@ -79,17 +83,18 @@ public struct SwiftDataRuntimeView: View {
         }
     }
     
-    private func debugEntitySection(_ entity: RuntimeDebugEntity) -> some View {
-        Section {
+    private func debugEntitySection(_ entity: DebugEntity) -> some View {
+        DisclosureGroup {
             ForEach(entity.objects) { object in
                 RuntimeDebugObjectRowView(object: object)
             }
-        } header: {
+        } label: {
             HStack {
                 Text(entity.entityName)
                     .font(.headline)
-                Spacer()
-                Text("\(entity.objects.count)")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Text(entity.objects.count.formatted())
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 8)
@@ -101,7 +106,9 @@ public struct SwiftDataRuntimeView: View {
     }
     
     private var refreshButton: some View {
-        Button(action: loadDebugData) {
+        Button {
+            Task { await loadDebugData() }
+        } label: {
             if isLoading {
                 ProgressView()
                     .scaleEffect(0.8)
@@ -112,166 +119,20 @@ public struct SwiftDataRuntimeView: View {
         .disabled(isLoading)
     }
     
-    private func loadDebugData() {
-        isLoading = true
+    // MARK: - Private Helpers
+    
+    private func loadDebugData() async {
         errorMessage = nil
+        isLoading = true
+        defer { isLoading = false }
         
-        Task { @MainActor in
-            do {
-                debugEntities = try modelContext.container.fetchAllRuntimeData()
-                errorMessage = nil
-            } catch {
-                errorMessage = error.localizedDescription
-                debugEntities = []
-            }
-            isLoading = false
+        do {
+            debugEntities = try modelContext.container.fetchAllRuntimeData()
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+            debugEntities = []
         }
-    }
-}
-
-private struct RuntimeDebugObjectRowView: View {
-    let object: RuntimeDebugObject
-    @State private var isExpanded = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Main content
-            if isExpanded {
-                expandedView
-            } else {
-                collapsedView
-            }
-            
-            // ID display
-            if let persistentModelID = object.persistentModelID {
-                idView(persistentModelID)
-            }
-        }
-        .padding(.vertical, 4)
-        .onTapGesture {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isExpanded.toggle()
-            }
-        }
-    }
-    
-    private var collapsedView: some View {
-        HStack {
-            Text(summaryText)
-                .font(.caption)
-                .lineLimit(2)
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-    }
-    
-    private var expandedView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("Properties")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                Spacer()
-                Image(systemName: "chevron.down")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.bottom, 4)
-            
-            ForEach(sortedAttributeKeys, id: \.self) { key in
-                attributeRow(for: key)
-            }
-        }
-    }
-    
-    private var summaryText: String {
-        let primaryKeys = ["name", "title", "id", "identifier", "rawVersion", "createdAt"]
-        for key in primaryKeys {
-            if let value = object.attributes[key] {
-                return "\(key): \(String(describing: value))"
-            }
-        }
-        return "Object with \(object.attributes.count) properties"
-    }
-    
-    private var sortedAttributeKeys: [String] {
-        Array(object.attributes.keys.sorted())
-    }
-    
-    private func attributeRow(for key: String) -> some View {
-        HStack(alignment: .top) {
-            Text(key)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(.secondary)
-                .frame(minWidth: 80, alignment: .leading)
-            
-            Spacer()
-            
-            Text(formatValue(object.attributes[key]))
-                .font(.caption2)
-                .foregroundColor(.primary)
-                .multilineTextAlignment(.trailing)
-                .lineLimit(nil)
-                .textSelection(.enabled)
-        }
-        .padding(.vertical, 1)
-    }
-    
-    private func idView(_ id: PersistentIdentifier) -> some View {
-        HStack {
-            Text("ID")
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(.blue)
-            Spacer()
-            Text(formatPersistentIdentifier(id))
-                .font(.caption2)
-                .foregroundColor(.blue)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .textSelection(.enabled)
-        }
-        .padding(.top, 4)
-    }
-    
-    private func formatValue(_ value: Any?) -> String {
-        guard let value = value else { return "nil" }
-        
-        if let date = value as? Date {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .short
-            formatter.timeStyle = .short
-            return formatter.string(from: date)
-        }
-        
-        if let bool = value as? Bool {
-            return bool ? "✓" : "✗"
-        }
-        
-        let description = String(describing: value)
-        if description.count > 100 {
-            return String(description.prefix(97)) + "..."
-        }
-        return description
-    }
-    
-    private func formatPersistentIdentifier(_ id: PersistentIdentifier) -> String {
-        let fullDescription = String(describing: id)
-        
-        // Extract just the meaningful part
-        if let match = fullDescription.range(of: "/p\\d+", options: .regularExpression) {
-            return String(fullDescription[match])
-        }
-        
-        // Fallback to truncated version
-        if fullDescription.count > 30 {
-            return "..." + String(fullDescription.suffix(27))
-        }
-        
-        return fullDescription
     }
 }
 

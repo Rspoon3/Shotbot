@@ -11,16 +11,15 @@ import Foundation
 import SwiftData
 import CoreData
 
-public struct RuntimeDebugEntity: Identifiable {
+public struct DebugEntity: Identifiable {
     public let id = UUID()
     public let entityName: String
-    public let objects: [RuntimeDebugObject]
+    public let objects: [DebugObject]
 }
 
-public struct RuntimeDebugObject: Identifiable {
+public struct DebugObject: Identifiable {
     public let id = UUID()
     public let attributes: [String: Any]
-    public let persistentModelID: PersistentIdentifier?
 }
 
 extension Schema.Entity {
@@ -41,9 +40,6 @@ extension ModelContext {
     func fetchAll<T: PersistentModel>(_ type: T.Type) throws -> [any PersistentModel] {
         try self.fetch(FetchDescriptor<T>())
     }
-}
-
-extension ModelContext {
     
     func fetchDebugArray() throws -> [(any PersistentModel.Type, [[String: Any]])] {
         try fetchDebugArray(container.schema.entities.map(\.metatype))
@@ -76,32 +72,27 @@ extension ModelContext {
 
 extension ModelContainer {
     @MainActor
-    public func fetchAllRuntimeData() throws -> [RuntimeDebugEntity] {
-        var debugEntities: [RuntimeDebugEntity] = []
+    public func fetchAllRuntimeData() throws -> [DebugEntity] {
+        var debugEntities: [DebugEntity] = []
         
         // Use the new fetchDebugArray method from ModelContext
         let debugData = try mainContext.fetchDebugArray()
         
         for (modelType, objects) in debugData {
             let entityName = String(describing: modelType)
-                .replacingOccurrences(of: "ShotbotCore.", with: "")
-                .replacingOccurrences(of: "Persistence.", with: "")
             
             print("🔍 Found entity: \(entityName) with \(objects.count) objects")
             
-            if !objects.isEmpty {
-                let debugObjects = objects.map { dict in
-                    RuntimeDebugObject(
-                        attributes: dict,
-                        persistentModelID: nil // We don't have access to persistent IDs with this approach
-                    )
-                }
-                
-                debugEntities.append(RuntimeDebugEntity(
-                    entityName: entityName,
-                    objects: debugObjects
-                ))
+            guard !objects.isEmpty else { continue }
+            
+            let debugObjects = objects.map {
+                DebugObject(attributes: $0)
             }
+            
+            debugEntities.append(DebugEntity(
+                entityName: entityName,
+                objects: debugObjects
+            ))
         }
         
         return debugEntities

@@ -10,6 +10,7 @@ import Persistence
 import Models
 import Purchases
 import SwiftTools
+import ReferralFeature
 
 public struct SettingsView: View {
     let appID = 6450552843
@@ -138,6 +139,29 @@ public struct SettingsView: View {
                         }
                     } icon: {
                         Image(symbol: .heart)
+                    }
+                }
+
+                NavigationLink {
+                    ReferralView()
+                        .environmentObject(persistenceManager)
+                } label: {
+                    Label {
+                        VStack(alignment: .leading) {
+                            Text("Referrals")
+                            if persistenceManager.creditBalance > 0 {
+                                Text("\(persistenceManager.creditBalance) \(persistenceManager.creditBalance == 1 ? "credit" : "credits") available")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                            } else {
+                                Text("Share with friends to earn rewards")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                            }
+                        }
+                    } icon: {
+                        Image(systemName: "person.2.fill")
+                            .foregroundColor(.blue)
                     }
                 }
 

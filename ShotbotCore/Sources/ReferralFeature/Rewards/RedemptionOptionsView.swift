@@ -5,72 +5,122 @@
 
 import SwiftUI
 import ReferralService
+import Persistence
+import OSLog
 
 struct RedemptionOptionsView: View {
     @EnvironmentObject private var viewModel: ReferralViewModel
     @EnvironmentObject private var persistenceManager: PersistenceManager
+    @State private var selectedOption: AvailablePurchase?
+    @State private var isRedeeming = false
+    private let logger = Logger(subsystem: "com.shotbot.referral", category: "RedemptionOptionsView")
     
-    private var extraScreenshotRewards: [AvailablePurchase] {
-        viewModel.availablePurchases.filter { $0.rewardType == "extra_screenshots" }
-    }
-    
-    private var customCodeRewards: [AvailablePurchase] {
-        viewModel.availablePurchases.filter { $0.rewardType == "custom_code" }
+    private var redeemButtonIsDisabled: Bool {
+        !canRedeem || isRedeeming || persistenceManager.creditBalance <= 0
     }
     
     var body: some View {
         VStack(spacing: 16) {
-            if !extraScreenshotRewards.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("Extra Screenshots", systemImage: "photo.stack")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                    
-                    ForEach(extraScreenshotRewards, id: \.id) { reward in
-                        RewardOptionCard(
-                            reward: reward,
-                            canAfford: persistenceManager.creditBalance >= reward.cost,
-                            onRedeem: {
-                                await redeemReward(reward)
-                            }
-                        )
+            if viewModel.isLoadingRewards {
+                ProgressView("Loading rewards...")
+                    .frame(maxWidth: .infinity, minHeight: 100)
+            } else if viewModel.availablePurchases.isEmpty {
+                Text("No rewards available")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, minHeight: 100)
+            } else {
+                ForEach(viewModel.availablePurchases) { option in
+                    RewardOptionCard(
+                        option: option,
+                        isSelected: selectedOption?.id == option.id,
+                        canAfford: canAfford(option)
+                    ) {
+                        selectedOption = option
                     }
                 }
             }
             
-            if !customCodeRewards.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("Custom Referral Codes", systemImage: "star.fill")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+            if let selectedOption {
+                redeemButton(selectedOption)
+                
+                if !canRedeem {
+                    let cost = selectedOption.cost
+                    Text("Need \(cost) \(creditText(for: cost)) to redeem this reward")
+                        .font(.caption)
                         .foregroundColor(.secondary)
-                    
-                    ForEach(customCodeRewards, id: \.id) { reward in
-                        RewardOptionCard(
-                            reward: reward,
-                            canAfford: persistenceManager.creditBalance >= reward.cost,
-                            onRedeem: {
-                                await redeemReward(reward)
-                            }
-                        )
-                    }
                 }
+            }
+        }
+        .onAppear(perform: autoSelectFirstAvailableReward)
+        .onChange(of: viewModel.availablePurchases) { _, newPurchases in
+            if selectedOption == nil && !newPurchases.isEmpty {
+                selectedOption = newPurchases.first
             }
         }
     }
     
-    private func redeemReward(_ reward: AvailablePurchase) async {
-        let newBalance = await viewModel.redeemReward(reward)
-        
-        if let balance = newBalance {
-            persistenceManager.creditBalance = balance
-            
-            if reward.rewardType == "extra_screenshots" {
-                persistenceManager.extraScreenshots += reward.value ?? 0
-            } else if reward.rewardType == "custom_code" {
-                persistenceManager.canCreateCustomCode = true
+    private func redeemButton(_ selectedOption: AvailablePurchase) -> some View {
+        Button {
+            Task {
+                await handleRewardAction(selectedOption)
             }
+        } label: {
+            HStack {
+                if isRedeeming {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .tint(.white)
+                } else {
+                    Image(systemName: "gift")
+                }
+                
+                Text(isRedeeming ? "Redeeming..." : "Redeem \(selectedOption.title)")
+                    .fontWeight(.semibold)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .disabled(redeemButtonIsDisabled)
+    }
+    
+    private func creditText(for amount: Int) -> String {
+        amount == 1 ? "credit" : "credits"
+    }
+    
+    private func autoSelectFirstAvailableReward() {
+        guard selectedOption == nil && !viewModel.availablePurchases.isEmpty else { return }
+        selectedOption = viewModel.availablePurchases.first
+    }
+    
+    private func canAfford(_ option: AvailablePurchase) -> Bool {
+        return persistenceManager.creditBalance >= option.cost
+    }
+    
+    private var canRedeem: Bool {
+        guard let selectedOption else { return false }
+        return canAfford(selectedOption)
+    }
+    
+    private func handleRewardAction(_ selectedOption: AvailablePurchase) async {
+        switch selectedOption.action {
+        case "redeem":
+            await redeemReward()
+        default:
+            logger.error("Reward action not supported: \(selectedOption.action ?? "nil")")
+        }
+    }
+    
+    private func redeemReward() async {
+        guard let selectedOption else { return }
+        
+        isRedeeming = true
+        defer { isRedeeming = false }
+        
+        guard let newBalance = await viewModel.redeemReward(selectedOption) else { return }
+        
+        withAnimation {
+            persistenceManager.creditBalance = newBalance
         }
     }
 }

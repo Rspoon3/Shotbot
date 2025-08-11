@@ -12,6 +12,7 @@ import Persistence
 import Models
 import Purchases
 import MediaManager
+import ReferralFeature
 
 public struct HomeView: View {
     @StateObject var manager = AppIntentManager.shared
@@ -250,29 +251,33 @@ public struct HomeView: View {
     }
     
     private var placeholder: some View {
-        Image(systemName: "photo")
-            .resizable()
-            .scaledToFit()
-            .contextMenu { placeholderContextButton }
-            .frame(maxWidth: 200)
-            .padding()
-            .contentShape(
-                .hoverEffect,
-                .rect(
-                    cornerRadius: 14,
-                    style: .continuous
+        VStack(spacing: 30) {
+            Image(systemName: "photo")
+                .resizable()
+                .scaledToFit()
+                .contextMenu { placeholderContextButton }
+                .frame(maxWidth: 200)
+                .contentShape(
+                    .hoverEffect,
+                    .rect(
+                        cornerRadius: 14,
+                        style: .continuous
+                    )
                 )
-            )
-            .hoverEffect()
-            .foregroundColor(.secondary)
-            .frame(maxHeight: .infinity)
-            .onTapGesture {
-                if ProcessInfo.processInfo.isiOSAppOnMac {
-                    viewModel.attemptToImportFile()
-                } else {
-                    viewModel.selectPhotos()
+                .hoverEffect()
+                .foregroundColor(.secondary)
+                .onTapGesture {
+                    if ProcessInfo.processInfo.isiOSAppOnMac {
+                        viewModel.attemptToImportFile()
+                    } else {
+                        viewModel.selectPhotos()
+                    }
                 }
-            }
+            
+            ReferralBanner()
+        }
+        .padding()
+        .frame(maxHeight: .infinity)
     }
     
     private func tabView(shareableImages: [ShareableImage]) -> some View {

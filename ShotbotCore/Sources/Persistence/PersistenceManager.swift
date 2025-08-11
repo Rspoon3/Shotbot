@@ -87,6 +87,18 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     @iCloudKeyValueStore("lastReviewPromptDate")
     public var lastReviewPromptDate: Date? = nil
     
+    @AppStorage("creditBalance")
+    public var creditBalance: Int = 0
+    
+    @AppStorage("canEnterReferralCode")
+    public var canEnterReferralCode: Bool = true
+    
+    @AppStorage("extraScreenshots")
+    public var extraScreenshots: Int = 0
+    
+    @AppStorage("canCreateCustomCode")
+    public var canCreateCustomCode: Bool = false
+    
     
 #if DEBUG
     public enum SubscriptionOverrideMethod: String, CaseIterable, Identifiable {
@@ -122,6 +134,10 @@ public class MockPersistenceManager: PersistenceManaging {
     public var clearImagesOnAppBackground: Bool = false
     public var imageSelectionType: ImageSelectionType = .all
     public var imageQuality: ImageQuality = .original
+    public var creditBalance: Int = 0
+    public var canEnterReferralCode: Bool = true
+    public var extraScreenshots: Int = 0
+    public var canCreateCustomCode: Bool = false
     
     public init() {}
 
@@ -141,6 +157,10 @@ public class MockPersistenceManager: PersistenceManaging {
         deviceFrameCreations = 0
         imageSelectionType = .all
         imageQuality = .original
+        creditBalance = 0
+        canEnterReferralCode = true
+        extraScreenshots = 0
+        canCreateCustomCode = false
     }
     
     public func setLastReviewPromptDateToNow() {

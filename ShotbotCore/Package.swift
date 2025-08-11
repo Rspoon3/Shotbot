@@ -122,6 +122,7 @@ extension Target {
     static let referralFeature: Target = .target(
         name: "ReferralFeature",
         dependencies: [
+            .target(.persistence),
             .referralService
         ]
     )
@@ -161,7 +162,8 @@ extension Target {
             .target(.persistence),
             .target(.purchases),
             .target(.mediaManager),
-            .target(.sbFoundation)
+            .target(.sbFoundation),
+            .target(.referralFeature)
         ]
     )
     
@@ -183,6 +185,7 @@ extension Target {
             .target(.sbFoundation),
             .target(.widgetFeature),
             .target(.createCombinedImageFeature),
+            .target(.referralFeature),
             .alertToast,
             .swiftTools
         ]
@@ -253,6 +256,6 @@ extension Package.Dependency {
     
     static let referralService: Package.Dependency = .package(
         url: "https://github.com/Rspoon3/ReferralService-iOS.git",
-        branch: "main"
+        branch: "swift-6"
     )
 }

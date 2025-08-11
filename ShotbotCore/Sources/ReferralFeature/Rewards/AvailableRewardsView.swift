@@ -43,60 +43,22 @@ struct AvailableRewardsView: View {
 struct UserRewardRow: View {
     let reward: UserReward
     
-    private var iconName: String {
-        switch reward.purchaseType {
-        case "extra_screenshots":
-            return "photo.stack"
-        case "custom_code":
-            return "star.fill"
-        default:
-            return "gift"
-        }
-    }
-    
-    private var iconColor: Color {
-        switch reward.purchaseType {
-        case "extra_screenshots":
-            return .blue
-        case "custom_code":
-            return .yellow
-        default:
-            return .gray
-        }
-    }
-    
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: iconName)
-                .foregroundColor(iconColor)
-                .frame(width: 30, height: 30)
-                .background(iconColor.opacity(0.1))
-                .cornerRadius(6)
+        HStack {
+            Image(systemName: reward.symbolString)
+                .foregroundColor(reward.availableQuantity == 0 ? .secondary : .blue)
+                .frame(width: 20)
             
-            VStack(alignment: .leading, spacing: 2) {
-                Text(reward.title)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
-                if let redeemedAt = reward.redeemedAt {
-                    Text("Redeemed \(redeemedAt, style: .date)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
+            Text(reward.title)
+                .font(.body)
+                .foregroundColor(reward.availableQuantity == 0 ? .secondary : .primary)
             
             Spacer()
             
-            if reward.isActive {
-                Text("Active")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.green)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.green.opacity(0.1))
-                    .cornerRadius(4)
-            }
+            Text(reward.availableQuantity.formatted())
+                .font(.headline)
+                .contentTransition(.numericText(value: Double(reward.availableQuantity)))
+                .foregroundColor(reward.availableQuantity == 0 ? .secondary : .blue)
         }
         .padding(.vertical, 4)
     }

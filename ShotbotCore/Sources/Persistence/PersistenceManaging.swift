@@ -25,5 +25,9 @@ public protocol PersistenceManaging: Sendable {
     var imageSelectionType: ImageSelectionType  { get set }
     var imageQuality: ImageQuality  { get set }
     var lastReviewPromptDate: Date? { get set }
+    var creditBalance: Int { get set }
+    var canEnterReferralCode: Bool { get set }
+    var extraScreenshots: Int { get set }
+    var canCreateCustomCode: Bool { get set }
     func setLastReviewPromptDateToNow()
 }

@@ -14,18 +14,13 @@ struct ReferralCodeCard: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(code.code)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    if code.isCustom {
-                        Label("Custom Code", systemImage: "star.fill")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                    }
-                }
+                Text(code.code)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .fontDesign(.monospaced)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 
                 Spacer()
                 
@@ -50,19 +45,10 @@ struct ReferralCodeCard: View {
                 }
             }
             
-            if code.usageCount > 0 {
-                HStack {
-                    Image(systemName: "person.2.fill")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("\(code.usageCount) \(code.usageCount == 1 ? "friend" : "friends") joined")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                }
-            }
+            Text(code.type.displayName)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding()
         .background(Color(.secondarySystemBackground))

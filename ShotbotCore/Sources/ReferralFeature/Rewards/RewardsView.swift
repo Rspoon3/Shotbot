@@ -5,6 +5,7 @@
 
 import SwiftUI
 import ReferralService
+import Persistence
 
 struct RewardsView: View {
     @EnvironmentObject private var viewModel: ReferralViewModel

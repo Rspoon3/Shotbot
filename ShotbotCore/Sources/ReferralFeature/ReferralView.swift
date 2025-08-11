@@ -5,6 +5,7 @@
 
 import SwiftUI
 import ReferralService
+import Persistence
 
 public struct ReferralView: View {
     @StateObject private var viewModel = ReferralViewModel()

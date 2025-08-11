@@ -5,7 +5,7 @@
 
 import Foundation
 
-public struct ReferralDataOptions: OptionSet {
+public struct ReferralDataOptions: OptionSet, Sendable {
     public let rawValue: Int
     
     public init(rawValue: Int) {

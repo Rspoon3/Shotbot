@@ -11,12 +11,12 @@ import OSLog
 import SwiftTools
 import ReferralService
 
-final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
+public final class NotificationManager: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     private let logger = Logger(category: NotificationManager.self)
     private let notificationCenter = UNUserNotificationCenter.current()
     private let userDefaults = UserDefaults.standard
         
-    override init() {
+    public override init() {
         super.init()
         notificationCenter.delegate = self
     }
@@ -78,9 +78,9 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
     
-    // MARK: - Device Token Management
+    // MARK: - Device Token Management (Public)
     
-    func registerStoredTokenOnAppLaunch() async {
+    public func registerStoredTokenOnAppLaunch() async {
         guard let deviceToken = userDefaults.string(forKey: "deviceToken") else {
             logger.info("No stored device token found on app launch")
             return
@@ -90,7 +90,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         await registerDeviceTokenWithBackend(deviceToken)
     }
     
-    func handleDeviceTokenRegistration(_ deviceToken: Data) async {
+    public func handleDeviceTokenRegistration(_ deviceToken: Data) async {
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         
         // Get stored token from UserDefaults
@@ -110,6 +110,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             hasChanged: hasTokenChanged
         )
     }
+    
+    // MARK: - Device Token Management (Private)
     
     private func handleTokenRefresh(newToken: String, oldToken: String?, hasChanged: Bool) async {
         if hasChanged, let oldToken {
@@ -177,7 +179,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     
     // MARK: - UNUserNotificationCenterDelegate
     
-    func userNotificationCenter(
+    public func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void

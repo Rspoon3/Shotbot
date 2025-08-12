@@ -10,6 +10,7 @@ import Persistence
 public struct ReferralView: View {
     @StateObject private var viewModel = ReferralViewModel()
     @EnvironmentObject private var persistenceManager: PersistenceManager
+    @State private var showingNotificationPermission = false
     
     public init() { }
     
@@ -36,6 +37,14 @@ public struct ReferralView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadData()
+            
+            // Show notification permission view on first visit
+            if !persistenceManager.hasShownNotificationPermission {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showingNotificationPermission = true
+                    persistenceManager.hasShownNotificationPermission = true
+                }
+            }
         }
         .overlay {
             if viewModel.isLoading {
@@ -77,6 +86,9 @@ public struct ReferralView: View {
             if let error = viewModel.error {
                 Text(error.failureReason ?? error.localizedDescription)
             }
+        }
+        .fullScreenCover(isPresented: $showingNotificationPermission) {
+            NotificationPermissionView(isPresented: $showingNotificationPermission)
         }
     }
     

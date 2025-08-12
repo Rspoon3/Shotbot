@@ -99,6 +99,9 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     @AppStorage("canCreateCustomCode")
     public var canCreateCustomCode: Bool = false
     
+    @AppStorage("hasShownNotificationPermission")
+    public var hasShownNotificationPermission: Bool = false
+    
     
 #if DEBUG
     public enum SubscriptionOverrideMethod: String, CaseIterable, Identifiable {

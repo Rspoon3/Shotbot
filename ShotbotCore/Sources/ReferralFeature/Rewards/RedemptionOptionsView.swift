@@ -107,7 +107,7 @@ struct RedemptionOptionsView: View {
         case "redeem":
             await redeemReward()
         default:
-            logger.error("Reward action not supported: \(selectedOption.action ?? "nil")")
+            logger.error("Reward action not supported: \(selectedOption.action)")
         }
     }
     

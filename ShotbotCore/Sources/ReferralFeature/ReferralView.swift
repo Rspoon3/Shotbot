@@ -35,6 +35,9 @@ public struct ReferralView: View {
         }
         .navigationTitle("Referrals")
         .navigationBarTitleDisplayMode(.inline)
+        .background {
+            Color(.secondarySystemBackground).ignoresSafeArea(.all)
+        }
         .task {
             await viewModel.loadData()
             

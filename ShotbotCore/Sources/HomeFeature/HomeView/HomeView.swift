@@ -34,6 +34,9 @@ public struct HomeView: View {
             mainContent
             selectionButtons
         }
+        .background {
+            Color(.secondarySystemBackground).ignoresSafeArea(.all)
+        }
 #if os(iOS)
         .navigationTitle("Shotbot")
 #endif
@@ -173,7 +176,12 @@ public struct HomeView: View {
             ProgressView("Combining Images...")
                 .frame(maxHeight: .infinity, alignment: .center)
         case .individualPlaceholder:
-            placeholder
+            VStack {
+                ReferralBanner()
+                    .padding(.horizontal)
+                    .environmentObject(PersistenceManager.shared)
+                placeholder
+            }
         case .individualImages(let shareableImages):
             individualImagesView(shareableImages)
         case .combinedImages(let shareableImage):
@@ -273,9 +281,6 @@ public struct HomeView: View {
                         viewModel.selectPhotos()
                     }
                 }
-            
-            ReferralBanner()
-                .environmentObject(PersistenceManager.shared)
         }
         .padding()
         .frame(maxHeight: .infinity)

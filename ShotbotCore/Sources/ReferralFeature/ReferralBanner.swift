@@ -41,21 +41,11 @@ public struct ReferralBanner: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
-                
-                HStack {
-                    Image(systemName: "chevron.right.circle.fill")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                    Text("Tap to learn more")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.blue)
-                }
                 .padding(.top, 4)
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(.thinMaterial)
+            .background(Color(.systemBackground))
             .cornerRadius(12)
             .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
             .contentShape(Rectangle())

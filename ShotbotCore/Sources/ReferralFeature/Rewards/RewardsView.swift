@@ -51,6 +51,9 @@ struct RewardsView: View {
         }
         .navigationTitle("Rewards")
         .navigationBarTitleDisplayMode(.inline)
+        .background {
+            Color(.secondarySystemBackground).ignoresSafeArea(.all)
+        }
         .task {
             guard viewModel.availablePurchases.isEmpty else { return }
             await viewModel.loadData()

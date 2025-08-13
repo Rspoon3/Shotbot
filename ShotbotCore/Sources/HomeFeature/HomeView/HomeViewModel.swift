@@ -33,6 +33,7 @@ import SwiftTools
     private let screenshotImporter: any ScreenshotImporting
     private let notificationCenter: any NotificationCenterProtocol
     private var imageQuality: ImageQuality
+    private let eligibilityUseCase = FramedScreenshotEligibilityUseCase()
     private let logger = Logger(category: HomeViewModel.self)
     private(set) var imageResults = ImageResults()
     @Published public var showPurchaseView = false
@@ -216,7 +217,15 @@ import SwiftTools
     /// Starts the image pipeline using the passed in screenshots
     private func processSelectedPhotos(source: PhotoSource) async throws {
         // Subscription Check
-        guard persistenceManager.canSaveFramedScreenshot else {
+        let screenshotCount: Int
+        
+        if let itemCount = source.itemCount {
+            screenshotCount = itemCount
+        } else {
+            screenshotCount = try await screenshotImporter.screenshots(from: source).count
+        }
+        
+        guard await eligibilityUseCase.canSaveFramedScreenshot(screenshotCount: screenshotCount) else {
             showPurchaseView = true
             return
         }
@@ -331,8 +340,8 @@ import SwiftTools
     
     /// Checks if the user has permission to save screenshot, and if so starts
     /// the file importing process. If not, it shows the purchase sheet.
-    public func attemptToImportFile() {
-        guard persistenceManager.canSaveFramedScreenshot else {
+    public func attemptToImportFile() async {
+        guard await eligibilityUseCase.canProceedWithPhotoSelection() else {
             showPurchaseView = true
             return
         }
@@ -390,8 +399,8 @@ import SwiftTools
     }
     
     /// If not loading, show the photo picker.
-    public func selectPhotos() {
-        guard persistenceManager.canSaveFramedScreenshot else {
+    public func selectPhotos() async {
+        guard await eligibilityUseCase.canProceedWithPhotoSelection() else {
             showPurchaseView = true
             return
         }
@@ -449,11 +458,6 @@ import SwiftTools
     
     /// Copies a framed screenshot to the clipboard
     public func copy(_ image: UIFramedScreenshot) {
-        guard persistenceManager.canSaveFramedScreenshot else {
-            showPurchaseView = true
-            return
-        }
-        
         UIPasteboard.general.image = image
         showCopyToast = true
         logger.debug("Copying image.")
@@ -461,11 +465,6 @@ import SwiftTools
     
     /// Saves a framed screenshot to the users photo library
     public func saveToPhotos(_ image: UIFramedScreenshot) async {
-        guard persistenceManager.canSaveFramedScreenshot else {
-            showPurchaseView = true
-            return
-        }
-        
         do {
             try await photoLibraryManager.save(image)
             showQuickSaveToast = true
@@ -478,11 +477,6 @@ import SwiftTools
     
     /// Saves a framed screenshot to iCloud using the url
     public func saveToiCloud(_ url: URL) {
-        guard persistenceManager.canSaveFramedScreenshot else {
-            showPurchaseView = true
-            return
-        }
-        
         do {
             try fileManager.copyToiCloudFiles(from: url)
             showQuickSaveToast = true

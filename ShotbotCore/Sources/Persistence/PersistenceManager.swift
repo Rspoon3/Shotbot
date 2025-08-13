@@ -14,7 +14,11 @@ import SwiftTools
 public final class PersistenceManager: ObservableObject, PersistenceManaging, Sendable {
     public static let shared = PersistenceManager()
     private let logger = Logger(category: PersistenceManager.self)
-
+    
+    public var freeFramedScreenshotsRemaining: Int {
+        max(0, (30 - deviceFrameCreations))
+    }
+    
     private init(){
         logger.notice("isSubscribed: \(self.isSubscribed, privacy: .public)")
         logger.notice("deviceFrameCreations: \(self.deviceFrameCreations.formatted(), privacy: .public)")

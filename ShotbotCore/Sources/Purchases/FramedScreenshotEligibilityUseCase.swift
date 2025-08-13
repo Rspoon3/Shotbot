@@ -15,12 +15,44 @@ public struct FramedScreenshotEligibilityUseCase: Sendable {
     private let persistenceManager: PersistenceManager
     private let referralService: ReferralService
     
+    // MARK: - Initializer
+    
     public init(
-        persistenceManager: PersistenceManager,
-        referralService: ReferralService
+        persistenceManager: PersistenceManager = PersistenceManager.shared,
+        referralService: ReferralService = ReferralService()
     ) {
         self.persistenceManager = persistenceManager
         self.referralService = referralService
+    }
+    
+    public func canProceedWithPhotoSelection() async -> Bool {
+#if DEBUG
+        switch persistenceManager.subscriptionOverride {
+        case .alwaysFalse:
+            return false
+        case .alwaysTrue:
+            return true
+        case .appStore:
+            return await canProceedWithPhotoSelectionAppStore()
+        }
+#else
+        return await canProceedWithPhotoSelectionAppStore
+#endif
+    }
+    
+    private func canProceedWithPhotoSelectionAppStore() async -> Bool {
+        if persistenceManager.isSubscribed { return true }
+        
+        if persistenceManager.freeFramedScreenshotsRemaining > 0 {
+            return true
+        }
+        
+        // Check for extra screenshots from referral rewards
+        guard let countResponse = try? await referralService.getRewardCount(rewardId: "extra_screenshots") else {
+            return false
+        }
+        
+        return countResponse.availableQuantity > 0
     }
     
     /// Checks if user can save framed screenshots

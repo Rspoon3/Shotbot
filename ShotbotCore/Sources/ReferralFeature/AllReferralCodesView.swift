@@ -13,7 +13,7 @@ struct AllReferralCodesView: View {
         ScrollView {
             VStack(spacing: 16) {
                 ForEach(viewModel.referralCodes, id: \.id) { code in
-                    ReferralCodeCard(code: code, viewModel: viewModel)
+                    ReferralCodeCard(code: code)
                 }
             }
             .padding()

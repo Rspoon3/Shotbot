@@ -143,7 +143,7 @@ public struct ReferralView: View {
             }
             
             if let code = viewModel.primaryReferralCode {
-                ReferralCodeCard(code: code, viewModel: viewModel)
+                ReferralCodeCard(code: code)
             } else {
                 NoReferralCodeCard()
             }

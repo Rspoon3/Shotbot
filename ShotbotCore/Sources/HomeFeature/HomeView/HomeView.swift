@@ -207,11 +207,8 @@ public struct HomeView: View {
                             Label("Reverse Images", systemImage: "arrow.left.arrow.right")
                         }
                         .disabled(viewModel.isLoading)
-
-                        PurchaseShareLink(
-                            items: [shareableImage.url],
-                            showPurchaseView: $viewModel.showPurchaseView
-                        )
+                        
+                        ShareLink(items: [shareableImage.url])
                     }
                 }
         }
@@ -221,18 +218,18 @@ public struct HomeView: View {
         VStack(spacing: 16) {
             if ProcessInfo.processInfo.isiOSAppOnMac {
                 PrimaryButton(title: "Select From Files") {
-                    viewModel.attemptToImportFile()
+                    Task { await viewModel.attemptToImportFile() }
                 }
                 Button("Select Photos") {
-                    viewModel.selectPhotos()
+                    Task { await viewModel.selectPhotos() }
                 }
                 .font(.headline)
             } else {
                 PrimaryButton(title: "Select Photos") {
-                    viewModel.selectPhotos()
+                    Task { await viewModel.selectPhotos() }
                 }
                 Button("Select From Files") {
-                    viewModel.attemptToImportFile()
+                    Task { await viewModel.attemptToImportFile() }
                 }
                 .font(.headline)
             }
@@ -245,13 +242,13 @@ public struct HomeView: View {
     private var placeholderContextButton: some View {
         if ProcessInfo.processInfo.isiOSAppOnMac {
             Button {
-                viewModel.selectPhotos()
+                Task { await viewModel.selectPhotos() }
             } label: {
                 Label("Select Photos", systemImage: "photo")
             }
         } else {
             Button {
-                viewModel.attemptToImportFile()
+                Task { await viewModel.attemptToImportFile() }
             } label: {
                 Label("Select From Files", systemImage: "doc")
             }
@@ -276,9 +273,9 @@ public struct HomeView: View {
                 .foregroundColor(.secondary)
                 .onTapGesture {
                     if ProcessInfo.processInfo.isiOSAppOnMac {
-                        viewModel.attemptToImportFile()
+                        Task { await viewModel.attemptToImportFile() }
                     } else {
-                        viewModel.selectPhotos()
+                        Task { await viewModel.selectPhotos() }
                     }
                 }
         }
@@ -357,10 +354,8 @@ public struct HomeView: View {
             Label("Copy", systemImage: "doc.on.doc")
         }
         
-        PurchaseShareLink(
-            items: [shareableImage.url],
-            showPurchaseView: $viewModel.showPurchaseView
-        )
+        
+        ShareLink(items: [shareableImage.url])
     }
     
     private func individualImagesView(_ shareableImages: [ShareableImage]) -> some View {
@@ -380,11 +375,8 @@ public struct HomeView: View {
                         Label("Individual View Type", systemImage: name)
                     }
                 }
-
-                PurchaseShareLink(
-                    items: shareableImages.map(\.url),
-                    showPurchaseView: $viewModel.showPurchaseView
-                )
+                
+                ShareLink(items: shareableImages.map(\.url))
             }
         }
     }

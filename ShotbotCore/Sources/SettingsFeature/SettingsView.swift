@@ -15,6 +15,7 @@ import ReferralFeature
 public struct SettingsView: View {
     let appID = 6450552843
     @State private var logExporter = LogExporter()
+    @State private var deviceFrameCreations = 0
     @Environment(\.openURL) var openURL
     @EnvironmentObject private var persistenceManager: PersistenceManager
     
@@ -217,16 +218,23 @@ public struct SettingsView: View {
                 )
                 
                 LabeledContent(
-                    "Number of device frame creations",
-                    value: persistenceManager.deviceFrameCreations,
-                    format: .number
-                )
-                
-                LabeledContent(
                     "Is Subscribed",
                     value: persistenceManager.isSubscribed.description
                 )
-
+                
+                Stepper(
+                    "Frames Creations: \(persistenceManager.deviceFrameCreations.formatted())",
+                    value: .init(get: {
+                        deviceFrameCreations
+                    }, set: { value in
+                        deviceFrameCreations = value
+                        persistenceManager.deviceFrameCreations = value
+                    })
+                )
+                .onAppear {
+                    deviceFrameCreations = persistenceManager.deviceFrameCreations
+                }
+                
                 Picker("Subscription Override", selection: $persistenceManager.subscriptionOverride) {
                     ForEach(PersistenceManager.SubscriptionOverrideMethod.allCases) { type in
                         Text(type.id)

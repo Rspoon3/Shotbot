@@ -250,20 +250,4 @@ public class ReferralViewModel: ObservableObject {
         showingSuccessMessage = false
         successMessage = ""
     }
-    
-    func createShareContent() -> [Any] {
-        guard let primaryReferralCode else {
-            return ["Check out Shotbot - The ultimate screenshot organizer!"]
-        }
-        
-        let shareText = """
-        Join me on Shotbot! 📸
-        
-        Use my referral code \(primaryReferralCode.code) to get started.
-        
-        Shotbot helps you capture, organize, and create beautiful screenshot collections!
-        """
-        
-        return [shareText]
-    }
 }

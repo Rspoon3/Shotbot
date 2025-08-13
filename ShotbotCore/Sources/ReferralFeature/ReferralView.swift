@@ -43,10 +43,9 @@ public struct ReferralView: View {
             
             // Show notification permission view on first visit
             if !persistenceManager.hasShownNotificationPermission {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    showingNotificationPermission = true
-                    persistenceManager.hasShownNotificationPermission = true
-                }
+                try? await Task.sleep(for: .milliseconds(500))
+                showingNotificationPermission = true
+                persistenceManager.hasShownNotificationPermission = true
             }
         }
         .overlay {

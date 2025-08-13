@@ -150,6 +150,7 @@ extension Target {
         name: "Purchases",
         dependencies: [
             .target(.persistence),
+            .target(.referralFeature),
             .revenueCat,
             .swiftTools
         ]

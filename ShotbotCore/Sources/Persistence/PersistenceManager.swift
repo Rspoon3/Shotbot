@@ -22,29 +22,6 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
         logger.notice("numberOfActivations: \(self.numberOfActivations.formatted(), privacy: .public)")
     }
     
-    private var canSaveFramedScreenshotAppStore: Bool {
-        isSubscribed || deviceFrameCreations <= 30
-    }
-    
-    public var canSaveFramedScreenshot: Bool {
-#if DEBUG
-        switch subscriptionOverride {
-        case .alwaysFalse:
-            return false
-        case .alwaysTrue:
-            return true
-        case .appStore:
-            return canSaveFramedScreenshotAppStore
-        }
-#else
-        canSaveFramedScreenshotAppStore
-#endif
-    }
-    
-    public var freeFramedScreenshotsRemaining: Int {
-        max(0, (30 - deviceFrameCreations))
-    }
-    
     @AppStorage("isSubscribed", store: .shared)
     public var isSubscribed = false
     
@@ -93,12 +70,6 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     @AppStorage("canEnterReferralCode")
     public var canEnterReferralCode: Bool = true
     
-    @AppStorage("extraScreenshots")
-    public var extraScreenshots: Int = 0
-    
-    @AppStorage("canCreateCustomCode")
-    public var canCreateCustomCode: Bool = false
-    
     @AppStorage("hasShownNotificationPermission")
     public var hasShownNotificationPermission: Bool = false
     
@@ -123,7 +94,6 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
 
 public class MockPersistenceManager: PersistenceManaging {
     public var lastReviewPromptDate: Date?
-    public var canSaveFramedScreenshot: Bool = false
     public var isSubscribed: Bool = false
     public var numberOfLaunches: Int = 0
     public var numberOfActivations: Int = 0
@@ -139,14 +109,11 @@ public class MockPersistenceManager: PersistenceManaging {
     public var imageQuality: ImageQuality = .original
     public var creditBalance: Int = 0
     public var canEnterReferralCode: Bool = true
-    public var extraScreenshots: Int = 0
-    public var canCreateCustomCode: Bool = false
     
     public init() {}
 
     public func reset() {
         lastReviewPromptDate = nil
-        canSaveFramedScreenshot = false
         isSubscribed = false
         autoCopy = false
         autoSaveToFiles = false
@@ -162,8 +129,6 @@ public class MockPersistenceManager: PersistenceManaging {
         imageQuality = .original
         creditBalance = 0
         canEnterReferralCode = true
-        extraScreenshots = 0
-        canCreateCustomCode = false
     }
     
     public func setLastReviewPromptDateToNow() {

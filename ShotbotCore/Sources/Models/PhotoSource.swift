@@ -23,11 +23,10 @@ public enum PhotoSource: Sendable {
     public var itemCount: Int? {
         switch self {
         case .photoPicker(let items): items.count
-        case .photoAssetID: 1
         case .filePicker(let urls): urls.count
         case .dropItems(let items): items.count
         case .existingScreenshots: 0
-        case .controlCenter: nil
+        case .controlCenter, .photoAssetID: nil
         }
     }
 }

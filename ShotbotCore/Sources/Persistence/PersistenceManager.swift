@@ -14,35 +14,16 @@ import SwiftTools
 public final class PersistenceManager: ObservableObject, PersistenceManaging, Sendable {
     public static let shared = PersistenceManager()
     private let logger = Logger(category: PersistenceManager.self)
-
+    
+    public var freeFramedScreenshotsRemaining: Int {
+        max(0, (30 - deviceFrameCreations))
+    }
+    
     private init(){
         logger.notice("isSubscribed: \(self.isSubscribed, privacy: .public)")
         logger.notice("deviceFrameCreations: \(self.deviceFrameCreations.formatted(), privacy: .public)")
         logger.notice("numberOfLaunches: \(self.numberOfLaunches.formatted(), privacy: .public)")
         logger.notice("numberOfActivations: \(self.numberOfActivations.formatted(), privacy: .public)")
-    }
-    
-    private var canSaveFramedScreenshotAppStore: Bool {
-        isSubscribed || deviceFrameCreations <= 30
-    }
-    
-    public var canSaveFramedScreenshot: Bool {
-#if DEBUG
-        switch subscriptionOverride {
-        case .alwaysFalse:
-            return false
-        case .alwaysTrue:
-            return true
-        case .appStore:
-            return canSaveFramedScreenshotAppStore
-        }
-#else
-        canSaveFramedScreenshotAppStore
-#endif
-    }
-    
-    public var freeFramedScreenshotsRemaining: Int {
-        max(0, (30 - deviceFrameCreations))
     }
     
     @AppStorage("isSubscribed", store: .shared)
@@ -87,6 +68,15 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     @iCloudKeyValueStore("lastReviewPromptDate")
     public var lastReviewPromptDate: Date? = nil
     
+    @AppStorage("creditBalance")
+    public var creditBalance: Int = 0
+    
+    @AppStorage("canEnterReferralCode")
+    public var canEnterReferralCode: Bool = true
+    
+    @AppStorage("hasShownNotificationPermission")
+    public var hasShownNotificationPermission: Bool = false
+    
     
 #if DEBUG
     public enum SubscriptionOverrideMethod: String, CaseIterable, Identifiable {
@@ -108,7 +98,6 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
 
 public class MockPersistenceManager: PersistenceManaging {
     public var lastReviewPromptDate: Date?
-    public var canSaveFramedScreenshot: Bool = false
     public var isSubscribed: Bool = false
     public var numberOfLaunches: Int = 0
     public var numberOfActivations: Int = 0
@@ -122,12 +111,13 @@ public class MockPersistenceManager: PersistenceManaging {
     public var clearImagesOnAppBackground: Bool = false
     public var imageSelectionType: ImageSelectionType = .all
     public var imageQuality: ImageQuality = .original
+    public var creditBalance: Int = 0
+    public var canEnterReferralCode: Bool = true
     
     public init() {}
 
     public func reset() {
         lastReviewPromptDate = nil
-        canSaveFramedScreenshot = false
         isSubscribed = false
         autoCopy = false
         autoSaveToFiles = false
@@ -141,6 +131,8 @@ public class MockPersistenceManager: PersistenceManaging {
         deviceFrameCreations = 0
         imageSelectionType = .all
         imageQuality = .original
+        creditBalance = 0
+        canEnterReferralCode = true
     }
     
     public func setLastReviewPromptDateToNow() {

@@ -15,6 +15,7 @@ import AppIntents
 import OSLog
 import Photos
 import Models
+import ReferralFeature
 
 #if canImport(WidgetKit)
 import WidgetKit
@@ -29,6 +30,8 @@ struct ShotbotApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     private let logger = Logger(category: "ShotbotApp")
+    private let referralChecker = ReferralChecker()
+    private let notificaitonManager = NotificationManager()
     
     init() {
         Purchases.logLevel = .info
@@ -43,6 +46,8 @@ struct ShotbotApp: App {
                 .environmentObject(tabManager)
                 .task {
                     await purchaseManager.fetchOfferings()
+                    await referralChecker.checkForUnnotifiedReferralsAndCreditBalance()
+                    await notificaitonManager.registerStoredTokenOnAppLaunch()
                 }
                 .onAppear {
                     performLogging()
@@ -94,9 +99,4 @@ struct ShotbotApp: App {
     }
 }
 
-final class AppDelegateAdaptor: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        PersistenceManager.shared.numberOfLaunches += 1
-        return true
-    }
-}
+

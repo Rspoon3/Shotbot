@@ -10,7 +10,6 @@ import Models
 
 @MainActor
 public protocol PersistenceManaging: Sendable {
-    var canSaveFramedScreenshot: Bool  { get }
     var isSubscribed: Bool { get set }
     var autoCopy: Bool  { get set }
     var autoSaveToFiles: Bool { get set }
@@ -25,5 +24,7 @@ public protocol PersistenceManaging: Sendable {
     var imageSelectionType: ImageSelectionType  { get set }
     var imageQuality: ImageQuality  { get set }
     var lastReviewPromptDate: Date? { get set }
+    var creditBalance: Int { get set }
+    var canEnterReferralCode: Bool { get set }
     func setLastReviewPromptDateToNow()
 }

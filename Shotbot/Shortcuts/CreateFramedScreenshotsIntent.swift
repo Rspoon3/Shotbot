@@ -12,6 +12,7 @@ import Persistence
 import MediaManager
 import OSLog
 import SBFoundation
+import Purchases
 
 public struct CreateFramedScreenshotsIntent: AppIntent {
     public static let intentClassName = "CreateFramedScreenshotsIntent"
@@ -62,11 +63,7 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
     
     public func perform() async throws -> some IntentResult & ReturnsValue<[IntentFile]> {
         let persistenceManager = await PersistenceManager.shared
-        
-        guard await persistenceManager.canSaveFramedScreenshot else {
-            logger.error("pro subscription required to save screenshot")
-            throw SBError.proSubscriptionRequired
-        }
+        let eligabilityUseCase = await FramedScreenshotEligibilityUseCase()
         
         let screenshots = try await images.asyncCompactMap { file -> IntentFile? in
             let url = try await createDeviceFrame(using: file.data)
@@ -75,6 +72,11 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
             file.removedOnCompletion = true
             
             return file
+        }
+        
+        guard await eligabilityUseCase.canSaveFramedScreenshot(screenshotCount: screenshots.count) else {
+            logger.error("pro subscription required to save screenshot")
+            throw SBError.proSubscriptionRequired
         }
         
         await MainActor.run {

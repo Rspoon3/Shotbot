@@ -24,6 +24,8 @@
 		946E7FC72C4C3341001E4C46 /* MultipleScreenshotsEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC32C4C3341001E4C46 /* MultipleScreenshotsEntry.swift */; };
 		946E7FC92C4C3341001E4C46 /* MultipleScreenshotsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FC02C4C3341001E4C46 /* MultipleScreenshotsProvider.swift */; };
 		946E7FCB2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946E7FCA2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift */; };
+		9490F4902E4ABE3700A07611 /* AppDelegateAdaptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9490F48F2E4ABE3700A07611 /* AppDelegateAdaptor.swift */; };
+		9490F4AB2E4D0E7D00A07611 /* Purchases in Frameworks */ = {isa = PBXBuildFile; productRef = 9490F4AA2E4D0E7D00A07611 /* Purchases */; };
 		94BD65CA2A44B28700D0CE61 /* ShotbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */; };
 		94BD65CE2A44B28700D0CE61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65CD2A44B28700D0CE61 /* Assets.xcassets */; };
 		94BD65D12A44B28700D0CE61 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BD65D02A44B28700D0CE61 /* Preview Assets.xcassets */; };
@@ -96,6 +98,7 @@
 		946E7FC42C4C3341001E4C46 /* MultipleScreenshotsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleScreenshotsWidget.swift; sourceTree = "<group>"; };
 		946E7FCA2C4C338B001E4C46 /* DeleteLatestScreenshotIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteLatestScreenshotIntent.swift; sourceTree = "<group>"; };
 		9482BE752C51402A00881181 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		9490F48F2E4ABE3700A07611 /* AppDelegateAdaptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateAdaptor.swift; sourceTree = "<group>"; };
 		94BD65C62A44B28700D0CE61 /* Shotbot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shotbot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotbotApp.swift; sourceTree = "<group>"; };
 		94BD65CD2A44B28700D0CE61 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -167,6 +170,7 @@
 				94BD66022A44B8CC00D0CE61 /* Persistence in Frameworks */,
 				94BD65E32A44B49900D0CE61 /* UniformTypeIdentifiers.framework in Frameworks */,
 				9466A0D72CA3B3B500700BAA /* CreateCombinedImageFeature in Frameworks */,
+				9490F4AB2E4D0E7D00A07611 /* Purchases in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,6 +247,7 @@
 			children = (
 				94BD65DC2A44B3B900D0CE61 /* Shotbot.entitlements */,
 				94BD65C92A44B28700D0CE61 /* ShotbotApp.swift */,
+				9490F48F2E4ABE3700A07611 /* AppDelegateAdaptor.swift */,
 				94CA148F2B81C1CD009D956C /* Shortcuts */,
 				94BD65FF2A44B77A00D0CE61 /* Info.plist */,
 				94BD65CD2A44B28700D0CE61 /* Assets.xcassets */,
@@ -382,6 +387,7 @@
 				94BD66032A44B8D000D0CE61 /* Models */,
 				9466A0D42CA3B16600700BAA /* SBFoundation */,
 				9466A0D62CA3B3B500700BAA /* CreateCombinedImageFeature */,
+				9490F4AA2E4D0E7D00A07611 /* Purchases */,
 			);
 			productName = ShotbotActionExtension;
 			productReference = 94BD65E12A44B49900D0CE61 /* ShotbotActionExtension.appex */;
@@ -488,6 +494,7 @@
 			files = (
 				94CA148C2B81C13F009D956C /* CreateFramedScreenshotsIntent.swift in Sources */,
 				94CA148E2B81C1CA009D956C /* ShortcutsImageQuality.swift in Sources */,
+				9490F4902E4ABE3700A07611 /* AppDelegateAdaptor.swift in Sources */,
 				94BD65CA2A44B28700D0CE61 /* ShotbotApp.swift in Sources */,
 				94CA14912B81C5C2009D956C /* ShotBotShortcuts.swift in Sources */,
 			);
@@ -902,6 +909,10 @@
 		9466A0D62CA3B3B500700BAA /* CreateCombinedImageFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CreateCombinedImageFeature;
+		};
+		9490F4AA2E4D0E7D00A07611 /* Purchases */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Purchases;
 		};
 		94BD65DA2A44B3B300D0CE61 /* AppFeature */ = {
 			isa = XCSwiftPackageProductDependency;

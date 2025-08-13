@@ -19,13 +19,15 @@ let package = Package(
         .library(for: .purchases),
         .library(for: .sbFoundation),
         .library(for: .settingsFeature),
-        .library(for: .widgetFeature)
+        .library(for: .widgetFeature),
+        .library(for: .referralFeature)
     ],
     dependencies: [
         .collectionConcurrencyKit,
         .alertToast,
         .revenueCat,
-        .swiftTools
+        .swiftTools,
+        .referralService
     ],
     targets: [
         .appFeature,
@@ -39,7 +41,8 @@ let package = Package(
         .purchases,
         .sbFoundation,
         .settingsFeature,
-        .widgetFeature
+        .widgetFeature,
+        .referralFeature
     ]
 )
 
@@ -116,6 +119,14 @@ extension Target {
         ]
     )
     
+    static let referralFeature: Target = .target(
+        name: "ReferralFeature",
+        dependencies: [
+            .target(.persistence),
+            .referralService
+        ]
+    )
+    
     static let mediaManager: Target = .target(
         name: "MediaManager",
         dependencies: [
@@ -139,6 +150,7 @@ extension Target {
         name: "Purchases",
         dependencies: [
             .target(.persistence),
+            .target(.referralFeature),
             .revenueCat,
             .swiftTools
         ]
@@ -151,7 +163,8 @@ extension Target {
             .target(.persistence),
             .target(.purchases),
             .target(.mediaManager),
-            .target(.sbFoundation)
+            .target(.sbFoundation),
+            .target(.referralFeature)
         ]
     )
     
@@ -173,6 +186,7 @@ extension Target {
             .target(.sbFoundation),
             .target(.widgetFeature),
             .target(.createCombinedImageFeature),
+            .target(.referralFeature),
             .alertToast,
             .swiftTools
         ]
@@ -209,6 +223,10 @@ extension Target.Dependency {
         package: "purchases-ios"
     )
     
+    static let referralService: Target.Dependency = .product(
+        name: "ReferralService",
+        package: "ReferralService-iOS"
+    )
     
     static let swiftTools: Target.Dependency = .product(
         name: "SwiftTools",
@@ -235,5 +253,10 @@ extension Package.Dependency {
     static let swiftTools: Package.Dependency = .package(
         url: "https://github.com/Rspoon3/SwiftTools",
         exact: "2.2.4"
+    )
+    
+    static let referralService: Package.Dependency = .package(
+        url: "https://github.com/Rspoon3/ReferralService-iOS.git",
+        branch: "swift-6"
     )
 }

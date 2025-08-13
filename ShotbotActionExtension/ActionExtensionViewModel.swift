@@ -14,6 +14,7 @@ import Models
 import Persistence
 import OSLog
 import SBFoundation
+import Purchases
 import CreateCombinedImageFeature
 
 @MainActor final class ActionExtensionViewModel: ObservableObject {
@@ -27,6 +28,7 @@ import CreateCombinedImageFeature
     @Published var shareableImages: [ShareableImage]?
     @Published var shareableCombinedImage: ShareableImage?
     @Published var showGridView: Bool
+    @Published var canSaveFramedScreenshot = false
     @Published public var error: Error?
     private var persistenceManager: any PersistenceManaging
     private let fileManager: any FileManaging
@@ -54,10 +56,6 @@ import CreateCombinedImageFeature
             guard let shareableCombinedImage else { return nil }
             return [shareableCombinedImage.url]
         }
-    }
-    
-    var canSaveFramedScreenshot : Bool {
-        persistenceManager.canSaveFramedScreenshot
     }
     
     var hasMultipleImages: Bool {
@@ -88,7 +86,6 @@ import CreateCombinedImageFeature
         self.showGridView = persistenceManager.defaultHomeView == .grid
         
         logger.notice("attachments: \(attachments.count.formatted(), privacy: .public)")
-        logger.notice("canSaveFramedScreenshot: \(persistenceManager.canSaveFramedScreenshot, privacy: .public)")
         
         if persistenceManager.defaultHomeTab == .combined, attachments.count > 1 {
             imageType = .combined
@@ -109,7 +106,10 @@ import CreateCombinedImageFeature
     }
     
     func loadAttachments() async {
-        guard persistenceManager.canSaveFramedScreenshot else { return }
+        let useCae = FramedScreenshotEligibilityUseCase()
+        canSaveFramedScreenshot = await useCae.canSaveFramedScreenshot(screenshotCount: attachments.count)
+        guard canSaveFramedScreenshot else { return }
+        
         await createIndividualImages()
         
         if (shareableImages ?? []).count != attachments.count {

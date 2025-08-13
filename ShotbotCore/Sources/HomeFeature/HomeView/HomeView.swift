@@ -12,6 +12,7 @@ import Persistence
 import Models
 import Purchases
 import MediaManager
+import ReferralFeature
 
 public struct HomeView: View {
     @StateObject var manager = AppIntentManager.shared
@@ -32,6 +33,9 @@ public struct HomeView: View {
             picker
             mainContent
             selectionButtons
+        }
+        .background {
+            Color(.secondarySystemBackground).ignoresSafeArea(.all)
         }
 #if os(iOS)
         .navigationTitle("Shotbot")
@@ -172,7 +176,12 @@ public struct HomeView: View {
             ProgressView("Combining Images...")
                 .frame(maxHeight: .infinity, alignment: .center)
         case .individualPlaceholder:
-            placeholder
+            VStack {
+                ReferralBanner()
+                    .padding(.horizontal)
+                    .environmentObject(PersistenceManager.shared)
+                placeholder
+            }
         case .individualImages(let shareableImages):
             individualImagesView(shareableImages)
         case .combinedImages(let shareableImage):
@@ -198,11 +207,8 @@ public struct HomeView: View {
                             Label("Reverse Images", systemImage: "arrow.left.arrow.right")
                         }
                         .disabled(viewModel.isLoading)
-
-                        PurchaseShareLink(
-                            items: [shareableImage.url],
-                            showPurchaseView: $viewModel.showPurchaseView
-                        )
+                        
+                        ShareLink(items: [shareableImage.url])
                     }
                 }
         }
@@ -212,18 +218,18 @@ public struct HomeView: View {
         VStack(spacing: 16) {
             if ProcessInfo.processInfo.isiOSAppOnMac {
                 PrimaryButton(title: "Select From Files") {
-                    viewModel.attemptToImportFile()
+                    Task { await viewModel.attemptToImportFile() }
                 }
                 Button("Select Photos") {
-                    viewModel.selectPhotos()
+                    Task { await viewModel.selectPhotos() }
                 }
                 .font(.headline)
             } else {
                 PrimaryButton(title: "Select Photos") {
-                    viewModel.selectPhotos()
+                    Task { await viewModel.selectPhotos() }
                 }
                 Button("Select From Files") {
-                    viewModel.attemptToImportFile()
+                    Task { await viewModel.attemptToImportFile() }
                 }
                 .font(.headline)
             }
@@ -236,13 +242,13 @@ public struct HomeView: View {
     private var placeholderContextButton: some View {
         if ProcessInfo.processInfo.isiOSAppOnMac {
             Button {
-                viewModel.selectPhotos()
+                Task { await viewModel.selectPhotos() }
             } label: {
                 Label("Select Photos", systemImage: "photo")
             }
         } else {
             Button {
-                viewModel.attemptToImportFile()
+                Task { await viewModel.attemptToImportFile() }
             } label: {
                 Label("Select From Files", systemImage: "doc")
             }
@@ -250,29 +256,31 @@ public struct HomeView: View {
     }
     
     private var placeholder: some View {
-        Image(systemName: "photo")
-            .resizable()
-            .scaledToFit()
-            .contextMenu { placeholderContextButton }
-            .frame(maxWidth: 200)
-            .padding()
-            .contentShape(
-                .hoverEffect,
-                .rect(
-                    cornerRadius: 14,
-                    style: .continuous
+        VStack(spacing: 30) {
+            Image(systemName: "photo")
+                .resizable()
+                .scaledToFit()
+                .contextMenu { placeholderContextButton }
+                .frame(maxWidth: 200)
+                .contentShape(
+                    .hoverEffect,
+                    .rect(
+                        cornerRadius: 14,
+                        style: .continuous
+                    )
                 )
-            )
-            .hoverEffect()
-            .foregroundColor(.secondary)
-            .frame(maxHeight: .infinity)
-            .onTapGesture {
-                if ProcessInfo.processInfo.isiOSAppOnMac {
-                    viewModel.attemptToImportFile()
-                } else {
-                    viewModel.selectPhotos()
+                .hoverEffect()
+                .foregroundColor(.secondary)
+                .onTapGesture {
+                    if ProcessInfo.processInfo.isiOSAppOnMac {
+                        Task { await viewModel.attemptToImportFile() }
+                    } else {
+                        Task { await viewModel.selectPhotos() }
+                    }
                 }
-            }
+        }
+        .padding()
+        .frame(maxHeight: .infinity)
     }
     
     private func tabView(shareableImages: [ShareableImage]) -> some View {
@@ -346,10 +354,8 @@ public struct HomeView: View {
             Label("Copy", systemImage: "doc.on.doc")
         }
         
-        PurchaseShareLink(
-            items: [shareableImage.url],
-            showPurchaseView: $viewModel.showPurchaseView
-        )
+        
+        ShareLink(items: [shareableImage.url])
     }
     
     private func individualImagesView(_ shareableImages: [ShareableImage]) -> some View {
@@ -369,11 +375,8 @@ public struct HomeView: View {
                         Label("Individual View Type", systemImage: name)
                     }
                 }
-
-                PurchaseShareLink(
-                    items: shareableImages.map(\.url),
-                    showPurchaseView: $viewModel.showPurchaseView
-                )
+                
+                ShareLink(items: shareableImages.map(\.url))
             }
         }
     }

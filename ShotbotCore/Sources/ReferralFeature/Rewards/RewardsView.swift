@@ -121,10 +121,10 @@ struct RewardsView: View {
                 .font(.largeTitle)
                 .foregroundColor(.secondary)
             
-            Text("No credits yet")
+            Text("No Credits Yet")
                 .font(.headline)
             
-            Text("Share your referral code with friends to earn credits")
+            Text("Refer friends to earn credits and unlock amazing rewards!")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

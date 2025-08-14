@@ -61,7 +61,7 @@ public struct FramedScreenshotEligibilityUseCase: Sendable {
             return await canProceedWithPhotoSelectionAppStore()
         }
 #else
-        return await canProceedWithPhotoSelectionAppStore
+        return await canProceedWithPhotoSelectionAppStore()
 #endif
     }
     

@@ -10,6 +10,7 @@ import Models
 
 public protocol PersistenceManaging: Sendable {
     var isSubscribed: Bool { get set }
+    var referralBannerCount: Int { get set }
     var autoCopy: Bool  { get set }
     var autoSaveToFiles: Bool { get set }
     var autoSaveToPhotos: Bool  { get set }

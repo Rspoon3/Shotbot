@@ -71,6 +71,9 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     @AppStorage("creditBalance")
     public var creditBalance: Int = 0
     
+    @AppStorage("referralBannerCount")
+    public var referralBannerCount: Int = 0
+    
     @AppStorage("canEnterReferralCode")
     public var canEnterReferralCode: Bool = true
     
@@ -113,6 +116,7 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var imageQuality: ImageQuality = .original
     public var creditBalance: Int = 0
     public var canEnterReferralCode: Bool = true
+    public var referralBannerCount: Int = 0
     
     public init() {}
 
@@ -132,6 +136,7 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
         imageSelectionType = .all
         imageQuality = .original
         creditBalance = 0
+        referralBannerCount = 0
         canEnterReferralCode = true
     }
     

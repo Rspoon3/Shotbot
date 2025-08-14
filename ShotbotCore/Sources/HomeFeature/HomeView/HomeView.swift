@@ -189,15 +189,21 @@ public struct HomeView: View {
                 .frame(maxHeight: .infinity, alignment: .center)
         case .individualPlaceholder:
             VStack {
-                Button {
-                    showReferrals = true
-                } label: {
-                    ReferralBanner(emoji: "👯🤩👯‍♂️")
+                
+                if persistenceManager.referralBannerCount < 10 {
+                    Button {
+                        showReferrals = true
+                    } label: {
+                        ReferralBanner(emoji: "👯📸👯‍♂️")
+                    }
+                    .padding(.bottom, 20)
+                    .padding(.horizontal)
+                    .transition(.scale.combined(with: .opacity))
+                    .buttonStyle(.plain)
+                    .onFirstAppear {
+                        persistenceManager.referralBannerCount += 1
+                    }
                 }
-                .padding(.bottom, 20)
-                .padding(.horizontal)
-                .transition(.scale.combined(with: .opacity))
-                .buttonStyle(.plain)
                 
                 placeholder
             }

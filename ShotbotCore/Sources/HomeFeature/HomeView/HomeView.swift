@@ -22,6 +22,7 @@ public struct HomeView: View {
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
     @State private var showReferrals = false
+    @State private var showNotificationPermission = false
     @StateObject private var referralViewModel = ReferralViewModel()
 
     // MARK: - Initializer
@@ -137,6 +138,14 @@ public struct HomeView: View {
                     viewModel: referralViewModel,
                     referralDataStorage: persistenceManager
                 )
+                .fullScreenCover(isPresented: $showNotificationPermission) {
+                    NotificationPermissionView(isPresented: $showNotificationPermission)
+                }
+                .onAppear {
+                    guard !persistenceManager.hasShownNotificationPermission else { return }
+                    showNotificationPermission = true
+                    persistenceManager.hasShownNotificationPermission = true
+                }
             }
         }
         .sheet(isPresented: $viewModel.showPurchaseView) {

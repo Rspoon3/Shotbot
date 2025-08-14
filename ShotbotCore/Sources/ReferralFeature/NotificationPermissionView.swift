@@ -6,19 +6,19 @@
 import SwiftUI
 import UserNotifications
 
-struct NotificationPermissionView: View {
+public struct NotificationPermissionView: View {
     @Binding var isPresented: Bool
     @State private var animateIcon = false
     
     // MARK: - Initializer
     
-    init(isPresented: Binding<Bool>) {
+    public init(isPresented: Binding<Bool>) {
         self._isPresented = isPresented
     }
     
     // MARK: - Body
     
-    var body: some View {
+    public var body: some View {
         ZStack {
             // Blue gradient background
             LinearGradient(

@@ -48,6 +48,8 @@ struct ShotbotApp: App {
                 .task {
                     await purchaseManager.fetchOfferings()
                     await notificaitonManager.registerStoredTokenOnAppLaunch()
+                    
+                    guard persistenceManager.hasShownNotificationPermission else { return }
                     await referralChecker.checkForUnnotifiedReferralsAndCreditBalance()
                 }
                 .onAppear {

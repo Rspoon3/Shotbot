@@ -30,6 +30,7 @@ public struct SettingsView: View {
     @State private var clearDatabaseMessage = ""
     @State private var showClearDatabaseAlert = false
     @State private var showConfirmDatabaseClear = false
+    @State private var showNotificationPermission = false
 
     private let referralService = ReferralService()
     
@@ -162,6 +163,14 @@ public struct SettingsView: View {
                         viewModel: referralViewModel,
                         referralDataStorage: persistenceManager
                     )
+                    .fullScreenCover(isPresented: $showNotificationPermission) {
+                        NotificationPermissionView(isPresented: $showNotificationPermission)
+                    }
+                    .onAppear {
+                        guard !persistenceManager.hasShownNotificationPermission else { return }
+                        showNotificationPermission = true
+                        persistenceManager.hasShownNotificationPermission = true
+                    }
                 } label: {
                     Label {
                         VStack(alignment: .leading) {

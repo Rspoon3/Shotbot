@@ -106,8 +106,10 @@ import CreateCombinedImageFeature
     }
     
     func loadAttachments() async {
-        let useCae = FramedScreenshotEligibilityUseCase()
-        canSaveFramedScreenshot = await useCae.canSaveFramedScreenshot(screenshotCount: attachments.count)
+        let eligibilityUseCase = FramedScreenshotEligibilityUseCase()
+        let reason = await eligibilityUseCase.canSaveFramedScreenshot(screenshotCount: attachments.count)
+
+        canSaveFramedScreenshot = reason.canSave
         guard canSaveFramedScreenshot else { return }
         
         await createIndividualImages()
@@ -119,6 +121,15 @@ import CreateCombinedImageFeature
         
         Task {
             await createCombineImageIfNeeded()
+            
+            if let amount = reason.rewardedScreenShotsCount {
+                do {
+                    try await eligibilityUseCase.consumeExtraScreenshot(amount: attachments.count)
+                    logger.info("Consumed \(amount, privacy: .public) extra screenshot(s).")
+                } catch {
+                    logger.error("Failed to consume \(amount, privacy: .public) extra screenshot(s): \(error.localizedDescription, privacy: .public).")
+                }
+            }
         }
     }
     

@@ -11,6 +11,7 @@ import Models
 import Purchases
 import SwiftTools
 import ReferralFeature
+import ReferralService
 
 public struct SettingsView: View {
     let appID = 6450552843
@@ -18,7 +19,8 @@ public struct SettingsView: View {
     @State private var deviceFrameCreations = 0
     @Environment(\.openURL) var openURL
     @EnvironmentObject private var persistenceManager: PersistenceManager
-    
+    @StateObject private var referralViewModel = ReferralViewModel()
+
     // MARK: - Initializer
     
     public init() {}
@@ -142,10 +144,12 @@ public struct SettingsView: View {
                         Image(symbol: .heart)
                     }
                 }
-
+                
                 NavigationLink {
-                    ReferralView()
-                        .environmentObject(persistenceManager)
+                    ReferralView(
+                        viewModel: referralViewModel,
+                        referralDataStorage: persistenceManager
+                    )
                 } label: {
                     Label {
                         VStack(alignment: .leading) {
@@ -161,7 +165,7 @@ public struct SettingsView: View {
                             }
                         }
                     } icon: {
-                        Image(systemName: "person.2.fill")
+                        Image(systemName: "person.2")
                             .foregroundColor(.blue)
                     }
                 }

@@ -13,12 +13,16 @@ import Models
 import Purchases
 import MediaManager
 import ReferralFeature
+import ReferralService
 
 public struct HomeView: View {
     @StateObject var manager = AppIntentManager.shared
     @StateObject var viewModel = HomeViewModel()
+    @EnvironmentObject private var persistenceManager: PersistenceManager
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
+    @State private var showReferrals = false
+    @StateObject private var referralViewModel = ReferralViewModel()
 
     // MARK: - Initializer
     
@@ -127,6 +131,14 @@ public struct HomeView: View {
                 await viewModel.didOpenViaDeepLink(url)
             }
         }
+        .sheet(isPresented: $showReferrals) {
+            NavigationStack {
+                ReferralView(
+                    viewModel: referralViewModel,
+                    referralDataStorage: persistenceManager
+                )
+            }
+        }
         .sheet(isPresented: $viewModel.showPurchaseView) {
             NavigationView {
                 PurchaseView()
@@ -177,9 +189,16 @@ public struct HomeView: View {
                 .frame(maxHeight: .infinity, alignment: .center)
         case .individualPlaceholder:
             VStack {
-                ReferralBanner()
-                    .padding(.horizontal)
-                    .environmentObject(PersistenceManager.shared)
+                Button {
+                    showReferrals = true
+                } label: {
+                    ReferralBanner(emoji: "👯🤩👯‍♂️")
+                }
+                .padding(.bottom, 20)
+                .padding(.horizontal)
+                .transition(.scale.combined(with: .opacity))
+                .buttonStyle(.plain)
+                
                 placeholder
             }
         case .individualImages(let shareableImages):

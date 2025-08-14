@@ -727,6 +727,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Shotbot/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Shotbot;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.graphics-design";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Add and delete screenshots to your photo library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -767,6 +768,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Shotbot/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Shotbot;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.graphics-design";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Add and delete screenshots to your photo library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -16,6 +16,7 @@ import OSLog
 import Photos
 import Models
 import ReferralFeature
+@preconcurrency import ReferralService
 
 #if canImport(WidgetKit)
 import WidgetKit

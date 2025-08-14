@@ -8,7 +8,6 @@
 import Foundation
 import Models
 
-@MainActor
 public protocol PersistenceManaging: Sendable {
     var isSubscribed: Bool { get set }
     var autoCopy: Bool  { get set }

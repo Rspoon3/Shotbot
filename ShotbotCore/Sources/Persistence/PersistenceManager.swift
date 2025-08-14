@@ -9,9 +9,9 @@ import SwiftUI
 import Models
 import OSLog
 import SwiftTools
+import ReferralService
 
-@MainActor
-public final class PersistenceManager: ObservableObject, PersistenceManaging, Sendable {
+public final class PersistenceManager: ObservableObject, PersistenceManaging, @unchecked Sendable, ReferralDataStorage {
     public static let shared = PersistenceManager()
     private let logger = Logger(category: PersistenceManager.self)
     
@@ -96,7 +96,7 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     }
 }
 
-public class MockPersistenceManager: PersistenceManaging {
+public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var lastReviewPromptDate: Date?
     public var isSubscribed: Bool = false
     public var numberOfLaunches: Int = 0

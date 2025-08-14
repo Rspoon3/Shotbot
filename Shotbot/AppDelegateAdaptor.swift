@@ -7,6 +7,7 @@
 
 import UIKit
 import ReferralFeature
+@preconcurrency import ReferralService
 import Persistence
 import OSLog
 

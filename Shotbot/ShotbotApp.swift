@@ -47,8 +47,8 @@ struct ShotbotApp: App {
                 .environmentObject(tabManager)
                 .task {
                     await purchaseManager.fetchOfferings()
-                    await referralChecker.checkForUnnotifiedReferralsAndCreditBalance()
                     await notificaitonManager.registerStoredTokenOnAppLaunch()
+                    await referralChecker.checkForUnnotifiedReferralsAndCreditBalance()
                 }
                 .onAppear {
                     performLogging()

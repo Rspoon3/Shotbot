@@ -26,6 +26,11 @@ public struct SettingsView: View {
     @State private var isTestingPush = false
     @State private var testPushMessage = ""
     @State private var showTestPushAlert = false
+    @State private var isClearingDatabase = false
+    @State private var clearDatabaseMessage = ""
+    @State private var showClearDatabaseAlert = false
+    @State private var showConfirmDatabaseClear = false
+
     private let referralService = ReferralService()
     
     // MARK: - Initializer
@@ -307,6 +312,21 @@ public struct SettingsView: View {
                 }
                 .disabled(isTestingPush)
             }
+            
+            Section("Development Database") {
+                Button {
+                    showConfirmDatabaseClear = true
+                } label: {
+                    HStack {
+                        if isClearingDatabase {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        }
+                        Text("Clear Development Database")
+                    }
+                }
+                .disabled(isClearingDatabase)
+            }
 #endif
             
             SettingsMadeBy(appID: appID)
@@ -315,8 +335,45 @@ public struct SettingsView: View {
         .navigationTitle("Settings")
 #endif
         .buttonStyle(.plain)
+        .alert("Database Clear", isPresented: $showClearDatabaseAlert) {
+            Button("OK") { }
+        } message: {
+            Text(clearDatabaseMessage)
+        }
+        .alert("Clear Development Database", isPresented: $showConfirmDatabaseClear) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear Database", role: .destructive) {
+                Task {
+                    await clearDevelopmentDatabase()
+                }
+            }
+        } message: {
+            Text("This will permanently delete all data from the development database. This action cannot be undone.")
+        }
+        .alert("Test Push Notification", isPresented: $showTestPushAlert) {
+            Button("OK") { }
+        } message: {
+            Text(testPushMessage)
+        }
     }
     
+#if DEBUG
+    private func clearDevelopmentDatabase() async {
+        isClearingDatabase = true
+        
+        defer {
+            showClearDatabaseAlert = true
+            isClearingDatabase = false
+        }
+        
+        do {
+            let message = try await referralService.clearDevelopmentDatabase()
+            clearDatabaseMessage = message
+        } catch {
+            clearDatabaseMessage = "Failed to clear database: \(error.localizedDescription)"
+        }
+    }
+
     private func loadCloudKitID() async {
         cloudKitID = (try? await referralService.getCurrentCloudKitID()) ?? "Error"
     }
@@ -336,6 +393,7 @@ public struct SettingsView: View {
             testPushMessage = "Failed to test push notification: \(error.localizedDescription)"
         }
     }
+#endif
 }
 
 struct SettingsView_Previews: PreviewProvider {

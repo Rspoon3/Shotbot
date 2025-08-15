@@ -48,6 +48,7 @@ struct ShotbotApp: App {
                 .task {
                     await purchaseManager.fetchOfferings()
                     await notificaitonManager.registerStoredTokenOnAppLaunch()
+                    await updateCanEnterReferralCode()
                     
                     guard persistenceManager.hasShownNotificationPermission else { return }
                     await referralChecker.checkForUnnotifiedReferralsAndCreditBalance()
@@ -74,6 +75,22 @@ struct ShotbotApp: App {
             height: 800
         )
     #endif
+    }
+    
+    private func updateCanEnterReferralCode() async {
+        guard persistenceManager.canEnterReferralCode else {
+            logger.info("Can't enter referral code. No need to check BE.")
+            return
+        }
+        
+        do {
+            let referralService = ReferralService()
+            let canEnter = try await referralService.canEnterReferralCode()
+            persistenceManager.canEnterReferralCode = canEnter
+            logger.info("Can enter referral code status: \(canEnter, privacy: .public)")
+        } catch {
+            logger.error("Error checking referral service for canEnterReferralCode: \(error.localizedDescription, privacy: .public)")
+        }
     }
     
     private func performLogging() {

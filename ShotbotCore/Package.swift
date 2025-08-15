@@ -260,6 +260,6 @@ extension Package.Dependency {
     
     static let referralService: Package.Dependency = .package(
         url: "https://github.com/Rspoon3/ReferralService-iOS.git",
-        branch: "view-components"
+        branch: "main"
     )
 }

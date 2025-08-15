@@ -9,9 +9,11 @@ import SwiftUI
 import Models
 import HomeFeature
 import SettingsFeature
+import Persistence
 
 public struct AppTabNavigation: View {
     @EnvironmentObject var tabManager: TabManager
+    @EnvironmentObject private var persistenceManager: PersistenceManager
 
     // MARK: - Initializer
     
@@ -35,6 +37,7 @@ public struct AppTabNavigation: View {
                 SettingsView()
                     .toolbar(ProcessInfo.processInfo.isiOSAppOnMac ? .hidden : .automatic)
             }
+            .badge(persistenceManager.creditBalance)
             .tabItem {
                 Label("Settings", systemImage: "gear")
                     .accessibility(label: Text("Settings"))

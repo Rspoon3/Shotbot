@@ -5,6 +5,7 @@
 
 import SwiftUI
 import UserNotifications
+import ReferralService
 
 public struct NotificationPermissionView: View {
     @Binding var isPresented: Bool
@@ -72,7 +73,6 @@ public struct NotificationPermissionView: View {
                     Button {
                         Task {
                             await requestNotificationPermissions()
-                            isPresented = false
                         }
                     } label: {
                         HStack {
@@ -107,16 +107,12 @@ public struct NotificationPermissionView: View {
         }
     }
     
-    // MARK: - Private Methods
+    // MARK: - Private Helpers
     
     private func requestNotificationPermissions() async {
-        let center = UNUserNotificationCenter.current()
-        do {
-            let granted = try await center.requestAuthorization(options: [.alert, .badge, .sound])
-            print("Notification permission granted: \(granted)")
-        } catch {
-            print("Failed to request notification permissions: \(error)")
-        }
+        let notificationManager = NotificationManager()
+        await notificationManager.requestNotificationPermissions()
+        isPresented = false
     }
 }
 

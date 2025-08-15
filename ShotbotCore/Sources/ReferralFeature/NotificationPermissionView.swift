@@ -83,7 +83,7 @@ public struct NotificationPermissionView: View {
                                 .fontWeight(.semibold)
                         }
                         .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: 300)
                         .padding(.vertical, 16)
                         .background(Color.white)
                         .cornerRadius(12)

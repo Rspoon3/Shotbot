@@ -39,6 +39,7 @@ public struct HomeView: View {
             mainContent
             selectionButtons
         }
+        .frame(maxWidth: .infinity)
         .background {
             Color(.secondarySystemBackground).ignoresSafeArea(.all)
         }
@@ -198,12 +199,12 @@ public struct HomeView: View {
                 .frame(maxHeight: .infinity, alignment: .center)
         case .individualPlaceholder:
             VStack {
-                
                 if persistenceManager.referralBannerCount < 10 {
                     Button {
                         showReferrals = true
                     } label: {
                         ReferralBanner(emoji: "👯📸👯‍♂️")
+                            .frame(maxWidth: 400)
                     }
                     .padding(.bottom, 20)
                     .padding(.horizontal)

@@ -336,6 +336,26 @@ public struct SettingsView: View {
                 }
                 .disabled(isClearingDatabase)
             }
+            .alert("Database Clear", isPresented: $showClearDatabaseAlert) {
+                Button("OK") { }
+            } message: {
+                Text(clearDatabaseMessage)
+            }
+            .alert("Clear Development Database", isPresented: $showConfirmDatabaseClear) {
+                Button("Cancel", role: .cancel) { }
+                Button("Clear Database", role: .destructive) {
+                    Task {
+                        await clearDevelopmentDatabase()
+                    }
+                }
+            } message: {
+                Text("This will permanently delete all data from the development database. This action cannot be undone.")
+            }
+            .alert("Test Push Notification", isPresented: $showTestPushAlert) {
+                Button("OK") { }
+            } message: {
+                Text(testPushMessage)
+            }
 #endif
             
             SettingsMadeBy(appID: appID)
@@ -344,26 +364,6 @@ public struct SettingsView: View {
         .navigationTitle("Settings")
 #endif
         .buttonStyle(.plain)
-        .alert("Database Clear", isPresented: $showClearDatabaseAlert) {
-            Button("OK") { }
-        } message: {
-            Text(clearDatabaseMessage)
-        }
-        .alert("Clear Development Database", isPresented: $showConfirmDatabaseClear) {
-            Button("Cancel", role: .cancel) { }
-            Button("Clear Database", role: .destructive) {
-                Task {
-                    await clearDevelopmentDatabase()
-                }
-            }
-        } message: {
-            Text("This will permanently delete all data from the development database. This action cannot be undone.")
-        }
-        .alert("Test Push Notification", isPresented: $showTestPushAlert) {
-            Button("OK") { }
-        } message: {
-            Text(testPushMessage)
-        }
     }
     
 #if DEBUG

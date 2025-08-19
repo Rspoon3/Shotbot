@@ -5,20 +5,21 @@
 
 import SwiftUI
 import UserNotifications
+import ReferralService
 
-struct NotificationPermissionView: View {
+public struct NotificationPermissionView: View {
     @Binding var isPresented: Bool
     @State private var animateIcon = false
     
     // MARK: - Initializer
     
-    init(isPresented: Binding<Bool>) {
+    public init(isPresented: Binding<Bool>) {
         self._isPresented = isPresented
     }
     
     // MARK: - Body
     
-    var body: some View {
+    public var body: some View {
         ZStack {
             // Blue gradient background
             LinearGradient(
@@ -72,7 +73,6 @@ struct NotificationPermissionView: View {
                     Button {
                         Task {
                             await requestNotificationPermissions()
-                            isPresented = false
                         }
                     } label: {
                         HStack {
@@ -83,7 +83,7 @@ struct NotificationPermissionView: View {
                                 .fontWeight(.semibold)
                         }
                         .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: 300)
                         .padding(.vertical, 16)
                         .background(Color.white)
                         .cornerRadius(12)
@@ -107,16 +107,12 @@ struct NotificationPermissionView: View {
         }
     }
     
-    // MARK: - Private Methods
+    // MARK: - Private Helpers
     
     private func requestNotificationPermissions() async {
-        let center = UNUserNotificationCenter.current()
-        do {
-            let granted = try await center.requestAuthorization(options: [.alert, .badge, .sound])
-            print("Notification permission granted: \(granted)")
-        } catch {
-            print("Failed to request notification permissions: \(error)")
-        }
+        let notificationManager = NotificationManager()
+        await notificationManager.requestNotificationPermissions()
+        isPresented = false
     }
 }
 

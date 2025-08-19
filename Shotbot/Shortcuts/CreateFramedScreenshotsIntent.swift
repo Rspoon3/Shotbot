@@ -62,8 +62,8 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
     // MARK: - Functions
     
     public func perform() async throws -> some IntentResult & ReturnsValue<[IntentFile]> {
-        let persistenceManager = await PersistenceManager.shared
-        let eligabilityUseCase = await FramedScreenshotEligibilityUseCase()
+        let persistenceManager = PersistenceManager.shared
+        let eligibilityUseCase = await FramedScreenshotEligibilityUseCase()
         
         let screenshots = try await images.asyncCompactMap { file -> IntentFile? in
             let url = try await createDeviceFrame(using: file.data)
@@ -74,13 +74,25 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
             return file
         }
         
-        guard await eligabilityUseCase.canSaveFramedScreenshot(screenshotCount: screenshots.count) else {
+        let reason = await eligibilityUseCase.canSaveFramedScreenshot(screenshotCount: screenshots.count)
+
+        guard reason.canSave else {
             logger.error("pro subscription required to save screenshot")
             throw SBError.proSubscriptionRequired
         }
         
         await MainActor.run {
             persistenceManager.deviceFrameCreations += screenshots.count
+        }
+        
+        // Consume from rewards if needed
+        if let amount = reason.rewardedScreenShotsCount {
+            do {
+                try await eligibilityUseCase.consumeExtraScreenshot(amount: screenshots.count)
+                logger.info("Consumed \(amount, privacy: .public) extra screenshot(s).")
+            } catch {
+                logger.error("Failed to consume \(amount, privacy: .public) extra screenshot(s): \(error.localizedDescription, privacy: .public).")
+            }
         }
         
         logger.debug("returning CreateFramedScreenshotsIntent result")

@@ -225,7 +225,9 @@ import SwiftTools
             screenshotCount = try await screenshotImporter.screenshots(from: source).count
         }
         
-        guard await eligibilityUseCase.canSaveFramedScreenshot(screenshotCount: screenshotCount) else {
+        let reason = await eligibilityUseCase.canSaveFramedScreenshot(screenshotCount: screenshotCount)
+        
+        guard reason.canSave else {
             showPurchaseView = true
             return
         }
@@ -304,6 +306,16 @@ import SwiftTools
             }
             await autoCRUDManager.autoDeleteScreenshotsIfNeeded(items: imageSelections)
             reviewManager.askForAReview()
+            
+            // Consume from rewards if needed
+            if let amount = reason.rewardedScreenShotsCount {
+                do {
+                    try await eligibilityUseCase.consumeExtraScreenshot(amount: amount)
+                    logger.info("Consumed \(amount, privacy: .public) extra screenshot(s).")
+                } catch {
+                    logger.error("Failed to consume \(amount, privacy: .public) extra screenshot(s): \(error.localizedDescription, privacy: .public).")
+                }
+            }
         }
     }
     

@@ -11,6 +11,7 @@ import Models
 import Purchases
 import SwiftTools
 import ReferralFeature
+import ReferralService
 
 public struct SettingsView: View {
     let appID = 6450552843
@@ -18,6 +19,20 @@ public struct SettingsView: View {
     @State private var deviceFrameCreations = 0
     @Environment(\.openURL) var openURL
     @EnvironmentObject private var persistenceManager: PersistenceManager
+    @StateObject private var referralViewModel = ReferralViewModel()
+    @AppStorage("useProductionCloudKit") private var useProductionCloudKit = false
+    @AppStorage("useReferralLocalHostURL") private var useReferralLocalHostURL = false
+    @State private var cloudKitID: String = "Loading..."
+    @State private var isTestingPush = false
+    @State private var testPushMessage = ""
+    @State private var showTestPushAlert = false
+    @State private var isClearingDatabase = false
+    @State private var clearDatabaseMessage = ""
+    @State private var showClearDatabaseAlert = false
+    @State private var showConfirmDatabaseClear = false
+    @State private var showNotificationPermission = false
+
+    private let referralService = ReferralService()
     
     // MARK: - Initializer
     
@@ -46,7 +61,7 @@ public struct SettingsView: View {
                             .tag(type)
                     }
                 }
-
+                
                 Picker("Image Selection Filter", selection: $persistenceManager.imageSelectionType) {
                     ForEach(ImageSelectionType.allCases) { type in
                         Text(type.title)
@@ -60,7 +75,7 @@ public struct SettingsView: View {
                     }
                 }
             }
-
+            
             Section("Feedback") {
                 Button {
                     openURL(.personalMastodon)
@@ -69,7 +84,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-
+                
                 Button {
                     openURL(.twitter(username: "Rspoon3"))
                 } label: {
@@ -77,7 +92,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-
+                
                 Button {
                     Task {
                         try? await logExporter.emailFeedbackButtonTapped()
@@ -115,7 +130,7 @@ public struct SettingsView: View {
                         }
                     }
                 }
-
+                
                 Button {
                     openURL(.appStore(appID: appID))
                 } label: {
@@ -124,7 +139,7 @@ public struct SettingsView: View {
                         .contentShape(Rectangle())
                 }
             }
-
+            
             Section("Other") {
                 NavigationLink {
                     PurchaseView()
@@ -142,42 +157,60 @@ public struct SettingsView: View {
                         Image(symbol: .heart)
                     }
                 }
-
+                
                 NavigationLink {
-                    ReferralView()
-                        .environmentObject(persistenceManager)
+                    ReferralView(
+                        viewModel: referralViewModel,
+                        referralDataStorage: persistenceManager
+                    )
+                    .fullScreenCover(isPresented: $showNotificationPermission) {
+                        NotificationPermissionView(isPresented: $showNotificationPermission)
+                    }
+                    .onAppear {
+                        guard !persistenceManager.hasShownNotificationPermission else { return }
+                        showNotificationPermission = true
+                        persistenceManager.hasShownNotificationPermission = true
+                    }
                 } label: {
                     Label {
-                        VStack(alignment: .leading) {
-                            Text("Referrals")
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Referrals")
+                                if persistenceManager.creditBalance > 0 {
+                                    Text("\(persistenceManager.creditBalance) \(persistenceManager.creditBalance == 1 ? "credit" : "credits") available")
+                                        .foregroundColor(.secondary)
+                                        .font(.caption)
+                                } else {
+                                    Text("Share with friends to earn rewards")
+                                        .foregroundColor(.secondary)
+                                        .font(.caption)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            
                             if persistenceManager.creditBalance > 0 {
-                                Text("\(persistenceManager.creditBalance) \(persistenceManager.creditBalance == 1 ? "credit" : "credits") available")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            } else {
-                                Text("Share with friends to earn rewards")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
+                                Image(systemName: "\(persistenceManager.creditBalance).circle.fill")
+                                    .foregroundStyle(.white, .red)
                             }
                         }
                     } icon: {
-                        Image(systemName: "person.2.fill")
+                        Image(systemName: "person.2")
                             .foregroundColor(.blue)
                     }
                 }
-
+                
                 NavigationLink {
                     SupportedDevicesView()
                 } label: {
                     Label("Supported Devices", symbol: .macbookAndIphone)
                 }
-
+                
                 NavigationLink {
                     AppPermissionsView()
                 } label: {
                     Label("App Permissions", symbol: .lockShield)
                 }
-
+                
                 Button {
                     openURL(.gitHub)
                 } label: {
@@ -185,7 +218,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-
+                
                 Button {
                     openURL(.privacyPolicy)
                 } label: {
@@ -193,7 +226,7 @@ public struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-
+                
                 Button {
                     openURL(.termsAndConditions)
                 } label: {
@@ -202,9 +235,9 @@ public struct SettingsView: View {
                         .contentShape(Rectangle())
                 }
             }
-
+            
 #if DEBUG
-            Section("Debug") {
+            Section("App") {
                 LabeledContent(
                     "Number of launches",
                     value: persistenceManager.numberOfLaunches,
@@ -242,15 +275,142 @@ public struct SettingsView: View {
                     }
                 }
             }
+            
+            Section("Referral Environment") {
+                Toggle("Use Production CloudKit", isOn: $useProductionCloudKit)
+                Toggle("Use Production Local Host URL", isOn: $useReferralLocalHostURL)
+            }
+            
+            Section("Referral Data") {
+                Stepper(
+                    "Referral Banner Loads: \(persistenceManager.referralBannerCount.formatted())",
+                    value: $persistenceManager.referralBannerCount
+                )
+                
+                NavigationLink(
+                    "View All My Codes",
+                    destination: AllReferralCodesView(referralViewModel: referralViewModel)
+                )
+                
+                NavigationLink(
+                    "Code Rules",
+                    destination: CodeRulesView(referralViewModel: referralViewModel)
+                )
+                
+                LabeledContent(
+                    "Credit Balance",
+                    value: persistenceManager.creditBalance.formatted()
+                )
+                
+                LabeledContent(
+                    "Can Enter Referral Code",
+                    value: persistenceManager.canEnterReferralCode.description
+                )
+                
+                LabeledContent("CloudKit ID", value: cloudKitID)
+                    .task {
+                        await loadCloudKitID()
+                    }
+            }
+            
+            Section("Push Notifications") {
+                Button {
+                    Task {
+                        await testPushNotification()
+                    }
+                } label: {
+                    HStack {
+                        if isTestingPush {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        }
+                        Label("Test Push Notification", systemImage: "bell.badge")
+                    }
+                }
+                .disabled(isTestingPush)
+            }
+            
+            Section("Development Database") {
+                Button {
+                    showConfirmDatabaseClear = true
+                } label: {
+                    HStack {
+                        if isClearingDatabase {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        }
+                        Text("Clear Development Database")
+                    }
+                }
+                .disabled(isClearingDatabase)
+            }
+            .alert("Database Clear", isPresented: $showClearDatabaseAlert) {
+                Button("OK") { }
+            } message: {
+                Text(clearDatabaseMessage)
+            }
+            .alert("Clear Development Database", isPresented: $showConfirmDatabaseClear) {
+                Button("Cancel", role: .cancel) { }
+                Button("Clear Database", role: .destructive) {
+                    Task {
+                        await clearDevelopmentDatabase()
+                    }
+                }
+            } message: {
+                Text("This will permanently delete all data from the development database. This action cannot be undone.")
+            }
+            .alert("Test Push Notification", isPresented: $showTestPushAlert) {
+                Button("OK") { }
+            } message: {
+                Text(testPushMessage)
+            }
 #endif
-
+            
             SettingsMadeBy(appID: appID)
         }
-        #if os(iOS)
+#if os(iOS)
         .navigationTitle("Settings")
-        #endif
+#endif
         .buttonStyle(.plain)
     }
+    
+#if DEBUG
+    private func clearDevelopmentDatabase() async {
+        isClearingDatabase = true
+        
+        defer {
+            showClearDatabaseAlert = true
+            isClearingDatabase = false
+        }
+        
+        do {
+            let message = try await referralService.clearDevelopmentDatabase()
+            clearDatabaseMessage = message
+        } catch {
+            clearDatabaseMessage = "Failed to clear database: \(error.localizedDescription)"
+        }
+    }
+
+    private func loadCloudKitID() async {
+        cloudKitID = (try? await referralService.getCurrentCloudKitID()) ?? "Error"
+    }
+    
+    private func testPushNotification() async {
+        isTestingPush = true
+        
+        defer {
+            showTestPushAlert = true
+            isTestingPush = false
+        }
+        
+        do {
+            let response = try await referralService.testPushNotification()
+            testPushMessage = response.message
+        } catch {
+            testPushMessage = "Failed to test push notification: \(error.localizedDescription)"
+        }
+    }
+#endif
 }
 
 struct SettingsView_Previews: PreviewProvider {

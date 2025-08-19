@@ -101,7 +101,8 @@ extension Target {
         name: "Persistence",
         dependencies: [
             .target(.models),
-            .swiftTools
+            .swiftTools,
+            .referralService
         ]
     )
     
@@ -164,7 +165,8 @@ extension Target {
             .target(.purchases),
             .target(.mediaManager),
             .target(.sbFoundation),
-            .target(.referralFeature)
+            .target(.referralFeature),
+            .referralService
         ]
     )
     
@@ -187,6 +189,7 @@ extension Target {
             .target(.widgetFeature),
             .target(.createCombinedImageFeature),
             .target(.referralFeature),
+            .referralService,
             .alertToast,
             .swiftTools
         ]
@@ -257,6 +260,6 @@ extension Package.Dependency {
     
     static let referralService: Package.Dependency = .package(
         url: "https://github.com/Rspoon3/ReferralService-iOS.git",
-        branch: "swift-6"
+        branch: "main"
     )
 }

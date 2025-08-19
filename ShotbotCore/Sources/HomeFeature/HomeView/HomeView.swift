@@ -13,12 +13,17 @@ import Models
 import Purchases
 import MediaManager
 import ReferralFeature
+import ReferralService
 
 public struct HomeView: View {
     @StateObject var manager = AppIntentManager.shared
     @StateObject var viewModel = HomeViewModel()
+    @EnvironmentObject private var persistenceManager: PersistenceManager
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
+    @State private var showReferrals = false
+    @State private var showNotificationPermission = false
+    @StateObject private var referralViewModel = ReferralViewModel()
 
     // MARK: - Initializer
     
@@ -34,6 +39,7 @@ public struct HomeView: View {
             mainContent
             selectionButtons
         }
+        .frame(maxWidth: .infinity)
         .background {
             Color(.secondarySystemBackground).ignoresSafeArea(.all)
         }
@@ -127,6 +133,22 @@ public struct HomeView: View {
                 await viewModel.didOpenViaDeepLink(url)
             }
         }
+        .sheet(isPresented: $showReferrals) {
+            NavigationStack {
+                ReferralView(
+                    viewModel: referralViewModel,
+                    referralDataStorage: persistenceManager
+                )
+                .fullScreenCover(isPresented: $showNotificationPermission) {
+                    NotificationPermissionView(isPresented: $showNotificationPermission)
+                }
+                .onAppear {
+                    guard !persistenceManager.hasShownNotificationPermission else { return }
+                    showNotificationPermission = true
+                    persistenceManager.hasShownNotificationPermission = true
+                }
+            }
+        }
         .sheet(isPresented: $viewModel.showPurchaseView) {
             NavigationView {
                 PurchaseView()
@@ -177,9 +199,22 @@ public struct HomeView: View {
                 .frame(maxHeight: .infinity, alignment: .center)
         case .individualPlaceholder:
             VStack {
-                ReferralBanner()
+                if persistenceManager.referralBannerCount < 10 {
+                    Button {
+                        showReferrals = true
+                    } label: {
+                        ReferralBanner(emoji: "👯📸👯‍♂️")
+                            .frame(maxWidth: 400)
+                    }
+                    .padding(.bottom, 20)
                     .padding(.horizontal)
-                    .environmentObject(PersistenceManager.shared)
+                    .transition(.scale.combined(with: .opacity))
+                    .buttonStyle(.plain)
+                    .onFirstAppear {
+                        persistenceManager.referralBannerCount += 1
+                    }
+                }
+                
                 placeholder
             }
         case .individualImages(let shareableImages):

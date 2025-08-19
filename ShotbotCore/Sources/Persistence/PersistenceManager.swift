@@ -9,9 +9,9 @@ import SwiftUI
 import Models
 import OSLog
 import SwiftTools
+import ReferralService
 
-@MainActor
-public final class PersistenceManager: ObservableObject, PersistenceManaging, Sendable {
+public final class PersistenceManager: ObservableObject, PersistenceManaging, @unchecked Sendable, ReferralDataStorage {
     public static let shared = PersistenceManager()
     private let logger = Logger(category: PersistenceManager.self)
     
@@ -71,6 +71,9 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     @AppStorage("creditBalance")
     public var creditBalance: Int = 0
     
+    @AppStorage("referralBannerCount")
+    public var referralBannerCount: Int = 0
+    
     @AppStorage("canEnterReferralCode")
     public var canEnterReferralCode: Bool = true
     
@@ -96,7 +99,7 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, Se
     }
 }
 
-public class MockPersistenceManager: PersistenceManaging {
+public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var lastReviewPromptDate: Date?
     public var isSubscribed: Bool = false
     public var numberOfLaunches: Int = 0
@@ -113,6 +116,7 @@ public class MockPersistenceManager: PersistenceManaging {
     public var imageQuality: ImageQuality = .original
     public var creditBalance: Int = 0
     public var canEnterReferralCode: Bool = true
+    public var referralBannerCount: Int = 0
     
     public init() {}
 
@@ -132,6 +136,7 @@ public class MockPersistenceManager: PersistenceManaging {
         imageSelectionType = .all
         imageQuality = .original
         creditBalance = 0
+        referralBannerCount = 0
         canEnterReferralCode = true
     }
     

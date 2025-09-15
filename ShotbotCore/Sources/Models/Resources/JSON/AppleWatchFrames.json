@@ -40,5 +40,10 @@
         "mergeMethod": "doubleOverlay",
         "inputSize": [324, 394],
         "offSet": [114, 308],
+    },
+    {
+        "deviceFrame": "Watch Ultra 2025",
+        "mergeMethod": "singleOverlayV2",
+        "inputSize": [422, 514]
     }
 ]

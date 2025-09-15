@@ -138,5 +138,15 @@
         "mergeMethod": "singleOverlayV2",
         "cornerRadius": 100,
         "inputSize": [2868, 1320]
-    }
+    },
+    {
+        "deviceFrame": "iPhone Air - Space Black - Portrait",
+        "mergeMethod": "singleOverlayV2",
+        "inputSize": [1260, 2736]
+    },
+    {
+        "deviceFrame": "iPhone Air - Space Black - Landscape",
+        "mergeMethod": "singleOverlayV2",
+        "inputSize": [2736, 1260]
+    },
 ]

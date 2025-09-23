@@ -12,7 +12,7 @@ import WidgetKit
 extension Image {
     /// A back deployed method for `widgetAccentedRenderingMode` view modifier
     public func backDeployedWidgetAccentedRenderingMode(_ renderingMode: BackDeployedWidgetAccentedRenderingMode?) -> some View {
-        if #available(iOS 18.0, *) {
+        if #available(iOS 18.0, visionOS 26.0, *) {
             return self
                 .widgetAccentedRenderingMode(renderingMode?.value)
         } else {
@@ -33,7 +33,7 @@ public enum BackDeployedWidgetAccentedRenderingMode {
     case fullColor
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.0, visionOS 26.0, *)
 extension BackDeployedWidgetAccentedRenderingMode {
     /// A back deployed method for `WidgetAccentedRenderingMode`
     fileprivate var value: WidgetAccentedRenderingMode {

@@ -43,14 +43,14 @@ public struct SettingsView: View {
     public var body: some View {
         Form {
             Section {
-                Picker("Auto save to files", selection: $persistenceManager.autoSaveToFiles) {
+                Picker("Auto save to files", selection: $persistenceManager.autoSaveFilesOption) {
                     ForEach(AutoSaveOption.allCases) { option in
                         Text(option.rawValue)
                             .tag(option)
                     }
                 }
 
-                Picker("Auto save to photos", selection: $persistenceManager.autoSaveToPhotos) {
+                Picker("Auto save to photos", selection: $persistenceManager.autoSavePhotosOption) {
                     ForEach(AutoSaveOption.allCases) { option in
                         Text(option.rawValue)
                             .tag(option)

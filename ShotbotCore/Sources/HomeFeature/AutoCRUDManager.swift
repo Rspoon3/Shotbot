@@ -37,7 +37,7 @@ public struct AutoCRUDManager: AutoCRUDManaging {
     private let fileManager: any FileManaging
     
     var canAutoSave: Bool {
-        persistenceManager.autoSaveToFiles != .none || persistenceManager.autoSaveToPhotos != .none
+        persistenceManager.autoSaveFilesOption != .none || persistenceManager.autoSavePhotosOption != .none
     }
         
     // MARK: - Initializer
@@ -54,7 +54,7 @@ public struct AutoCRUDManager: AutoCRUDManaging {
         self.fileManager = fileManager
     }
     
-    /// Shows the `showAutoSaveToast` if the user has `autoSaveToFiles` or `autoSaveToPhotos` enabled
+    /// Shows the `showAutoSaveToast` if the user has `autoSaveFilesOption` or `autoSavePhotosOption` enabled
     ///
     /// Using a slight delay in order to make the UI less jarring
     public func autoSaveIndividualImagesIfNeeded(
@@ -63,8 +63,8 @@ public struct AutoCRUDManager: AutoCRUDManaging {
     ) async throws {
         guard canAutoSave else { return }
 
-        let shouldSaveToFiles = persistenceManager.autoSaveToFiles == .individual || persistenceManager.autoSaveToFiles == .all
-        let shouldSaveToPhotos = persistenceManager.autoSaveToPhotos == .individual || persistenceManager.autoSaveToPhotos == .all
+        let shouldSaveToFiles = persistenceManager.autoSaveFilesOption == .individual || persistenceManager.autoSaveFilesOption == .all
+        let shouldSaveToPhotos = persistenceManager.autoSavePhotosOption == .individual || persistenceManager.autoSavePhotosOption == .all
 
         guard shouldSaveToFiles || shouldSaveToPhotos else { return }
 
@@ -90,14 +90,14 @@ public struct AutoCRUDManager: AutoCRUDManaging {
         }
     }
     
-    /// Autosaves the combined image to photos and iCloud if the user has `autoSaveToFiles` and/or `autoSaveToPhotos` enabled
+    /// Autosaves the combined image to photos and iCloud if the user has `autoSaveFilesOption` and/or `autoSavePhotosOption` enabled
     public func autoSaveCombinedIfNeeded(using combinedURL: URL?) async throws {
         guard let combinedURL, canAutoSave else {
             return
         }
 
-        let shouldSaveToFiles = persistenceManager.autoSaveToFiles == .combined || persistenceManager.autoSaveToFiles == .all
-        let shouldSaveToPhotos = persistenceManager.autoSaveToPhotos == .combined || persistenceManager.autoSaveToPhotos == .all
+        let shouldSaveToFiles = persistenceManager.autoSaveFilesOption == .combined || persistenceManager.autoSaveFilesOption == .all
+        let shouldSaveToPhotos = persistenceManager.autoSavePhotosOption == .combined || persistenceManager.autoSavePhotosOption == .all
 
         guard shouldSaveToFiles || shouldSaveToPhotos else { return }
 

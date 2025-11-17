@@ -32,11 +32,11 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     @AppStorage("autoCopy")
     public var autoCopy: Bool = false
 
-    @AppStorage("autoSaveToFiles")
-    public var autoSaveToFiles: AutoSaveOption = .none
+    @AppStorage("autoSaveFilesOption")
+    public var autoSaveFilesOption: AutoSaveOption = .none
 
-    @AppStorage("autoSaveToPhotos")
-    public var autoSaveToPhotos: AutoSaveOption = .none
+    @AppStorage("autoSavePhotosOption")
+    public var autoSavePhotosOption: AutoSaveOption = .none
 
     @AppStorage("autoDeleteScreenshots")
     public var autoDeleteScreenshots: Bool = false
@@ -106,8 +106,8 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var numberOfActivations: Int = 0
     public var deviceFrameCreations: Int = 0
     public var autoCopy: Bool = false
-    public var autoSaveToFiles: AutoSaveOption = .none
-    public var autoSaveToPhotos: AutoSaveOption = .none
+    public var autoSaveFilesOption: AutoSaveOption = .none
+    public var autoSavePhotosOption: AutoSaveOption = .none
     public var autoDeleteScreenshots: Bool = false
     public var defaultHomeTab: ImageType = .individual
     public var defaultHomeView: HomeViewType = .tabbed
@@ -124,8 +124,8 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
         lastReviewPromptDate = nil
         isSubscribed = false
         autoCopy = false
-        autoSaveToFiles = .none
-        autoSaveToPhotos = .none
+        autoSaveFilesOption = .none
+        autoSavePhotosOption = .none
         autoDeleteScreenshots = false
         defaultHomeTab = .individual
         defaultHomeView = .tabbed

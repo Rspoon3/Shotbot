@@ -63,8 +63,8 @@ import SwiftTools
     }
     
     var toastText: String? {
-        let files = persistenceManager.autoSaveToFiles
-        let photos = persistenceManager.autoSaveToPhotos
+        let files = persistenceManager.autoSaveFilesOption
+        let photos = persistenceManager.autoSavePhotosOption
 
         if files != .none && photos != .none {
             return "Saved to photos & files"

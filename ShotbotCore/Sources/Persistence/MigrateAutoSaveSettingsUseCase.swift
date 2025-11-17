@@ -36,6 +36,11 @@ public struct MigrateAutoSaveSettingsUseCase {
             oldKey: "autoSaveToPhotos",
             newKey: "autoSavePhotosOption"
         )
+
+        migrateSetting(
+            oldKey: "autoCopy",
+            newKey: "autoCopyOption"
+        )
     }
 
     // MARK: - Private

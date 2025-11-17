@@ -57,7 +57,13 @@ public struct SettingsView: View {
                     }
                 }
 
-                Toggle("Auto copy", isOn: $persistenceManager.autoCopy)
+                Picker("Auto copy", selection: $persistenceManager.autoCopyOption) {
+                    ForEach(AutoCopyOption.allCases) { option in
+                        Text(option.rawValue)
+                            .tag(option)
+                    }
+                }
+
                 Toggle("Auto delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
                 Toggle("Clear images on app background", isOn: $persistenceManager.clearImagesOnAppBackground)
             } header: {

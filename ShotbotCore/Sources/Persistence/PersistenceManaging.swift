@@ -11,7 +11,7 @@ import Models
 public protocol PersistenceManaging: Sendable {
     var isSubscribed: Bool { get set }
     var referralBannerCount: Int { get set }
-    var autoCopy: Bool  { get set }
+    var autoCopyOption: AutoCopyOption  { get set }
     var autoSaveFilesOption: AutoSaveOption { get set }
     var autoSavePhotosOption: AutoSaveOption  { get set }
     var autoDeleteScreenshots: Bool  { get set }

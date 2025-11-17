@@ -29,8 +29,8 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     @AppStorage("isSubscribed", store: .shared)
     public var isSubscribed = false
     
-    @AppStorage("autoCopy")
-    public var autoCopy: Bool = false
+    @AppStorage("autoCopyOption")
+    public var autoCopyOption: AutoCopyOption = .none
 
     @AppStorage("autoSaveFilesOption")
     public var autoSaveFilesOption: AutoSaveOption = .none
@@ -105,7 +105,7 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var numberOfLaunches: Int = 0
     public var numberOfActivations: Int = 0
     public var deviceFrameCreations: Int = 0
-    public var autoCopy: Bool = false
+    public var autoCopyOption: AutoCopyOption = .none
     public var autoSaveFilesOption: AutoSaveOption = .none
     public var autoSavePhotosOption: AutoSaveOption = .none
     public var autoDeleteScreenshots: Bool = false
@@ -123,7 +123,7 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public func reset() {
         lastReviewPromptDate = nil
         isSubscribed = false
-        autoCopy = false
+        autoCopyOption = .none
         autoSaveFilesOption = .none
         autoSavePhotosOption = .none
         autoDeleteScreenshots = false

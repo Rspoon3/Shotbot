@@ -277,25 +277,40 @@ import SwiftTools
             await combineDeviceFrames()
             try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
             
+            // Auto copy based on autoCopyOption (independent of view type)
+            switch persistenceManager.autoCopyOption {
+            case .none:
+                break
+            case .individual:
+                let images = imageResults.individual.map(\.framedScreenshot)
+                copy(images)
+            case .combined:
+                if let combined = imageResults.combined {
+                    copy(combined.framedScreenshot)
+                }
+            case .all:
+                // Copy all available images (combined + individual)
+                var allImages: [UIFramedScreenshot] = []
+                if let combined = imageResults.combined {
+                    allImages.append(combined.framedScreenshot)
+                }
+                allImages.append(contentsOf: imageResults.individual.map(\.framedScreenshot))
+                copy(allImages)
+            }
+
             switch imageType {
             case .combined:
                 isLoading = false
-                
+
                 guard let combined = imageResults.combined else {
                     logger.fault("Processing selected photos returning early because combined image results has no image.")
                     throw SBError.unsupportedImage
                 }
-                
+
                 logger.fault("Setting viewState to combinedImages")
                 viewState = .combinedImages(combined)
-                
-                if persistenceManager.autoCopy {
-                    copy(combined.framedScreenshot)
-                }
             case .individual:
-                if persistenceManager.autoCopy, let first = imageResults.individual.first?.framedScreenshot {
-                    copy(first)
-                }
+                break
             }
             
             // Post FramedScreenshot generation
@@ -468,11 +483,31 @@ import SwiftTools
         )
     }
     
-    /// Copies a framed screenshot to the clipboard
+    /// Copies a single framed screenshot to the clipboard
     public func copy(_ image: UIFramedScreenshot) {
         UIPasteboard.general.image = image
         showCopyToast = true
-        logger.debug("Copying image.")
+        logger.debug("Copying 1 image.")
+    }
+
+    /// Copies multiple framed screenshots to the clipboard using PNG data
+    public func copy(_ images: [UIFramedScreenshot]) {
+        guard !images.isEmpty else { return }
+
+        if images.count == 1, let first = images.first {
+            // Single image - use the simple property
+            UIPasteboard.general.image = first
+        } else {
+            // Multiple images - use setItems with PNG data
+            let pasteboardItems: [[String: Any]] = images.compactMap { image in
+                guard let pngData = image.pngData() else { return nil }
+                return ["public.png": pngData]
+            }
+            UIPasteboard.general.setItems(pasteboardItems)
+        }
+
+        showCopyToast = true
+        logger.debug("Copying \(images.count) image(s).")
     }
     
     /// Saves a framed screenshot to the users photo library

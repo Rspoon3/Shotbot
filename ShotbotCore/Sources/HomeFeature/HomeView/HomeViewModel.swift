@@ -65,12 +65,12 @@ import SwiftTools
     var toastText: String? {
         let files = persistenceManager.autoSaveToFiles
         let photos = persistenceManager.autoSaveToPhotos
-        
-        if files && photos {
+
+        if files != .none && photos != .none {
             return "Saved to photos & files"
-        } else if files {
+        } else if files != .none {
             return "Saved to files"
-        } else if photos {
+        } else if photos != .none {
             return "Saved to photos"
         } else {
             return nil

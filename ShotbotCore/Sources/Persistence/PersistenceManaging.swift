@@ -12,8 +12,8 @@ public protocol PersistenceManaging: Sendable {
     var isSubscribed: Bool { get set }
     var referralBannerCount: Int { get set }
     var autoCopy: Bool  { get set }
-    var autoSaveToFiles: Bool { get set }
-    var autoSaveToPhotos: Bool  { get set }
+    var autoSaveToFiles: AutoSaveOption { get set }
+    var autoSaveToPhotos: AutoSaveOption  { get set }
     var autoDeleteScreenshots: Bool  { get set }
     var defaultHomeTab: ImageType { get set }
     var defaultHomeView: HomeViewType { get set }

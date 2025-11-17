@@ -43,10 +43,22 @@ public struct SettingsView: View {
     public var body: some View {
         Form {
             Section {
-                Toggle("Automatically save to files", isOn: $persistenceManager.autoSaveToFiles)
-                Toggle("Automatically save to photos", isOn: $persistenceManager.autoSaveToPhotos)
-                Toggle("Automatically copy", isOn: $persistenceManager.autoCopy)
-                Toggle("Automatically delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
+                Picker("Auto save to files", selection: $persistenceManager.autoSaveToFiles) {
+                    ForEach(AutoSaveOption.allCases) { option in
+                        Text(option.rawValue)
+                            .tag(option)
+                    }
+                }
+
+                Picker("Auto save to photos", selection: $persistenceManager.autoSaveToPhotos) {
+                    ForEach(AutoSaveOption.allCases) { option in
+                        Text(option.rawValue)
+                            .tag(option)
+                    }
+                }
+
+                Toggle("Auto copy", isOn: $persistenceManager.autoCopy)
+                Toggle("Auto delete screenshots", isOn: $persistenceManager.autoDeleteScreenshots)
                 Toggle("Clear images on app background", isOn: $persistenceManager.clearImagesOnAppBackground)
             } header: {
                 Text("App Settings")

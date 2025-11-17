@@ -37,7 +37,7 @@ public struct AutoCRUDManager: AutoCRUDManaging {
     private let fileManager: any FileManaging
     
     var canAutoSave: Bool {
-        persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos
+        persistenceManager.autoSaveToFiles != .none || persistenceManager.autoSaveToPhotos != .none
     }
         
     // MARK: - Initializer
@@ -62,20 +62,25 @@ public struct AutoCRUDManager: AutoCRUDManaging {
         autoSave: @escaping ()-> Void
     ) async throws {
         guard canAutoSave else { return }
-        
+
+        let shouldSaveToFiles = persistenceManager.autoSaveToFiles == .individual || persistenceManager.autoSaveToFiles == .all
+        let shouldSaveToPhotos = persistenceManager.autoSaveToPhotos == .individual || persistenceManager.autoSaveToPhotos == .all
+
+        guard shouldSaveToFiles || shouldSaveToPhotos else { return }
+
         do {
             for shareableImage in shareableImages {
-                if persistenceManager.autoSaveToFiles {
+                if shouldSaveToFiles {
                     try fileManager.copyToiCloudFiles(from: shareableImage.url)
                     logger.info("Saving to iCloud.")
                 }
-                
-                if persistenceManager.autoSaveToPhotos {
+
+                if shouldSaveToPhotos {
                     try await photoLibraryManager.savePhoto(shareableImage.url)
                     logger.info("Saving to Photo library.")
                 }
             }
-            
+
             try await clock.sleep(for: .seconds(0.75))
             autoSave()
             try await clock.sleep(for: .seconds(0.75))
@@ -90,14 +95,19 @@ public struct AutoCRUDManager: AutoCRUDManaging {
         guard let combinedURL, canAutoSave else {
             return
         }
-        
+
+        let shouldSaveToFiles = persistenceManager.autoSaveToFiles == .combined || persistenceManager.autoSaveToFiles == .all
+        let shouldSaveToPhotos = persistenceManager.autoSaveToPhotos == .combined || persistenceManager.autoSaveToPhotos == .all
+
+        guard shouldSaveToFiles || shouldSaveToPhotos else { return }
+
         do {
-            if persistenceManager.autoSaveToFiles {
+            if shouldSaveToFiles {
                 try fileManager.copyToiCloudFiles(from: combinedURL)
                 logger.info("Saving combined image to iCloud.")
             }
-            
-            if persistenceManager.autoSaveToPhotos {
+
+            if shouldSaveToPhotos {
                 try await photoLibraryManager.savePhoto(combinedURL)
                 logger.info("Saving combined image to Photo library.")
             }

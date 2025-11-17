@@ -31,13 +31,13 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     
     @AppStorage("autoCopy")
     public var autoCopy: Bool = false
-    
+
     @AppStorage("autoSaveToFiles")
-    public var autoSaveToFiles: Bool = false
-    
+    public var autoSaveToFiles: AutoSaveOption = .none
+
     @AppStorage("autoSaveToPhotos")
-    public var autoSaveToPhotos: Bool = false
-    
+    public var autoSaveToPhotos: AutoSaveOption = .none
+
     @AppStorage("autoDeleteScreenshots")
     public var autoDeleteScreenshots: Bool = false
     
@@ -106,8 +106,8 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var numberOfActivations: Int = 0
     public var deviceFrameCreations: Int = 0
     public var autoCopy: Bool = false
-    public var autoSaveToFiles: Bool = false
-    public var autoSaveToPhotos: Bool = false
+    public var autoSaveToFiles: AutoSaveOption = .none
+    public var autoSaveToPhotos: AutoSaveOption = .none
     public var autoDeleteScreenshots: Bool = false
     public var defaultHomeTab: ImageType = .individual
     public var defaultHomeView: HomeViewType = .tabbed
@@ -117,15 +117,15 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var creditBalance: Int = 0
     public var canEnterReferralCode: Bool = true
     public var referralBannerCount: Int = 0
-    
+
     public init() {}
 
     public func reset() {
         lastReviewPromptDate = nil
         isSubscribed = false
         autoCopy = false
-        autoSaveToFiles = false
-        autoSaveToPhotos = false
+        autoSaveToFiles = .none
+        autoSaveToPhotos = .none
         autoDeleteScreenshots = false
         defaultHomeTab = .individual
         defaultHomeView = .tabbed

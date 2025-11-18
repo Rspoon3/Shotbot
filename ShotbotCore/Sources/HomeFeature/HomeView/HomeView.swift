@@ -22,7 +22,6 @@ public struct HomeView: View {
     @EnvironmentObject private var persistenceManager: PersistenceManager
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
-    @Environment(\.openURL) var openURL
     @State private var showReferrals = false
     @State private var showNotificationPermission = false
     @StateObject private var referralViewModel = ReferralViewModel()
@@ -217,19 +216,7 @@ public struct HomeView: View {
                         persistenceManager.referralBannerCount += 1
                     }
                 } else if crossPromoStore.shouldShowBanner() {
-                    Button {
-                        openURL(.photoRanker)
-                    } label: {
-                        PhotoRankerPromoBanner()
-                            .frame(maxWidth: 400)
-                    }
-                    .padding(.bottom, 20)
-                    .padding(.horizontal)
-                    .transition(.scale.combined(with: .opacity))
-                    .buttonStyle(.plain)
-                    .onFirstAppear {
-                        crossPromoStore.recordBannerShown()
-                    }
+                    PhotoRankerBannerButton(crossPromoStore: crossPromoStore)
                 }
 
                 placeholder

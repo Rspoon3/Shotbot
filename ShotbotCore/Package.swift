@@ -118,7 +118,8 @@ extension Target {
     static let crossPromoFeature: Target = .target(
         name: "CrossPromoFeature",
         dependencies: [
-            .target(.models)
+            .target(.models),
+            .swiftTools
         ],
         resources: [
             .process("Resources")

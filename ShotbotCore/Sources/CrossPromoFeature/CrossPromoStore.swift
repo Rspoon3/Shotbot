@@ -23,7 +23,7 @@ public final class CrossPromoStore {
     }
 
     // MARK: - Initializer
-    
+
     public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
     }
@@ -42,7 +42,9 @@ public final class CrossPromoStore {
         return lastShownDate < oneWeekAgo
     }
 
-    public func recordBannerShown() {
+    // MARK: - Internal
+
+    func recordBannerShown() {
         bannerCount += 1
         lastShownDate = .now
     }

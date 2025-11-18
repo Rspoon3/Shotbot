@@ -256,25 +256,7 @@ public struct SettingsView: View {
             }
 
             Section {
-                Button {
-                    openURL(.photoRanker)
-                } label: {
-                    Label {
-                        VStack(alignment: .leading) {
-                            Text("Photo Ranker")
-                            Text("Find your best photos")
-                                .foregroundColor(.secondary)
-                                .font(.caption)
-                        }
-                    } icon: {
-                        Image.photoRankerIcon
-                            .resizable()
-                            .frame(width: 29, height: 29)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                }
+                PhotoRankerSettingsRow()
             }
 
 #if DEBUG

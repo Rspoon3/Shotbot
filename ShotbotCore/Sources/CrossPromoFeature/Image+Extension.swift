@@ -7,6 +7,6 @@
 
 import SwiftUI
 
-public extension Image {
+extension Image {
     static let photoRankerIcon = Image("PhotoRanker512", bundle: .module)
 }

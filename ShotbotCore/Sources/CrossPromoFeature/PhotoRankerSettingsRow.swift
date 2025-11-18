@@ -24,7 +24,7 @@ public struct PhotoRankerSettingsRow: View {
                         .font(.caption)
                 }
             } icon: {
-                Image.photoRankerIcon
+                Image("PhotoRanker128", bundle: .module)
                     .resizable()
                     .frame(width: 29, height: 29)
                     .clipShape(RoundedRectangle(cornerRadius: 6))

@@ -13,7 +13,7 @@ public struct PhotoRankerPromoBanner: View {
 
     public var body: some View {
         HStack {
-            Image.photoRankerIcon
+            Image("PhotoRanker128", bundle: .module)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(widthAndHeight: 60)

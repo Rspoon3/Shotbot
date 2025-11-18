@@ -495,15 +495,9 @@ import SwiftTools
         guard !images.isEmpty else { return }
 
         if images.count == 1, let first = images.first {
-            // Single image - use the simple property
             UIPasteboard.general.image = first
         } else {
-            // Multiple images - use setItems with PNG data
-            let pasteboardItems: [[String: Any]] = images.compactMap { image in
-                guard let pngData = image.pngData() else { return nil }
-                return ["public.png": pngData]
-            }
-            UIPasteboard.general.setItems(pasteboardItems)
+            UIPasteboard.general.set(images)
         }
 
         showCopyToast = true

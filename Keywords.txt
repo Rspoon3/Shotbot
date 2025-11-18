@@ -1,0 +1,1 @@
+screenshot,mockup,device frame,marketing,app preview,iPhone,iPad,Mac,Vision Pro,shortcuts,widget

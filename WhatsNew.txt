@@ -1,0 +1,8 @@
+What's New in This Version of Shotbot
+
+• Choose exactly what gets saved and copied with new Auto-Action options
+• Auto-Save to Photos: None, Individual Only, Combined Only, or All
+• Auto-Save to Files: Same granular control for iCloud Documents
+• Auto-Copy to Clipboard: Pick what gets copied automatically
+• Better multi-image clipboard support for copying multiple screenshots
+• Enhanced user experience with more control over workflow

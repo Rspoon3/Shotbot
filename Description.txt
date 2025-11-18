@@ -1,0 +1,42 @@
+Transform your screenshots into professional marketing assets with Shotbot - the native app for framing screenshots with beautiful device mockups.
+
+POWERFUL FRAMING
+Frame screenshots with stunning device mockups for iPhone, iPad, Mac, and Apple Watch. Choose from the latest device models and create professional-looking images in seconds.
+
+FLEXIBLE WORKFLOWS
+• Individual Mode: Frame single screenshots with precision
+• Combined Mode: Stitch multiple framed screenshots horizontally
+• Drag & Drop: Simple drag-and-drop support across all platforms
+• Multiple Import Options: Photos, Files app, or direct sharing
+
+GRANULAR AUTO-ACTIONS
+Take complete control of your workflow with granular auto-action options:
+• Auto-Save to Photos: Choose to save individual, combined, all, or none
+• Auto-Save to Files: Same flexible control for iCloud Documents
+• Auto-Copy to Clipboard: Automatically copy exactly what you need
+• Auto-Delete: Optionally remove original screenshots after framing
+
+QUALITY CONTROL
+Five quality levels (Original, High, Medium, Low, Poor) let you optimize file size versus visual quality for any use case - from social media to presentations.
+
+WIDGETS & SHORTCUTS
+• Latest Screenshot Widget: Frame your most recent screenshot instantly
+• Multiple Widgets: Quick access to your screenshot library
+• Shortcuts Integration: Automate your framing workflow
+
+SHARE EXTENSION
+Frame screenshots from anywhere with the share sheet extension. No need to open the app - just share a screenshot and get instant results.
+
+CROSS-PLATFORM
+Available on iOS, macOS, and visionOS with iCloud sync to keep your preferences in sync across all your devices.
+
+SUBSCRIPTION OPTIONS
+• Free Tier: Limited frames per day to try the app
+• Unlimited Plan: Frame as many screenshots as you need
+• Referral Credits: Earn credits by inviting friends
+
+Perfect for app developers, designers, marketers, and anyone who wants to showcase their work with beautiful device frames. Download Shotbot today and transform your screenshots into professional marketing assets.
+
+
+Privacy Policy: https://github.com/Rspoon3/Shotbot/blob/main/PRIVACY.MD 
+Terms & Conditions: https://github.com/Rspoon3/Shotbot/blob/main/TERMS.MD

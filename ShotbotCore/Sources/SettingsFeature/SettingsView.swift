@@ -12,6 +12,7 @@ import Purchases
 import SwiftTools
 import ReferralFeature
 import ReferralService
+import CrossPromoFeature
 
 public struct SettingsView: View {
     let appID = 6450552843
@@ -216,7 +217,7 @@ public struct SettingsView: View {
                             .foregroundColor(.blue)
                     }
                 }
-                
+
                 NavigationLink {
                     SupportedDevicesView()
                 } label: {
@@ -253,7 +254,11 @@ public struct SettingsView: View {
                         .contentShape(Rectangle())
                 }
             }
-            
+
+            Section {
+                PhotoRankerSettingsRow()
+            }
+
 #if DEBUG
             Section("App") {
                 LabeledContent(

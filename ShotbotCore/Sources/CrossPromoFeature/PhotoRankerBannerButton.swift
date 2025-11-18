@@ -10,10 +10,10 @@ import SwiftTools
 
 public struct PhotoRankerBannerButton: View {
     @Environment(\.openURL) private var openURL
-    private let crossPromoStore: CrossPromoStore
+    private let store: CrossPromoStore
 
-    public init(crossPromoStore: CrossPromoStore) {
-        self.crossPromoStore = crossPromoStore
+    public init(store: CrossPromoStore) {
+        self.store = store
     }
 
     public var body: some View {
@@ -28,12 +28,12 @@ public struct PhotoRankerBannerButton: View {
         .transition(.scale.combined(with: .opacity))
         .buttonStyle(.plain)
         .onFirstAppear {
-            crossPromoStore.recordBannerShown()
+            store.recordBannerShown()
         }
     }
 }
 
 #Preview {
-    PhotoRankerBannerButton(crossPromoStore: CrossPromoStore())
+    PhotoRankerBannerButton(store: CrossPromoStore())
         .padding()
 }

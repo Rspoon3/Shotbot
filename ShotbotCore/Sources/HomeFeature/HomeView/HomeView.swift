@@ -216,7 +216,7 @@ public struct HomeView: View {
                         persistenceManager.referralBannerCount += 1
                     }
                 } else if crossPromoStore.shouldShowBanner() {
-                    PhotoRankerBannerButton(crossPromoStore: crossPromoStore)
+                    PhotoRankerBannerButton(store: crossPromoStore)
                 }
 
                 placeholder

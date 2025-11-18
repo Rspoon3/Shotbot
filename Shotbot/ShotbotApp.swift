@@ -33,10 +33,14 @@ struct ShotbotApp: App {
     private let logger = Logger(category: "ShotbotApp")
     private let referralChecker = ReferralChecker()
     private let notificaitonManager = NotificationManager()
-    
+    private let autoSaveMigration = MigrateAutoSaveSettingsUseCase()
+
     init() {
         Purchases.logLevel = .info
         Purchases.configure(withAPIKey: "appl_VOYNmwadBWEHBTYKlnZludJLwEX")
+
+        // Migrate legacy autosave settings
+        autoSaveMigration.migrate()
     }
     
     var body: some Scene {

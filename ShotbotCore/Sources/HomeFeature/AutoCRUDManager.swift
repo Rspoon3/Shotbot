@@ -37,7 +37,7 @@ public struct AutoCRUDManager: AutoCRUDManaging {
     private let fileManager: any FileManaging
     
     var canAutoSave: Bool {
-        persistenceManager.autoSaveToFiles || persistenceManager.autoSaveToPhotos
+        persistenceManager.autoSaveFilesOption != .none || persistenceManager.autoSavePhotosOption != .none
     }
         
     // MARK: - Initializer
@@ -54,7 +54,7 @@ public struct AutoCRUDManager: AutoCRUDManaging {
         self.fileManager = fileManager
     }
     
-    /// Shows the `showAutoSaveToast` if the user has `autoSaveToFiles` or `autoSaveToPhotos` enabled
+    /// Shows the `showAutoSaveToast` if the user has `autoSaveFilesOption` or `autoSavePhotosOption` enabled
     ///
     /// Using a slight delay in order to make the UI less jarring
     public func autoSaveIndividualImagesIfNeeded(
@@ -62,20 +62,25 @@ public struct AutoCRUDManager: AutoCRUDManaging {
         autoSave: @escaping ()-> Void
     ) async throws {
         guard canAutoSave else { return }
-        
+
+        let shouldSaveToFiles = persistenceManager.autoSaveFilesOption == .individual || persistenceManager.autoSaveFilesOption == .all
+        let shouldSaveToPhotos = persistenceManager.autoSavePhotosOption == .individual || persistenceManager.autoSavePhotosOption == .all
+
+        guard shouldSaveToFiles || shouldSaveToPhotos else { return }
+
         do {
             for shareableImage in shareableImages {
-                if persistenceManager.autoSaveToFiles {
+                if shouldSaveToFiles {
                     try fileManager.copyToiCloudFiles(from: shareableImage.url)
                     logger.info("Saving to iCloud.")
                 }
-                
-                if persistenceManager.autoSaveToPhotos {
+
+                if shouldSaveToPhotos {
                     try await photoLibraryManager.savePhoto(shareableImage.url)
                     logger.info("Saving to Photo library.")
                 }
             }
-            
+
             try await clock.sleep(for: .seconds(0.75))
             autoSave()
             try await clock.sleep(for: .seconds(0.75))
@@ -85,19 +90,24 @@ public struct AutoCRUDManager: AutoCRUDManaging {
         }
     }
     
-    /// Autosaves the combined image to photos and iCloud if the user has `autoSaveToFiles` and/or `autoSaveToPhotos` enabled
+    /// Autosaves the combined image to photos and iCloud if the user has `autoSaveFilesOption` and/or `autoSavePhotosOption` enabled
     public func autoSaveCombinedIfNeeded(using combinedURL: URL?) async throws {
         guard let combinedURL, canAutoSave else {
             return
         }
-        
+
+        let shouldSaveToFiles = persistenceManager.autoSaveFilesOption == .combined || persistenceManager.autoSaveFilesOption == .all
+        let shouldSaveToPhotos = persistenceManager.autoSavePhotosOption == .combined || persistenceManager.autoSavePhotosOption == .all
+
+        guard shouldSaveToFiles || shouldSaveToPhotos else { return }
+
         do {
-            if persistenceManager.autoSaveToFiles {
+            if shouldSaveToFiles {
                 try fileManager.copyToiCloudFiles(from: combinedURL)
                 logger.info("Saving combined image to iCloud.")
             }
-            
-            if persistenceManager.autoSaveToPhotos {
+
+            if shouldSaveToPhotos {
                 try await photoLibraryManager.savePhoto(combinedURL)
                 logger.info("Saving combined image to Photo library.")
             }

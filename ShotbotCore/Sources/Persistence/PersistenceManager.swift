@@ -28,16 +28,16 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     
     @AppStorage("isSubscribed", store: .shared)
     public var isSubscribed = false
-    
-    @AppStorage("autoCopy")
-    public var autoCopy: Bool = false
-    
-    @AppStorage("autoSaveToFiles")
-    public var autoSaveToFiles: Bool = false
-    
-    @AppStorage("autoSaveToPhotos")
-    public var autoSaveToPhotos: Bool = false
-    
+
+    @AppStorage("autoCopyOption")
+    public var autoCopyOption: AutoActionOption = .none
+
+    @AppStorage("autoSaveFilesOption")
+    public var autoSaveFilesOption: AutoActionOption = .none
+
+    @AppStorage("autoSavePhotosOption")
+    public var autoSavePhotosOption: AutoActionOption = .none
+
     @AppStorage("autoDeleteScreenshots")
     public var autoDeleteScreenshots: Bool = false
     
@@ -105,9 +105,9 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var numberOfLaunches: Int = 0
     public var numberOfActivations: Int = 0
     public var deviceFrameCreations: Int = 0
-    public var autoCopy: Bool = false
-    public var autoSaveToFiles: Bool = false
-    public var autoSaveToPhotos: Bool = false
+    public var autoCopyOption: AutoActionOption = .none
+    public var autoSaveFilesOption: AutoActionOption = .none
+    public var autoSavePhotosOption: AutoActionOption = .none
     public var autoDeleteScreenshots: Bool = false
     public var defaultHomeTab: ImageType = .individual
     public var defaultHomeView: HomeViewType = .tabbed
@@ -117,15 +117,15 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var creditBalance: Int = 0
     public var canEnterReferralCode: Bool = true
     public var referralBannerCount: Int = 0
-    
+
     public init() {}
 
     public func reset() {
         lastReviewPromptDate = nil
         isSubscribed = false
-        autoCopy = false
-        autoSaveToFiles = false
-        autoSaveToPhotos = false
+        autoCopyOption = .none
+        autoSaveFilesOption = .none
+        autoSavePhotosOption = .none
         autoDeleteScreenshots = false
         defaultHomeTab = .individual
         defaultHomeView = .tabbed

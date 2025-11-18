@@ -28,15 +28,15 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     
     @AppStorage("isSubscribed", store: .shared)
     public var isSubscribed = false
-    
+
     @AppStorage("autoCopyOption")
-    public var autoCopyOption: AutoCopyOption = .none
+    public var autoCopyOption: AutoActionOption = .none
 
     @AppStorage("autoSaveFilesOption")
-    public var autoSaveFilesOption: AutoSaveOption = .none
+    public var autoSaveFilesOption: AutoActionOption = .none
 
     @AppStorage("autoSavePhotosOption")
-    public var autoSavePhotosOption: AutoSaveOption = .none
+    public var autoSavePhotosOption: AutoActionOption = .none
 
     @AppStorage("autoDeleteScreenshots")
     public var autoDeleteScreenshots: Bool = false
@@ -105,9 +105,9 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var numberOfLaunches: Int = 0
     public var numberOfActivations: Int = 0
     public var deviceFrameCreations: Int = 0
-    public var autoCopyOption: AutoCopyOption = .none
-    public var autoSaveFilesOption: AutoSaveOption = .none
-    public var autoSavePhotosOption: AutoSaveOption = .none
+    public var autoCopyOption: AutoActionOption = .none
+    public var autoSaveFilesOption: AutoActionOption = .none
+    public var autoSavePhotosOption: AutoActionOption = .none
     public var autoDeleteScreenshots: Bool = false
     public var defaultHomeTab: ImageType = .individual
     public var defaultHomeView: HomeViewType = .tabbed

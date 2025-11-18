@@ -59,7 +59,7 @@ public struct MigrateAutoSaveSettingsUseCase {
         let oldBoolValue = userDefaults.bool(forKey: oldKey)
 
         // Convert boolean to enum
-        let newOption: AutoSaveOption = oldBoolValue ? .all : .none
+        let newOption: AutoActionOption = oldBoolValue ? .all : .none
 
         // Save the new enum value
         userDefaults.set(newOption.rawValue, forKey: newKey)

@@ -11,9 +11,9 @@ import Models
 public protocol PersistenceManaging: Sendable {
     var isSubscribed: Bool { get set }
     var referralBannerCount: Int { get set }
-    var autoCopyOption: AutoCopyOption  { get set }
-    var autoSaveFilesOption: AutoSaveOption { get set }
-    var autoSavePhotosOption: AutoSaveOption  { get set }
+    var autoCopyOption: AutoActionOption  { get set }
+    var autoSaveFilesOption: AutoActionOption { get set }
+    var autoSavePhotosOption: AutoActionOption  { get set }
     var autoDeleteScreenshots: Bool  { get set }
     var defaultHomeTab: ImageType { get set }
     var defaultHomeView: HomeViewType { get set }

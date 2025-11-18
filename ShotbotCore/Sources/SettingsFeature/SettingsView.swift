@@ -44,21 +44,21 @@ public struct SettingsView: View {
         Form {
             Section {
                 Picker("Auto save to files", selection: $persistenceManager.autoSaveFilesOption) {
-                    ForEach(AutoSaveOption.allCases) { option in
+                    ForEach(AutoActionOption.allCases) { option in
                         Text(option.rawValue)
                             .tag(option)
                     }
                 }
 
                 Picker("Auto save to photos", selection: $persistenceManager.autoSavePhotosOption) {
-                    ForEach(AutoSaveOption.allCases) { option in
+                    ForEach(AutoActionOption.allCases) { option in
                         Text(option.rawValue)
                             .tag(option)
                     }
                 }
 
                 Picker("Auto copy", selection: $persistenceManager.autoCopyOption) {
-                    ForEach(AutoCopyOption.allCases) { option in
+                    ForEach(AutoActionOption.allCases) { option in
                         Text(option.rawValue)
                             .tag(option)
                     }

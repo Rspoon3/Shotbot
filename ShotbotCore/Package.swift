@@ -12,6 +12,7 @@ let package = Package(
     products: [
         .library(for: .appFeature),
         .library(for: .createCombinedImageFeature),
+        .library(for: .crossPromoFeature),
         .library(for: .homeFeature),
         .library(for: .mediaManager),
         .library(for: .models),
@@ -32,6 +33,7 @@ let package = Package(
     targets: [
         .appFeature,
         .createCombinedImageFeature,
+        .crossPromoFeature,
         .homeFeature,
         .unitTests(for: .homeFeature),
         .mediaManager,
@@ -112,7 +114,17 @@ extension Target {
             .target(.models)
         ]
     )
-    
+
+    static let crossPromoFeature: Target = .target(
+        name: "CrossPromoFeature",
+        dependencies: [
+            .target(.models)
+        ],
+        resources: [
+            .process("Resources")
+        ]
+    )
+
     static let widgetFeature: Target = .target(
         name: "WidgetFeature",
         dependencies: [
@@ -165,6 +177,7 @@ extension Target {
             .target(.purchases),
             .target(.mediaManager),
             .target(.sbFoundation),
+            .target(.crossPromoFeature),
             .target(.referralFeature),
             .referralService
         ]
@@ -188,6 +201,7 @@ extension Target {
             .target(.sbFoundation),
             .target(.widgetFeature),
             .target(.createCombinedImageFeature),
+            .target(.crossPromoFeature),
             .target(.referralFeature),
             .referralService,
             .alertToast,

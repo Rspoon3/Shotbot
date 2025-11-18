@@ -12,6 +12,7 @@ import Purchases
 import SwiftTools
 import ReferralFeature
 import ReferralService
+import CrossPromoFeature
 
 public struct SettingsView: View {
     let appID = 6450552843
@@ -216,7 +217,7 @@ public struct SettingsView: View {
                             .foregroundColor(.blue)
                     }
                 }
-                
+
                 NavigationLink {
                     SupportedDevicesView()
                 } label: {
@@ -253,7 +254,29 @@ public struct SettingsView: View {
                         .contentShape(Rectangle())
                 }
             }
-            
+
+            Section {
+                Button {
+                    openURL(.photoRanker)
+                } label: {
+                    Label {
+                        VStack(alignment: .leading) {
+                            Text("Photo Ranker")
+                            Text("Find your best photos")
+                                .foregroundColor(.secondary)
+                                .font(.caption)
+                        }
+                    } icon: {
+                        Image.photoRankerIcon
+                            .resizable()
+                            .frame(width: 29, height: 29)
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+            }
+
 #if DEBUG
             Section("App") {
                 LabeledContent(

@@ -14,6 +14,7 @@ import Purchases
 import MediaManager
 import ReferralFeature
 import ReferralService
+import CrossPromoFeature
 
 public struct HomeView: View {
     @StateObject var manager = AppIntentManager.shared
@@ -21,9 +22,11 @@ public struct HomeView: View {
     @EnvironmentObject private var persistenceManager: PersistenceManager
     @EnvironmentObject var tabManager: TabManager
     @Environment(\.scenePhase) var scenePhase
+    @Environment(\.openURL) var openURL
     @State private var showReferrals = false
     @State private var showNotificationPermission = false
     @StateObject private var referralViewModel = ReferralViewModel()
+    private let crossPromoStore = CrossPromoStore()
 
     // MARK: - Initializer
     
@@ -213,8 +216,22 @@ public struct HomeView: View {
                     .onFirstAppear {
                         persistenceManager.referralBannerCount += 1
                     }
+                } else if crossPromoStore.shouldShowBanner() {
+                    Button {
+                        openURL(.photoRanker)
+                    } label: {
+                        PhotoRankerPromoBanner()
+                            .frame(maxWidth: 400)
+                    }
+                    .padding(.bottom, 20)
+                    .padding(.horizontal)
+                    .transition(.scale.combined(with: .opacity))
+                    .buttonStyle(.plain)
+                    .onFirstAppear {
+                        crossPromoStore.recordBannerShown()
+                    }
                 }
-                
+
                 placeholder
             }
         case .individualImages(let shareableImages):

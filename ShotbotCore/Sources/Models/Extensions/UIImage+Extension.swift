@@ -176,15 +176,28 @@ public extension UIImage {
         }
     }
     
-    /// Creates a framed screenshot based on the image quality passed in
+    /// Creates a framed screenshot based on the image quality passed in.
+    ///
+    /// Only succeeds for unambiguous device matches. For ambiguous matches
+    /// (e.g., Display Zoom conflicts), use the overload that accepts a `DeviceInfo`.
     func framedScreenshot(quality: ImageQuality) throws -> UIFramedScreenshot {
-        guard
-            let device = DeviceInfo.all().first(where: {$0.inputSize == size}),
-            let framedScreenshot = device.framed(using: self)?.scaled(to: quality.value)
+        let result = DeviceInfo.match(for: size)
+
+        guard case .exact(let device) = result,
+              let framedScreenshot = device.framed(using: self)?.scaled(to: quality.value)
         else {
             throw SBError.unsupportedImage
         }
-        
+
+        return framedScreenshot
+    }
+
+    /// Creates a framed screenshot using a pre-resolved device.
+    func framedScreenshot(quality: ImageQuality, device: DeviceInfo) throws -> UIFramedScreenshot {
+        guard let framedScreenshot = device.framed(using: self)?.scaled(to: quality.value) else {
+            throw SBError.unsupportedImage
+        }
+
         return framedScreenshot
     }
 }

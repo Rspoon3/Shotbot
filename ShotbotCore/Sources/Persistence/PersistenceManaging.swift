@@ -27,4 +27,24 @@ public protocol PersistenceManaging: Sendable {
     var creditBalance: Int { get set }
     var canEnterReferralCode: Bool { get set }
     func setLastReviewPromptDateToNow()
+
+    // MARK: - Device Frame Preferences
+
+    /// Returns the user's preferred device frame name for the given screenshot size, if cached.
+    func preferredDeviceFrame(for size: CGSize) -> String?
+
+    /// Stores the user's preferred device frame name for the given screenshot size.
+    func setPreferredDeviceFrame(_ frameName: String, for size: CGSize)
+
+    /// Removes all cached device frame preferences.
+    func clearDeviceFramePreferences()
+
+    /// Removes the cached device frame preference for the given screenshot size.
+    func removeDeviceFramePreference(for size: CGSize)
+
+    /// Whether any device frame preferences have been cached.
+    var hasDeviceFramePreferences: Bool { get }
+
+    /// All cached device frame preferences keyed by size string (e.g. "1170x2532") mapped to the device frame name.
+    var deviceFramePreferences: [String: String] { get }
 }

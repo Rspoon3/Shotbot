@@ -93,9 +93,56 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     @AppStorage("subscriptionOverride", store: .shared)
     public var subscriptionOverride: SubscriptionOverrideMethod = .appStore
 #endif
-    
+
     public func setLastReviewPromptDateToNow() {
         lastReviewPromptDate = .now
+    }
+
+    // MARK: - Device Frame Preferences
+
+    @AppStorage("deviceFramePreferences")
+    private var deviceFramePreferencesData: Data = Data()
+
+    private var deviceFramePreferencesDict: [String: String] {
+        get {
+            guard !deviceFramePreferencesData.isEmpty else { return [:] }
+            return (try? JSONDecoder().decode([String: String].self, from: deviceFramePreferencesData)) ?? [:]
+        }
+        set {
+            deviceFramePreferencesData = (try? JSONEncoder().encode(newValue)) ?? Data()
+        }
+    }
+
+    private static func sizeKey(for size: CGSize) -> String {
+        "\(Int(size.width))x\(Int(size.height))"
+    }
+
+    public func preferredDeviceFrame(for size: CGSize) -> String? {
+        deviceFramePreferencesDict[Self.sizeKey(for: size)]
+    }
+
+    public func setPreferredDeviceFrame(_ frameName: String, for size: CGSize) {
+        var dict = deviceFramePreferencesDict
+        dict[Self.sizeKey(for: size)] = frameName
+        deviceFramePreferencesDict = dict
+    }
+
+    public func clearDeviceFramePreferences() {
+        deviceFramePreferencesData = Data()
+    }
+
+    public func removeDeviceFramePreference(for size: CGSize) {
+        var dict = deviceFramePreferencesDict
+        dict.removeValue(forKey: Self.sizeKey(for: size))
+        deviceFramePreferencesDict = dict
+    }
+
+    public var hasDeviceFramePreferences: Bool {
+        !deviceFramePreferencesDict.isEmpty
+    }
+
+    public var deviceFramePreferences: [String: String] {
+        deviceFramePreferencesDict
     }
 }
 
@@ -117,6 +164,7 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var creditBalance: Int = 0
     public var canEnterReferralCode: Bool = true
     public var referralBannerCount: Int = 0
+    private var mockDeviceFramePreferences: [String: String] = [:]
 
     public init() {}
 
@@ -138,6 +186,31 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
         creditBalance = 0
         referralBannerCount = 0
         canEnterReferralCode = true
+        mockDeviceFramePreferences = [:]
+    }
+
+    public func preferredDeviceFrame(for size: CGSize) -> String? {
+        mockDeviceFramePreferences["\(Int(size.width))x\(Int(size.height))"]
+    }
+
+    public func setPreferredDeviceFrame(_ frameName: String, for size: CGSize) {
+        mockDeviceFramePreferences["\(Int(size.width))x\(Int(size.height))"] = frameName
+    }
+
+    public func clearDeviceFramePreferences() {
+        mockDeviceFramePreferences = [:]
+    }
+
+    public func removeDeviceFramePreference(for size: CGSize) {
+        mockDeviceFramePreferences.removeValue(forKey: "\(Int(size.width))x\(Int(size.height))")
+    }
+
+    public var hasDeviceFramePreferences: Bool {
+        !mockDeviceFramePreferences.isEmpty
+    }
+
+    public var deviceFramePreferences: [String: String] {
+        mockDeviceFramePreferences
     }
     
     public func setLastReviewPromptDateToNow() {

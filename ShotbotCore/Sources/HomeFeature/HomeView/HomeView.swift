@@ -177,6 +177,17 @@ public struct HomeView: View {
             allowedContentTypes: [.image, .png, .jpeg],
             allowsMultipleSelection: true
         ) { viewModel.fileImportCompletion(result: $0) }
+        .confirmationDialog(
+            "Which device is this screenshot from?",
+            isPresented: $viewModel.showDeviceDisambiguation,
+            titleVisibility: .visible
+        ) {
+            ForEach(viewModel.ambiguousDeviceOptions, id: \.deviceFrame) { device in
+                Button(device.displayName) {
+                    viewModel.didSelectDisambiguatedDevice(device)
+                }
+            }
+        }
     }
     
     @ViewBuilder

@@ -177,6 +177,16 @@ public struct HomeView: View {
             allowedContentTypes: [.image, .png, .jpeg],
             allowsMultipleSelection: true
         ) { viewModel.fileImportCompletion(result: $0) }
+        .sheet(isPresented: $viewModel.showDeviceDisambiguation) {
+            if let screenshot = viewModel.disambiguationScreenshot {
+                DeviceDisambiguationView(
+                    devices: viewModel.ambiguousDeviceOptions,
+                    screenshot: screenshot
+                ) { device in
+                    viewModel.didSelectDisambiguatedDevice(device)
+                }
+            }
+        }
     }
     
     @ViewBuilder

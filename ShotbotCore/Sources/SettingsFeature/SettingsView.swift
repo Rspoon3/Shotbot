@@ -93,6 +93,12 @@ public struct SettingsView: View {
                             .tag(type)
                     }
                 }
+
+                NavigationLink {
+                    DeviceFramePreferencesView()
+                } label: {
+                    Label("Device Frame Preferences", symbol: .rectangleOnRectangle)
+                }
             }
             
             Section("Feedback") {

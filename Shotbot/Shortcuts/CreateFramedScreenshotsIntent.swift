@@ -104,12 +104,24 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
             logger.error("Data could not be turned into a UIImage")
             throw SBError.unsupportedImage
         }
-                
-        guard let device = DeviceInfo.all().first(where: {$0.inputSize == screenshot.size}) else {
+
+        let device: DeviceInfo
+
+        switch DeviceInfo.match(for: screenshot.size) {
+        case .exact(let d):
+            device = d
+        case .ambiguous(let options):
+            let cached = await PersistenceManager.shared.preferredDeviceFrame(for: screenshot.size)
+            guard let resolved = options.first(where: { $0.deviceFrame == cached }) ?? options.first else {
+                logger.error("Could not resolve ambiguous device for width: \(screenshot.size.width, privacy: .public) and height: \(screenshot.size.height, privacy: .public).")
+                throw SBError.unsupportedDevice
+            }
+            device = resolved
+        case .none:
             logger.error("Could not find an image with width: \(screenshot.size.width, privacy: .public) and height: \(screenshot.size.height, privacy: .public).")
             throw SBError.unsupportedDevice
         }
-        
+
         guard let image = device.framed(using: screenshot)?.scaled(to: imageQuality.value) else {
             logger.error("Could not frame image.")
             throw SBError.framing

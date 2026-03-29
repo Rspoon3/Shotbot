@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum MergeMethod: String, Decodable {
+public enum MergeMethod: String, Decodable, Sendable {
     case singleOverlay
     case singleOverlayV2
     case doubleOverlay

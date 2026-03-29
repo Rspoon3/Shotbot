@@ -106,6 +106,7 @@
         "mergeMethod": "islandOverlay",
         "clipEdgesAmount": 75,
         "inputSize": [1290, 2796],
+        "displayZoomInputSize": [1125, 2436],
         "offSet": [80, 70],
     },
     {
@@ -113,6 +114,7 @@
         "mergeMethod": "islandOverlay",
         "clipEdgesAmount": 75,
         "inputSize": [2796, 1290],
+        "displayZoomInputSize": [2436, 1125],
         "offSet": [70, 80],
     },
     {
@@ -143,12 +145,14 @@
         "deviceFrame": "iPhone Air - Space Black - Portrait",
         "mergeMethod": "singleOverlayV2",
         "cornerRadius": 100,
-        "inputSize": [1260, 2736]
+        "inputSize": [1260, 2736],
+        "displayZoomInputSize": [1125, 2436]
     },
     {
         "deviceFrame": "iPhone Air - Space Black - Landscape",
         "mergeMethod": "singleOverlayV2",
         "cornerRadius": 100,
-        "inputSize": [2736, 1260]
+        "inputSize": [2736, 1260],
+        "displayZoomInputSize": [2436, 1125]
     },
 ]

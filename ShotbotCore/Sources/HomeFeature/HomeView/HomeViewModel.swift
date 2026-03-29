@@ -57,6 +57,10 @@ import SwiftTools
             isLoading = false
         }
     }
+    @Published public var showDeviceDisambiguation = false
+    @Published public var ambiguousDeviceOptions: [DeviceInfo] = []
+    @Published public var disambiguationScreenshot: UIImage?
+    private var disambiguationContinuation: CheckedContinuation<DeviceInfo, Never>?
     
     var showLoadingSpinner: Bool {
         isLoading && viewState != .combinedPlaceholder
@@ -334,11 +338,55 @@ import SwiftTools
         }
     }
     
+    /// Resolves the correct `DeviceInfo` for a screenshot, prompting the user when ambiguous.
+    ///
+    /// Checks the cached preference first. If no preference exists and the match is
+    /// ambiguous, presents a confirmation dialog and awaits the user's selection.
+    private func resolveDevice(for screenshot: UIImage) async -> DeviceInfo? {
+        let screenshotSize = screenshot.size
+        let result = DeviceInfo.match(for: screenshotSize)
+
+        switch result {
+        case .exact(let device):
+            return device
+        case .none:
+            return nil
+        case .ambiguous(let options):
+            if !persistenceManager.alwaysAskDeviceFrame,
+               let cached = persistenceManager.preferredDeviceFrame(for: screenshotSize),
+               let device = options.first(where: { $0.deviceFrame == cached }) {
+                return device
+            }
+
+            ambiguousDeviceOptions = options
+            disambiguationScreenshot = screenshot
+            showDeviceDisambiguation = true
+
+            let chosen = await withCheckedContinuation { continuation in
+                disambiguationContinuation = continuation
+            }
+
+            persistenceManager.setPreferredDeviceFrame(chosen.deviceFrame, for: screenshotSize)
+            return chosen
+        }
+    }
+
+    /// Called by the disambiguation dialog when the user selects a device.
+    public func didSelectDisambiguatedDevice(_ device: DeviceInfo) {
+        disambiguationContinuation?.resume(returning: device)
+        disambiguationContinuation = nil
+        disambiguationScreenshot = nil
+        showDeviceDisambiguation = false
+    }
+
     /// Creates a `ShareableImage` from a `UIScreenshot`
     ///
     /// Will auto save to files or photos if necessary
     private func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> ShareableImage {
-        let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality)
+        guard let device = await resolveDevice(for: screenshot) else {
+            throw SBError.unsupportedImage
+        }
+        let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality, device: device)
         let path = "Framed Screenshot \(count)_\(UUID()).png"
         let temporaryURL = URL.temporaryDirectory.appending(path: path)
         

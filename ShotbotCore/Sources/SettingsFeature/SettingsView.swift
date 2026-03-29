@@ -94,12 +94,10 @@ public struct SettingsView: View {
                     }
                 }
 
-                if persistenceManager.hasDeviceFramePreferences {
-                    NavigationLink {
-                        DeviceFramePreferencesView()
-                    } label: {
-                        Label("Device Frame Preferences", symbol: .rectangleOnRectangle)
-                    }
+                NavigationLink {
+                    DeviceFramePreferencesView()
+                } label: {
+                    Label("Device Frame Preferences", symbol: .rectangleOnRectangle)
                 }
             }
             

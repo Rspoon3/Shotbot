@@ -100,6 +100,9 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
 
     // MARK: - Device Frame Preferences
 
+    @AppStorage("alwaysAskDeviceFrame")
+    public var alwaysAskDeviceFrame: Bool = false
+
     @AppStorage("deviceFramePreferences")
     private var deviceFramePreferencesData: Data = Data()
 
@@ -164,6 +167,7 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var creditBalance: Int = 0
     public var canEnterReferralCode: Bool = true
     public var referralBannerCount: Int = 0
+    public var alwaysAskDeviceFrame: Bool = false
     private var mockDeviceFramePreferences: [String: String] = [:]
 
     public init() {}

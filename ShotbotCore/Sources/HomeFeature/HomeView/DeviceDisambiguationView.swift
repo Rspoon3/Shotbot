@@ -26,17 +26,23 @@ struct DeviceDisambiguationView: View {
 
     var body: some View {
         NavigationStack {
-            List(devices, id: \.deviceFrame) { device in
-                Button {
-                    onSelect(device)
-                } label: {
-                    DeviceRow(device: device)
+            List {
+                Section {
+                    ForEach(devices, id: \.deviceFrame) { device in
+                        Button {
+                            onSelect(device)
+                        } label: {
+                            DeviceRow(device: device)
+                        }
+                    }
+                } header: {
+                    Text("This screenshot's resolution matches multiple devices. Select the device this screenshot was taken on.")
                 }
             }
             .navigationTitle("Select Device")
             .navigationBarTitleDisplayMode(.inline)
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .interactiveDismissDisabled()
     }
 

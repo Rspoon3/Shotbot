@@ -30,6 +30,9 @@ public protocol PersistenceManaging: Sendable {
 
     // MARK: - Device Frame Preferences
 
+    /// When true, always prompt for device selection on ambiguous matches instead of using cached preferences.
+    var alwaysAskDeviceFrame: Bool { get set }
+
     /// Returns the user's preferred device frame name for the given screenshot size, if cached.
     func preferredDeviceFrame(for size: CGSize) -> String?
 

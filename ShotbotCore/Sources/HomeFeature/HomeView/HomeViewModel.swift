@@ -352,7 +352,8 @@ import SwiftTools
         case .none:
             return nil
         case .ambiguous(let options):
-            if let cached = persistenceManager.preferredDeviceFrame(for: screenshotSize),
+            if !persistenceManager.alwaysAskDeviceFrame,
+               let cached = persistenceManager.preferredDeviceFrame(for: screenshotSize),
                let device = options.first(where: { $0.deviceFrame == cached }) {
                 return device
             }

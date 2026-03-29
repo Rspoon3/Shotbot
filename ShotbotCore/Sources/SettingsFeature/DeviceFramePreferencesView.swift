@@ -18,25 +18,37 @@ struct DeviceFramePreferencesView: View {
     var body: some View {
         List {
             Section {
-                ForEach(sortedPreferences, id: \.key) { key, deviceFrame in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(deviceFrame)
-                        Text(key)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                Toggle("Always ask", isOn: $persistenceManager.alwaysAskDeviceFrame)
+            } footer: {
+                Text("When enabled, Shotbot will always ask which device to use when a screenshot's resolution matches multiple devices, instead of using your saved preference.")
+            }
+
+            if !sortedPreferences.isEmpty {
+                Section("Saved Preferences") {
+                    ForEach(sortedPreferences, id: \.key) { key, deviceFrame in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(deviceFrame)
+                            Text(key)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .contextMenu {
+                            Button("Remove", symbol: .trash, role: .destructive) {
+                                removePreference(forKey: key)
+                            }
+                        }
                     }
-                    .contextMenu {
-                        Button("Remove", symbol: .trash, role: .destructive) {
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            let key = sortedPreferences[index].key
                             removePreference(forKey: key)
                         }
                     }
                 }
-                .onDelete { indexSet in
-                    for index in indexSet {
-                        let key = sortedPreferences[index].key
-                        removePreference(forKey: key)
-                    }
-                }
+            }
+
+            Section {
+                EmptyView()
             } footer: {
                 Text("Shotbot matches screenshots to device frames using image resolution. This is the only reliable information a screenshot contains. Certain settings, such as Display Zoom, can cause a screenshot's resolution to match a different device, resulting in the wrong frame being applied. When this happens, you can choose the correct device and Shotbot will remember your preference.")
             }

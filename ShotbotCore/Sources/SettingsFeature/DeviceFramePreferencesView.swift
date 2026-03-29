@@ -24,7 +24,7 @@ struct DeviceFramePreferencesView: View {
             }
 
             if !sortedPreferences.isEmpty {
-                Section("Saved Preferences") {
+                Section {
                     ForEach(sortedPreferences, id: \.key) { key, deviceFrame in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(deviceFrame)
@@ -44,13 +44,11 @@ struct DeviceFramePreferencesView: View {
                             removePreference(forKey: key)
                         }
                     }
+                } header: {
+                    Text("Saved Preferences")
+                } footer: {
+                    Text("Shotbot matches screenshots to device frames using image resolution. This is the only reliable information a screenshot contains. Certain settings, such as Display Zoom, can cause a screenshot's resolution to match a different device, resulting in the wrong frame being applied. When this happens, you can choose the correct device and Shotbot will remember your preference.")
                 }
-            }
-
-            Section {
-                EmptyView()
-            } footer: {
-                Text("Shotbot matches screenshots to device frames using image resolution. This is the only reliable information a screenshot contains. Certain settings, such as Display Zoom, can cause a screenshot's resolution to match a different device, resulting in the wrong frame being applied. When this happens, you can choose the correct device and Shotbot will remember your preference.")
             }
         }
         .navigationTitle("Device Frame Preferences")

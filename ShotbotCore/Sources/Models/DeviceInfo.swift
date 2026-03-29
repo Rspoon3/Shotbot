@@ -63,8 +63,13 @@ public struct DeviceInfo: Decodable, Sendable {
         return name
     }
 
+    /// The device frame asset image, if available.
+    public var frameImage: UIImage? {
+        UIImage(named: deviceFrame, in: .module, with: nil)
+    }
+
     // MARK: - Functions
-    
+
     public func framed(using screenshot: UIImage) -> UIImage? {
         var screenshot = screenshot
         let offSet = offSet ?? .zero

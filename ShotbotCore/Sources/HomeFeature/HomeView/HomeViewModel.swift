@@ -59,6 +59,7 @@ import SwiftTools
     }
     @Published public var showDeviceDisambiguation = false
     @Published public var ambiguousDeviceOptions: [DeviceInfo] = []
+    @Published public var disambiguationScreenshot: UIImage?
     private var disambiguationContinuation: CheckedContinuation<DeviceInfo, Never>?
     
     var showLoadingSpinner: Bool {
@@ -341,7 +342,8 @@ import SwiftTools
     ///
     /// Checks the cached preference first. If no preference exists and the match is
     /// ambiguous, presents a confirmation dialog and awaits the user's selection.
-    private func resolveDevice(for screenshotSize: CGSize) async -> DeviceInfo? {
+    private func resolveDevice(for screenshot: UIImage) async -> DeviceInfo? {
+        let screenshotSize = screenshot.size
         let result = DeviceInfo.match(for: screenshotSize)
 
         switch result {
@@ -356,6 +358,7 @@ import SwiftTools
             }
 
             ambiguousDeviceOptions = options
+            disambiguationScreenshot = screenshot
             showDeviceDisambiguation = true
 
             let chosen = await withCheckedContinuation { continuation in
@@ -371,6 +374,7 @@ import SwiftTools
     public func didSelectDisambiguatedDevice(_ device: DeviceInfo) {
         disambiguationContinuation?.resume(returning: device)
         disambiguationContinuation = nil
+        disambiguationScreenshot = nil
         showDeviceDisambiguation = false
     }
 
@@ -378,7 +382,7 @@ import SwiftTools
     ///
     /// Will auto save to files or photos if necessary
     private func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> ShareableImage {
-        guard let device = await resolveDevice(for: screenshot.size) else {
+        guard let device = await resolveDevice(for: screenshot) else {
             throw SBError.unsupportedImage
         }
         let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality, device: device)

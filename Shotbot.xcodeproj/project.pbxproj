@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		94016B042C4F4F03006F025B /* WidgetFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 94016B032C4F4F03006F025B /* WidgetFeature */; };
+		DA097EE02083B99E89E75EFA /* AsyncTimelineProvider in Frameworks */ = {isa = PBXBuildFile; productRef = 27194894D8C2EFC4F73A7FD1 /* AsyncTimelineProvider */; };
 		940A9E662C514AA20093893D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9482BE752C51402A00881181 /* Preview Assets.xcassets */; };
 		94453E472C4AAD7900B15690 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94453E462C4AAD7800B15690 /* WidgetKit.framework */; };
 		94453E492C4AAD7900B15690 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94453E482C4AAD7900B15690 /* SwiftUI.framework */; };
@@ -150,6 +151,7 @@
 				94016B042C4F4F03006F025B /* WidgetFeature in Frameworks */,
 				94C4E26E2C4B0EDF0017C18E /* MediaManager in Frameworks */,
 				94453E472C4AAD7900B15690 /* WidgetKit.framework in Frameworks */,
+				DA097EE02083B99E89E75EFA /* AsyncTimelineProvider in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,6 +343,7 @@
 			packageProductDependencies = (
 				94C4E26D2C4B0EDF0017C18E /* MediaManager */,
 				94016B032C4F4F03006F025B /* WidgetFeature */,
+				27194894D8C2EFC4F73A7FD1 /* AsyncTimelineProvider */,
 			);
 			productName = WidgetsExtension;
 			productReference = 94453E452C4AAD7800B15690 /* WidgetsExtension.appex */;
@@ -425,6 +428,7 @@
 			);
 			mainGroup = 94BD65BD2A44B28700D0CE61;
 			packageReferences = (
+				7E58B9FBDA909F957CBAF50E /* XCRemoteSwiftPackageReference "AsyncTimelineProvider" */,
 			);
 			productRefGroup = 94BD65C72A44B28700D0CE61 /* Products */;
 			projectDirPath = "";
@@ -901,7 +905,22 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		7E58B9FBDA909F957CBAF50E /* XCRemoteSwiftPackageReference "AsyncTimelineProvider" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Rspoon3/AsyncTimelineProvider.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		27194894D8C2EFC4F73A7FD1 /* AsyncTimelineProvider */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AsyncTimelineProvider;
+		};
 		94016B032C4F4F03006F025B /* WidgetFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WidgetFeature;

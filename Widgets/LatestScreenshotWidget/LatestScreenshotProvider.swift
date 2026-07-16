@@ -10,47 +10,36 @@ import SwiftUI
 import Photos
 import MediaManager
 import WidgetFeature
+import AsyncTimelineProvider
 @preconcurrency import WidgetKit
 
-struct LatestScreenshotProvider: TimelineProvider {
+struct LatestScreenshotProvider: AsyncTimelineProvider {
     let imageManager: any ImageManaging
-    
+
     // MARK: - Initializer
-    
+
     init(imageManager: any ImageManaging = ImageManager()) {
         self.imageManager = imageManager
     }
-    
-    // MARK: - TimelineProvider
-    
+
+    // MARK: - AsyncTimelineProvider
+
     /// Placeholder
     func placeholder(in context: Context) -> LatestScreenshotEntry {
         LatestScreenshotEntry(viewState: .screenshot(.demoScreenshot, ""))
     }
-    
+
     /// Widget Gallery
-    func getSnapshot(in context: Context, completion: @escaping @Sendable (LatestScreenshotEntry) -> Void) {
-        Task {
-            guard let entry = await timeline(in: context).entries.first else {
-                completion(LatestScreenshotEntry(viewState: .screenshot(.demoScreenshot, "")))
-                return
-            }
-            
-            completion(entry)
+    func snapshot(in context: Context) async -> LatestScreenshotEntry {
+        guard let entry = await timeline(in: context).entries.first else {
+            return LatestScreenshotEntry(viewState: .screenshot(.demoScreenshot, ""))
         }
+
+        return entry
     }
-    
+
     /// Added Widget
-    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<LatestScreenshotEntry>) -> Void) {
-        Task {
-            let timeline = await timeline(in: context)
-            completion(timeline)
-        }
-    }
-    
-    // MARK: - Private Helpers
-    
-    private func timeline(in context: Context) async -> Timeline<LatestScreenshotEntry> {
+    func timeline(in context: Context) async -> Timeline<LatestScreenshotEntry> {
         do {
             let scaledSize = await context.displaySize * UIScreen.main.scale
             let (image, assetID) = try await imageManager.latestScreenshot(using: .size(scaledSize))
@@ -81,7 +70,9 @@ struct LatestScreenshotProvider: TimelineProvider {
             return errorTimeline()
         }
     }
-    
+
+    // MARK: - Private Helpers
+
     private func errorTimeline() -> Timeline<LatestScreenshotEntry> {
         let entryDate = Calendar.current.date(
             byAdding: .hour,

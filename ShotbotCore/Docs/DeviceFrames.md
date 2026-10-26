@@ -110,12 +110,15 @@ view, which draws the phone opened part of the way, like a book (landscape) or a
 ]
 ```
 
-`angle` is the angle between the two halves in degrees, from 90 (most closed) to 180 (flat). A fold needs no frames, offset
+`angle` is the angle between the two sides in degrees, from 90 (most closed) to 180 (flat). A fold needs no frames, offset
 or mask of its own. It uses the display's own, so it exists in every orientation. The image is framed flat first, then
-`UIImage.bookFolded(openingAngle:)` splits it at the crease, tilts each half back around it with a perspective transform,
-darkens the halves a little (the right or top one more), and adds a soft shadow. The result is on a transparent canvas
-that is larger than the frame to make room for the shadow. The left or bottom half reaches a few pixels under the other
-half, so the shadow can't show through as a dark line at the crease.
+`UIImage.bookFolded(openingAngle:)` bends it as one continuous surface. Away from the crease each side is a flat panel tilted
+back with a perspective transform. Near the crease the surface curves smoothly from one tilt to the other, so there is no hard
+edge, and it is cut into thin strips so the curve and the shading change gradually. The brightness follows the surface's
+slope, darker toward the right or top side. A soft shadow is added, and the result is on a transparent canvas that is larger
+than the frame to make room for it. Each piece reaches a few pixels under the next, so the shadow can't show through the
+half-transparent edge pixels between them as a dark line. The bend radius is a fraction of the image width, and a smaller
+one gives a sharper crease.
 
 ## Why `screenSize` is sometimes needed
 

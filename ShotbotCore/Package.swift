@@ -229,11 +229,11 @@ extension Package.Dependency {
     
     static let revenueCat: Package.Dependency = .package(
         url: "https://github.com/RevenueCat/purchases-ios.git",
-        exact: .init("5.2.2")!
+        exact: .init("5.98.0")!
     )
     
     static let swiftTools: Package.Dependency = .package(
         url: "https://github.com/Rspoon3/SwiftTools",
-        exact: "2.0.0"
+        exact: "2.3.3"
     )
 }

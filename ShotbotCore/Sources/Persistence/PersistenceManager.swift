@@ -147,6 +147,31 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     public var deviceFramePreferences: [String: String] {
         deviceFramePreferencesDict
     }
+
+    // MARK: - Device Color Preferences
+
+    @AppStorage("deviceColorPreferences")
+    private var deviceColorPreferencesData: Data = Data()
+
+    private var deviceColorPreferencesDict: [String: String] {
+        get {
+            guard !deviceColorPreferencesData.isEmpty else { return [:] }
+            return (try? JSONDecoder().decode([String: String].self, from: deviceColorPreferencesData)) ?? [:]
+        }
+        set {
+            deviceColorPreferencesData = (try? JSONEncoder().encode(newValue)) ?? Data()
+        }
+    }
+
+    public func preferredColor(for deviceName: String) -> String? {
+        deviceColorPreferencesDict[deviceName]
+    }
+
+    public func setPreferredColor(_ color: String, for deviceName: String) {
+        var dict = deviceColorPreferencesDict
+        dict[deviceName] = color
+        deviceColorPreferencesDict = dict
+    }
 }
 
 public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
@@ -169,6 +194,7 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
     public var referralBannerCount: Int = 0
     public var alwaysAskDeviceFrame: Bool = false
     private var mockDeviceFramePreferences: [String: String] = [:]
+    private var mockDeviceColorPreferences: [String: String] = [:]
 
     public init() {}
 
@@ -191,6 +217,7 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
         referralBannerCount = 0
         canEnterReferralCode = true
         mockDeviceFramePreferences = [:]
+        mockDeviceColorPreferences = [:]
     }
 
     public func preferredDeviceFrame(for size: CGSize) -> String? {
@@ -217,6 +244,14 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
         mockDeviceFramePreferences
     }
     
+    public func preferredColor(for deviceName: String) -> String? {
+        mockDeviceColorPreferences[deviceName]
+    }
+
+    public func setPreferredColor(_ color: String, for deviceName: String) {
+        mockDeviceColorPreferences[deviceName] = color
+    }
+
     public func setLastReviewPromptDateToNow() {
         lastReviewPromptDate = .now
     }

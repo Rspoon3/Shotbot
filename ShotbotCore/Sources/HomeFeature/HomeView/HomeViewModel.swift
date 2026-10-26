@@ -57,6 +57,8 @@ import SwiftTools
             isLoading = false
         }
     }
+    /// The devices in the current screenshots that have more than one frame color, for the color picker.
+    @Published public private(set) var colorOptions: [DeviceColorOption] = []
     @Published public var showDeviceDisambiguation = false
     @Published public var ambiguousDeviceOptions: [DeviceInfo] = []
     @Published public var disambiguationScreenshot: UIImage?
@@ -205,16 +207,20 @@ import SwiftTools
     /// Updates `imageResults` `individual`property and counts up `PersistenceManaging.deviceFrameCreations`
     private func updateImageResultsIndividualImages(using screenshots: [UIImage]) async throws {
         var shareableImages = [ShareableImage]()
+        var devices = [DeviceInfo]()
         
         for (i, screenshot) in screenshots.enumerated() {
-            let shareableImage = try await createDeviceFrame(using: screenshot, count: i)
+            let (shareableImage, device) = try await createDeviceFrame(using: screenshot, count: i)
             
             shareableImages.append(shareableImage)
+            devices.append(device)
             persistenceManager.deviceFrameCreations += 1
         }
         
         logger.debug("Setting imageResults.individual with \(shareableImages.count, privacy: .public) items.")
         imageResults.individual = shareableImages
+        imageResults.devices = devices
+        refreshColorOptions()
         showGridView = persistenceManager.defaultHomeView == .grid && imageResults.hasMultipleImages
     }
     
@@ -411,13 +417,21 @@ import SwiftTools
         showDeviceDisambiguation = false
     }
 
-    /// Creates a `ShareableImage` from a `UIScreenshot`
+    /// Frames a screenshot and returns the image along with the device it was framed with.
     ///
-    /// Will auto save to files or photos if necessary
-    private func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> ShareableImage {
-        guard let device = await resolveDevice(for: screenshot) else {
+    /// The device uses the color the user last picked for it. Will auto save to files or photos if necessary.
+    private func createDeviceFrame(using screenshot: UIScreenshot, count: Int) async throws -> (image: ShareableImage, device: DeviceInfo) {
+        guard let resolved = await resolveDevice(for: screenshot) else {
             throw SBError.unsupportedImage
         }
+        
+        let device = persistenceManager.applyingPreferredColor(to: resolved)
+        
+        return (try makeShareableImage(from: screenshot, device: device, count: count), device)
+    }
+    
+    /// Frames a screenshot with a device and writes the result to a temporary file.
+    private func makeShareableImage(from screenshot: UIScreenshot, device: DeviceInfo, count: Int) throws -> ShareableImage {
         let framedScreenshot = try screenshot.framedScreenshot(quality: persistenceManager.imageQuality, device: device)
         let path = "Framed Screenshot \(count)_\(UUID()).png"
         let temporaryURL = URL.temporaryDirectory.appending(path: path)
@@ -434,6 +448,17 @@ import SwiftTools
             framedScreenshot: framedScreenshot,
             url: temporaryURL
         )
+    }
+    
+    /// Rebuilds `colorOptions` from the devices in the current screenshots.
+    private func refreshColorOptions() {
+        var seen = Set<String>()
+        
+        colorOptions = imageResults.devices.compactMap { device in
+            guard device.hasColorOptions, let color = device.colorName, seen.insert(device.name).inserted else { return nil }
+            
+            return DeviceColorOption(deviceName: device.name, colors: device.colors, selectedColor: color)
+        }
     }
     
     private func clearTemporaryDirectory() {
@@ -541,6 +566,7 @@ import SwiftTools
         
         stopCombinedImageTask()
         imageResults.removeAll()
+        colorOptions = []
         imageSelections.removeAll()
         viewState = .individualPlaceholder
         imageType = .individual
@@ -660,5 +686,66 @@ import SwiftTools
         
         // Only the combined image changed. The individual images are the same, just in a new order.
         await runAutoActions(savingIndividualImages: false)
+    }
+    
+    /// Saves a frame color as the default for a device, then re-frames the current screenshots with it.
+    ///
+    /// Rebuilds both the individual and combined images, then runs the auto save and auto copy settings on them.
+    /// It reuses the devices already chosen for each screenshot, so it never asks which device to use again, and it
+    /// does not count as a new framed screenshot or delete the original screenshots.
+    ///
+    /// The current images stay on screen under the loading spinner and are replaced once, like when the image quality
+    /// changes or the combined images are reversed.
+    public func didSelectColor(_ color: String, forDeviceNamed deviceName: String) async {
+        guard imageResults.devices.contains(where: { $0.name == deviceName && $0.colorName != color }) else { return }
+        
+        logger.info("Re-framing screenshots with a new color for \(deviceName, privacy: .public).")
+        
+        persistenceManager.setPreferredColor(color, for: deviceName)
+        isLoading = true
+        defer { isLoading = false }
+        
+        stopCombinedImageTask()
+        
+        let previousURLs = imageResults.individual.map(\.url) + [imageResults.combined?.url].compactMap { $0 }
+        imageResults.devices = imageResults.devices.map { $0.name == deviceName ? $0.withColor(color) : $0 }
+        
+        do {
+            var shareableImages = [ShareableImage]()
+            
+            for (index, (screenshot, device)) in zip(imageResults.originalScreenshots, imageResults.devices).enumerated() {
+                shareableImages.append(try makeShareableImage(from: screenshot, device: device, count: index))
+            }
+            
+            // `viewState` still holds the previous images, so they stay visible until the new ones replace them.
+            imageResults.individual = shareableImages
+            imageResults.combined = nil
+            refreshColorOptions()
+            
+            switch imageType {
+            case .individual:
+                viewState = .individualImages(shareableImages)
+                isLoading = false
+                await combineDeviceFrames()
+            case .combined:
+                await combineDeviceFrames()
+                
+                guard let combined = imageResults.combined else {
+                    logger.fault("Re-framing returned early because combined image results has no image.")
+                    throw SBError.unsupportedImage
+                }
+                
+                viewState = .combinedImages(combined)
+                isLoading = false
+            }
+            
+            previousURLs.forEach { try? fileManager.removeItem(at: $0) }
+            
+            // The images changed, so the auto save and auto copy settings apply to the new ones.
+            await runAutoActions()
+        } catch {
+            logger.error("Could not re-frame screenshots: \(error.localizedDescription, privacy: .public).")
+            self.error = error
+        }
     }
 }

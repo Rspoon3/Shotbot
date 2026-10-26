@@ -10,6 +10,8 @@ import Models
 
 public struct ImageResults {
     var originalScreenshots: [UIScreenshot] = []
+    /// The device each original screenshot was framed with, in the same order, so re-framing never asks again.
+    var devices: [DeviceInfo] = []
     var individual: [ShareableImage] = []
     var combined: ShareableImage?
     
@@ -23,12 +25,14 @@ public struct ImageResults {
     
     mutating func removeAll() {
         originalScreenshots.removeAll()
+        devices.removeAll()
         individual.removeAll()
         combined = nil
     }
     
     mutating func reverseImages() {
         originalScreenshots.reverse()
+        devices.reverse()
         individual.reverse()
     }
 }

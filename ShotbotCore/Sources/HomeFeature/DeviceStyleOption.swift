@@ -9,7 +9,7 @@ import Foundation
 
 /// The frame choices available for one device in the current screenshots: its colors, and the views of each screen.
 public struct DeviceStyleOption: Identifiable, Equatable, Sendable {
-    /// The views one screen of the device can be shown in, such as the iPhone Duo's inner screen flat or as a book.
+    /// The views one screen of the device can be shown in, such as the iPhone Duo's inner screen flat or partially open.
     public struct Screen: Identifiable, Equatable, Sendable {
         /// Which screen this is, such as "Inner". `nil` for a device with one screen.
         public let screenName: String?

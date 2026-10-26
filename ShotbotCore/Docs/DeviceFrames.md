@@ -94,25 +94,26 @@ detected from its size. It is a choice in the toolbar menu, next to the color.
 ]
 ```
 
-The first view is the one written on the display, and the default. Apple only draws "Open" in portrait, so a landscape
+The first view is the one written on the display, and the default. The two screens each have their own set, so the inner
+screen's "Open" and the outer screen's "Open" are different views. Apple only draws "Open" in portrait, so a landscape
 outer screenshot has no view to pick. Every view needs its own screen mask, which the generator makes. A view uses the
 device's colors, and the choice is saved per device like the color.
 
 ### Folded views
 
-A view can also bend the display's own frame instead of using other art. The iPhone Duo's inner screen has a "Book"
+A view can also bend the display's own frame instead of using other art. The iPhone Duo's inner screen has a "Partially Open"
 view, which draws the phone opened part of the way, like a book (landscape) or a laptop (portrait):
 
 ```json
-"viewName": "Flat",
+"viewName": "Open",
 "alternateViews": [
-    { "name": "Book", "fold": { "angle": 145 } }
+    { "name": "Partially Open", "fold": { "angle": 145 } }
 ]
 ```
 
 `angle` is the angle between the two sides in degrees, from 90 (most closed) to 180 (flat). A fold needs no frames, offset
 or mask of its own. It uses the display's own, so it exists in every orientation. The image is framed flat first, then
-`UIImage.bookFolded(openingAngle:)` bends it as one continuous surface. Away from the crease each side is a flat panel tilted
+`UIImage.folded(openingAngle:)` bends it as one continuous surface. Away from the crease each side is a flat panel tilted
 back with a perspective transform. Near the crease the surface curves smoothly from one tilt to the other, so there is no hard
 edge, and it is cut into thin strips so the curve and the shading change gradually. The brightness follows the surface's
 slope, darker toward the right or top side. A soft shadow is added, and the result is on a transparent canvas that is larger

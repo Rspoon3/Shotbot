@@ -177,10 +177,10 @@ public struct DeviceInfo: Sendable {
 
         guard let foldAngle = viewFrame.foldAngle else { return flat }
 
-        return flat.bookFolded(openingAngle: foldAngle)
+        return flat.folded(openingAngle: foldAngle)
     }
 
-    /// Whether the selected view bends the frame, like the iPhone Duo's book mode. A folded image is larger than the
+    /// Whether the selected view bends the frame, like the iPhone Duo's folded view. A folded image is larger than the
     /// frame, to make room for its shadow.
     public var isFolded: Bool {
         viewFrame.foldAngle != nil

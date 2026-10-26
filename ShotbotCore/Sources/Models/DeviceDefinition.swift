@@ -44,7 +44,7 @@ struct DeviceDefinition: Decodable, Sendable {
     ///
     /// A view either has its own frame art (`orientations`) or bends the display's own frames (`fold`).
     struct AlternateView: Decodable, Sendable {
-        /// The view's name, such as "Open" or "Book".
+        /// The view's name, such as "Open" or "Partially Open".
         let name: String
         /// Where the screen opening's top-left corner sits in the view's first orientation's frame. Not needed
         /// when the view bends the display's own frames.

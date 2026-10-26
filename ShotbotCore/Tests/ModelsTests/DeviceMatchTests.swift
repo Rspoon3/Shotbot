@@ -201,7 +201,7 @@ struct DeviceMatchTests {
             let expected: [String]
 
             switch (device.name == "iPhone Duo", device.screenName, device.orientation) {
-            case (true, "Inner", _): expected = ["Flat", "Book"]
+            case (true, "Inner", _): expected = ["Open", "Partially Open"]
             case (true, "Outer", .portrait): expected = ["Closed", "Open"]
             default: expected = []
             }
@@ -210,23 +210,23 @@ struct DeviceMatchTests {
         }
     }
 
-    @Test("The iPhone Duo's inner screen can be folded like a book in both orientations")
-    func duoInnerScreenHasABookView() throws {
+    @Test("The iPhone Duo's inner screen can be folded in both orientations")
+    func duoInnerScreenHasAFoldedView() throws {
         for orientation in [DeviceOrientation.portrait, .landscape] {
             let flat = try #require(DeviceInfo.all().first {
                 $0.name == "iPhone Duo" && $0.screenName == "Inner" && $0.orientation == orientation
             })
-            let book = flat.withView("Book")
+            let folded = flat.withView("Partially Open")
 
             #expect(!flat.isFolded)
-            #expect(book.isFolded)
-            #expect(book.viewName == "Book")
+            #expect(folded.isFolded)
+            #expect(folded.viewName == "Partially Open")
 
-            // Book bends the flat frame, so it uses the same frame, offset and mask.
-            #expect(book.deviceFrame == flat.deviceFrame)
-            #expect(book.offSet == flat.offSet)
-            #expect(book.screenMask?.width == flat.screenMask?.width)
-            #expect(book.withColor("Night Sky").deviceFrame == flat.withColor("Night Sky").deviceFrame)
+            // Partially Open bends the flat frame, so it uses the same frame, offset and mask.
+            #expect(folded.deviceFrame == flat.deviceFrame)
+            #expect(folded.offSet == flat.offSet)
+            #expect(folded.screenMask?.width == flat.screenMask?.width)
+            #expect(folded.withColor("Night Sky").deviceFrame == flat.withColor("Night Sky").deviceFrame)
         }
     }
 

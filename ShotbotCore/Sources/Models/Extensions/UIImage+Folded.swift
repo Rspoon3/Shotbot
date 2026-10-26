@@ -1,5 +1,5 @@
 //
-//  UIImage+BookFold.swift
+//  UIImage+Folded.swift
 //  Shotbot
 //
 //  Created by Richard Witherspoon on 10/26/26.
@@ -19,7 +19,7 @@ public extension UIImage {
     ///
     /// - Parameter openingAngle: The angle between the two sides in degrees, from 90 (most closed) to 180 (flat).
     /// - Returns: The folded image on a transparent background, larger than the original to make room for the shadow.
-    func bookFolded(openingAngle: Double) -> UIImage? {
+    func folded(openingAngle: Double) -> UIImage? {
         guard let source = CIImage(image: self) else { return nil }
 
         let isLandscape = size.width >= size.height

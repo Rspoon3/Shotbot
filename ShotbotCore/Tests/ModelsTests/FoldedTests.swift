@@ -1,5 +1,5 @@
 //
-//  BookFoldTests.swift
+//  FoldedTests.swift
 //  Shotbot
 //
 //  Created by Richard Witherspoon on 10/26/26.
@@ -9,11 +9,11 @@ import Testing
 import UIKit
 import Models
 
-struct BookFoldTests {
+struct FoldedTests {
     @Test("Folding at 180 degrees leaves the image flat, on a larger canvas with room for the shadow")
     func flatFoldKeepsTheImage() throws {
         let image = solidImage(size: CGSize(width: 2000, height: 1500))
-        let folded = try #require(image.bookFolded(openingAngle: 180))
+        let folded = try #require(image.folded(openingAngle: 180))
 
         #expect(folded.size.width > image.size.width)
         #expect(folded.size.height > image.size.height)
@@ -34,7 +34,7 @@ struct BookFoldTests {
             UIColor.white.setFill()
             UIBezierPath(roundedRect: CGRect(origin: .zero, size: size), cornerRadius: 200).fill()
         }
-        let folded = try #require(rounded.bookFolded(openingAngle: 120))
+        let folded = try #require(rounded.folded(openingAngle: 120))
 
         for corner in [CGPoint(x: 0, y: 0), CGPoint(x: folded.size.width - 1, y: 0), CGPoint(x: 0, y: folded.size.height - 1)] {
             #expect(try #require(rgba(of: folded, at: corner)).alpha == 0)
@@ -44,7 +44,7 @@ struct BookFoldTests {
     @Test("There is no see-through line where the two halves meet", arguments: [90.0, 120.0, 145.0])
     func creaseHasNoSeam(angle: Double) throws {
         for size in [CGSize(width: 2000, height: 1500), CGSize(width: 1500, height: 2000)] {
-            let folded = try #require(solidImage(size: size).bookFolded(openingAngle: angle))
+            let folded = try #require(solidImage(size: size).folded(openingAngle: angle))
             let isLandscape = size.width > size.height
 
             // Walk across the crease, near the middle of the screen where nothing else is.
@@ -60,7 +60,7 @@ struct BookFoldTests {
 
     @Test("A landscape image folds around a vertical crease, and the right half is darker than the left")
     func landscapeShadesTheRightHalf() throws {
-        let folded = try #require(solidImage(size: CGSize(width: 2000, height: 1500)).bookFolded(openingAngle: 120))
+        let folded = try #require(solidImage(size: CGSize(width: 2000, height: 1500)).folded(openingAngle: 120))
         let middleY = folded.size.height / 2
         let left = try #require(rgba(of: folded, at: CGPoint(x: folded.size.width * 0.35, y: middleY)))
         let right = try #require(rgba(of: folded, at: CGPoint(x: folded.size.width * 0.65, y: middleY)))
@@ -73,7 +73,7 @@ struct BookFoldTests {
 
     @Test("A portrait image folds around a horizontal crease, and the top half is darker than the bottom")
     func portraitShadesTheTopHalf() throws {
-        let folded = try #require(solidImage(size: CGSize(width: 1500, height: 2000)).bookFolded(openingAngle: 120))
+        let folded = try #require(solidImage(size: CGSize(width: 1500, height: 2000)).folded(openingAngle: 120))
         let middleX = folded.size.width / 2
         let top = try #require(rgba(of: folded, at: CGPoint(x: middleX, y: folded.size.height * 0.35)))
         let bottom = try #require(rgba(of: folded, at: CGPoint(x: middleX, y: folded.size.height * 0.65)))
@@ -88,7 +88,7 @@ struct BookFoldTests {
         let image = solidImage(size: CGSize(width: 2000, height: 1500))
 
         func rightHalfBrightness(_ angle: Double) throws -> UInt8 {
-            let folded = try #require(image.bookFolded(openingAngle: angle))
+            let folded = try #require(image.folded(openingAngle: angle))
             return try #require(rgba(of: folded, at: CGPoint(x: folded.size.width * 0.65, y: folded.size.height / 2))).red
         }
 

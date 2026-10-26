@@ -12,6 +12,8 @@ public struct ImageResults {
     var originalScreenshots: [UIScreenshot] = []
     /// The device each original screenshot was framed with, in the same order, so re-framing never asks again.
     var devices: [DeviceInfo] = []
+    /// What was picked for each screenshot on its own, in the same order. An empty entry follows the choice for all.
+    var overrides: [StyleOverride] = []
     var individual: [ShareableImage] = []
     var combined: ShareableImage?
     
@@ -26,6 +28,7 @@ public struct ImageResults {
     mutating func removeAll() {
         originalScreenshots.removeAll()
         devices.removeAll()
+        overrides.removeAll()
         individual.removeAll()
         combined = nil
     }
@@ -33,6 +36,7 @@ public struct ImageResults {
     mutating func reverseImages() {
         originalScreenshots.reverse()
         devices.reverse()
+        overrides.reverse()
         individual.reverse()
     }
 }

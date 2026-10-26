@@ -32,6 +32,9 @@ public struct DeviceStyleOption: Identifiable, Equatable, Sendable {
     /// The screens that have more than one view.
     public let screens: [Screen]
 
+    /// Whether this is a choice for one screenshot that differs from the choice for all of them.
+    public var isCustomized = false
+
     public var id: String { deviceName }
 
     /// Whether there is more than one color to choose from.

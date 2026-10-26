@@ -74,6 +74,20 @@ screen. It does not count as a new framed screenshot and does not auto save agai
 Devices that share a name share a saved color. The iPhone Duo's inner and outer screens are one device, so one choice
 covers both.
 
+### Choosing for one screenshot
+
+The toolbar menu sets the color and view for every screenshot of a device. With several screenshots on the Individual tab,
+long-pressing one also offers a Frame Style menu with its own Color and View choices, so screenshots can be mixed and
+matched, like one iPhone 17 Pro in Silver and another in Cosmic Orange.
+
+A choice made for one screenshot wins over the toolbar's for that screenshot only, and it isn't saved as a default. Each
+screenshot keeps its own choices next to its device, in the same order as the screenshots. Changing the toolbar menu
+afterward re-frames only the screenshots without their own choice for that setting, since a screenshot can have its own color
+but follow the toolbar for its view. "Use Toolbar Choice" clears a screenshot's own choices. Reversing the images moves them
+along with their screenshots, and so does changing the image quality. New screenshots start with none. Every change
+re-frames just the screenshots that changed, rebuilds the combined image, and runs the auto save and auto copy settings on
+what changed.
+
 ## Views
 
 A view is another look of a screen that has its own frame art, which the user switches between. The iPhone Duo's outer

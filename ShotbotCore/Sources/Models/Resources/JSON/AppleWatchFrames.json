@@ -1,49 +1,128 @@
 [
     {
-        "deviceFrame": "Watch Ultra 2022",
-        "mergeMethod": "singleOverlayV2",
-        "inputSize": [410, 502],
-        "cornerRadius": 10
+        "name": "Watch Ultra 2022",
+        "offSet": [95, 219],
+        "resolutions": [
+            { "name": "Default", "size": [410, 502] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Ultra 2022" }
+        ]
     },
     {
-        "deviceFrame": "Watch Series 10 46 Jet Black",
-        "mergeMethod": "singleOverlayV2",
-        "inputSize": [416, 496],
-        "cornerRadius": 10
+        "name": "Watch Series 10 46 Jet Black",
+        "offSet": [72, 192],
+        "resolutions": [
+            { "name": "Default", "size": [416, 496] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Series 10 46 Jet Black" }
+        ]
     },
     {
-        "deviceFrame": "Watch Series 10 42 Jet Black",
-        "mergeMethod": "singleOverlayV2",
-        "inputSize": [374, 446],
-        "cornerRadius": 10
+        "name": "Watch Series 10 42 Jet Black",
+        "offSet": [63, 167],
+        "resolutions": [
+            { "name": "Default", "size": [374, 446] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Series 10 42 Jet Black" }
+        ]
     },
     {
-        "deviceFrame": "Watch Series 7 45 Midnight",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [396, 484],
+        "name": "Watch Series 7 45 Midnight",
         "offSet": [72, 188],
+        "resolutions": [
+            { "name": "Default", "size": [396, 484] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Series 7 45 Midnight" }
+        ]
     },
     {
-        "deviceFrame": "Watch Series 7 41",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [352, 430],
+        "name": "Watch Series 7 41",
         "offSet": [64, 165],
+        "resolutions": [
+            { "name": "Default", "size": [352, 430] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Series 7 41" }
+        ]
     },
     {
-        "deviceFrame": "Watch Series 4 44",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [368, 448],
+        "name": "Watch Series 4 44",
         "offSet": [66, 222],
+        "resolutions": [
+            { "name": "Default", "size": [368, 448] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Series 4 44" }
+        ]
     },
     {
-        "deviceFrame": "Watch Series 4 40",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [324, 394],
+        "name": "Watch Series 4 40",
         "offSet": [114, 308],
+        "resolutions": [
+            { "name": "Default", "size": [324, 394] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Series 4 40" }
+        ]
     },
     {
-        "deviceFrame": "Watch Ultra 2025",
-        "mergeMethod": "singleOverlayV2",
-        "inputSize": [422, 514]
+        "name": "Watch Ultra 2025",
+        "offSet": [89, 223],
+        "resolutions": [
+            { "name": "Default", "size": [422, 514] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Ultra 2025" }
+        ]
+    },
+    {
+        "name": "Watch Series 11 42",
+        "offSet": [73, 177],
+        "resolutions": [
+            { "name": "Default", "size": [374, 446] }
+        ],
+        "colorOffsets": { "Titanium Natural + Magnetic Link Caramel": [72, 177] },
+        "colors": ["Aluminum Jet Black + Sport Band Black", "Aluminum Jet Black + Sport Loop Dark Gray", "Aluminum Rose Gold + Sport Band Light Blush", "Aluminum Rose Gold + Sport Loop Purple Fog", "Aluminum Silver + Sport Band Neon Yellow", "Aluminum Silver + Sport Band Purple Fog", "Aluminum Silver + Sport Loop Forest", "Aluminum Silver + Sport Loop Neon Yellow", "Aluminum Space Gray + Sport Band Anchor Blue", "Aluminum Space Gray + Sport Band Black", "Aluminum Space Gray + Sport Loop Anchor Blue", "Aluminum Space Gray + Sport Loop Forest", "Titanium Gold + Magnetic Link Sage Gray", "Titanium Gold + Milanese Loop", "Titanium Gold + Sport Band Light Blush", "Titanium Gold + Sport Band Purple Fog", "Titanium Natural + Magnetic Link Caramel", "Titanium Natural + Milanese Loop", "Titanium Natural + Sport Band Stone Gray", "Titanium Slate + Magnetic Link Navy", "Titanium Slate + Milanese Loop", "Titanium Slate + Sport Band Black"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Series 11 42 - {color}" }
+        ]
+    },
+    {
+        "name": "Watch Series 11 46",
+        "offSet": [72, 192],
+        "resolutions": [
+            { "name": "Default", "size": [416, 496] }
+        ],
+        "colorOffsets": { "Aluminum Rose Gold + Sport Band Light Blush": [71, 192], "Titanium Natural + Sport Band Stone Gray": [71, 192] },
+        "colors": ["Aluminum Jet Black + Sport Band Black", "Aluminum Jet Black + Sport Loop Dark Gray", "Aluminum Rose Gold + Sport Band Light Blush", "Aluminum Rose Gold + Sport Loop Purple Fog", "Aluminum Silver + Sport Band Neon Yellow", "Aluminum Silver + Sport Band Purple Fog", "Aluminum Silver + Sport Loop Forest", "Aluminum Silver + Sport Loop Neon Yellow", "Aluminum Space Gray + Sport Band Anchor Blue", "Aluminum Space Gray + Sport Band Black", "Aluminum Space Gray + Sport Loop Anchor Blue", "Aluminum Space Gray + Sport Loop Forest", "Titanium Gold + Magnetic Link Sage Gray", "Titanium Gold + Milanese Loop", "Titanium Gold + Sport Band Light Blush", "Titanium Gold + Sport Band Purple Fog", "Titanium Natural + Magnetic Link Caramel", "Titanium Natural + Milanese Loop", "Titanium Natural + Sport Band Stone Gray", "Titanium Slate + Magnetic Link Navy", "Titanium Slate + Milanese Loop", "Titanium Slate + Sport Band Black"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Series 11 46 - {color}" }
+        ]
+    },
+    {
+        "name": "Watch Ultra 2024",
+        "offSet": [95, 219],
+        "resolutions": [
+            { "name": "Default", "size": [410, 502] }
+        ],
+        "colors": ["Black + Alpine Loop Dark Green", "Black + Alpine Loop Navy", "Black + Alpine Loop Tan", "Black + Ocean Band Black", "Black + Ocean Band Ice Blue", "Black + Ocean Band Navy", "Black + Titanium Milanese Loop", "Black + Trail Loop Black", "Black + Trail Loop Blue", "Black + Trail Loop Green", "Blue Alpine Loop", "Natural + Alpine Loop Dark Green", "Natural + Alpine Loop Navy", "Natural + Alpine Loop Tan", "Natural + Ocean Band Black", "Natural + Ocean Band Ice Blue", "Natural + Ocean Band Navy", "Natural + Titanium Milanese Loop", "Natural + Trail Loop Black", "Natural + Trail Loop Blue", "Orange Beige Trail Loop", "Orange Ocean Band"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Ultra 2024 - {color}" }
+        ]
+    },
+    {
+        "name": "Watch Ultra 3",
+        "offSet": [89, 223],
+        "resolutions": [
+            { "name": "Default", "size": [422, 514] }
+        ],
+        "colors": ["Black + Alpine Loop Black", "Black + Alpine Loop Light Blue", "Black + Milanese Loop", "Black + Ocean Band Anchor Blue", "Black + Ocean Band Black", "Black + Trail Loop Black Charcoal", "Natural + Alpine Loop Light Blue", "Natural + Alpine Loop Terra Cotta", "Natural + Milanese Loop", "Natural + Ocean Band Anchor Blue", "Natural + Ocean Band Neon Green", "Natural + Trail Loop Blue Bright Blue", "Natural + Trail Loop Green Neon"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Ultra 3 - {color}" }
+        ]
     }
 ]

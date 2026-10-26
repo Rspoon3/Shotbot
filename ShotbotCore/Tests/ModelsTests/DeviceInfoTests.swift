@@ -9,27 +9,28 @@ import XCTest
 import Models
 
 final class DeviceInfoTests: XCTestCase {
-    func testAllDeviceInputSizesAreUnique() {
-        let inputSizes = DeviceInfo.all().map(\.inputSize)
-        let set = Set(inputSizes)
-        XCTAssertEqual(inputSizes.count, set.count)
+    func testNoDeviceListsTheSameFrameAndSizeTwice() {
+        let grouped = Dictionary(grouping: DeviceInfo.all(), by: \.inputSize)
+
+        // Different devices may share a screenshot size, such as the iPhone 16 Pro and 17 Pro. The user picks one.
+        for (size, devices) in grouped {
+            XCTAssertEqual(
+                Set(devices.map(\.deviceFrame)).count,
+                devices.count,
+                "\(size) is listed more than once for \(devices.map(\.deviceFrame))"
+            )
+        }
     }
 
     func testNumberOfDevices() {
-        XCTAssertEqual(DeviceInfo.all().count, 47)
+        XCTAssertEqual(DeviceInfo.all().count, 108)
     }
 
     func testAllDeviceFramesHaveAnAsset() {
         for device in DeviceInfo.all() {
-            let image = UIImage(named: device.deviceFrame, in: .models, compatibleWith: nil)
-
-            XCTAssertNotNil(image)
-
-            if device.mergeMethod == .islandOverlay {
-                let title = "\(device.deviceFrame) Without Island"
-                let islandImage = UIImage(named: title, in: .models, compatibleWith: nil)
-
-                XCTAssertNotNil(islandImage)
+            // Every color of every device needs its own frame.
+            for variant in device.hasColorOptions ? device.colors.map(device.withColor) : [device] {
+                XCTAssertNotNil(variant.frameImage, variant.deviceFrame)
             }
         }
     }

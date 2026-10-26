@@ -1,40 +1,159 @@
 [
     {
-        "deviceFrame": "MacBook Pro 2021 16",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [3456, 2234],
+        "name": "MacBook Pro 2021 16",
         "offSet": [442, 313],
+        "resolutions": [
+            { "name": "Default", "size": [3456, 2234] }
+        ],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Pro 2021 16" }
+        ]
     },
     {
-        "deviceFrame": "MacBook Pro 2021 14",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [3024, 1964],
+        "name": "MacBook Pro 2021 14",
         "offSet": [460, 300],
+        "resolutions": [
+            { "name": "Default", "size": [3024, 1964] }
+        ],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Pro 2021 14" }
+        ]
     },
     {
-        "deviceFrame": "MacBook Pro 13",
-        "mergeMethod": "singleOverlay",
-        "inputSize": [2560, 1600],
+        "name": "MacBook Pro 13",
         "offSet": [620, 261],
+        "resolutions": [
+            { "name": "Default", "size": [2560, 1600] }
+        ],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Pro 13" }
+        ]
     },
     {
-        "deviceFrame": "MacBook Air 2020",
-        "mergeMethod": "singleOverlay",
-        "inputSize": [2880, 1800],
-        "scaledSize": [2560, 1600],
+        "name": "MacBook Air 2020",
+        "screenSize": [2560, 1600],
         "offSet": [620, 652],
+        "resolutions": [
+            { "name": "Default", "size": [2880, 1800] },
+            { "name": "More Space", "size": [3360, 2100] }
+        ],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Air 2020" }
+        ]
     },
     {
-        "deviceFrame": "MacBook Air 2022 13",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [2940, 1912],
-        "scaledSize": [2560, 1664],
+        "name": "MacBook Air 2022 13",
+        "screenSize": [2560, 1664],
         "offSet": [330, 218],
+        "resolutions": [
+            { "name": "Default", "size": [2940, 1912] }
+        ],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Air 2022 13" }
+        ]
     },
     {
-        "deviceFrame": "iMac 2021 24",
-        "mergeMethod": "singleOverlay",
-        "inputSize": [4480, 2520],
+        "name": "iMac 2021 24",
         "offSet": [141, 161],
+        "resolutions": [
+            { "name": "Default", "size": [4480, 2520] }
+        ],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "iMac 2021 24" }
+        ]
+    },
+    {
+        "name": "MacBook Air M5 15",
+        "offSet": [329, 218],
+        "resolutions": [
+            { "name": "Default", "size": [2880, 1864] }
+        ],
+        "colors": ["Starlight", "Midnight", "Silver", "Sky Blue"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Air M5 15 - {color}" }
+        ]
+    },
+    {
+        "name": "MacBook Neo",
+        "screenSize": [2408, 1506],
+        "offSet": [406, 297],
+        "resolutions": [
+            { "name": "Default", "size": [2816, 1762] }
+        ],
+        "colors": ["Silver", "Blush", "Citrus", "Indigo"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Neo - {color}" }
+        ]
+    },
+    {
+        "name": "Studio Display",
+        "offSet": [140, 140],
+        "resolutions": [
+            { "name": "Default", "size": [5120, 2880] }
+        ],
+        "colors": ["Light", "Dark"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "Studio Display - {color}" }
+        ]
+    },
+    {
+        "name": "MacBook Air M5 13",
+        "screenSize": [2560, 1664],
+        "offSet": [420, 288],
+        "resolutions": [
+            { "name": "Default", "size": [2940, 1912] },
+            { "name": "More Space", "size": [3420, 2223] }
+        ],
+        "colors": ["Starlight", "Midnight", "Silver", "Sky Blue"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Air M5 13 - {color}" }
+        ]
+    },
+    {
+        "name": "MacBook Pro M5 14",
+        "offSet": [418, 288],
+        "resolutions": [
+            { "name": "Default", "size": [3024, 1964] },
+            { "name": "More Space", "size": [3600, 2338] }
+        ],
+        "colors": ["Silver", "Space Black"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Pro M5 14 - {color}" }
+        ]
+    },
+    {
+        "name": "MacBook Pro M5 16",
+        "offSet": [402, 303],
+        "resolutions": [
+            { "name": "Default", "size": [3456, 2234] },
+            { "name": "More Space", "size": [4112, 2658] }
+        ],
+        "colors": ["Silver", "Space Black"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Pro M5 16 - {color}" }
+        ]
+    },
+    {
+        "name": "iMac M4",
+        "offSet": [140, 150],
+        "resolutions": [
+            { "name": "Default", "size": [4480, 2520] }
+        ],
+        "colorOffsets": { "Orange": [142, 150] },
+        "colors": ["Blue", "Green", "Pink", "Silver", "Yellow", "Orange", "Purple"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "iMac M4 - {color}" }
+        ]
+    },
+    {
+        "name": "Studio Display XDR",
+        "offSet": [140, 140],
+        "resolutions": [
+            { "name": "Default", "size": [5120, 2880] }
+        ],
+        "colors": ["Light", "Dark"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "Studio Display XDR - {color}" }
+        ]
     }
 ]

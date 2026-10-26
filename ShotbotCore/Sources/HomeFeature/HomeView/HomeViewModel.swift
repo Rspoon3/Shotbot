@@ -726,7 +726,7 @@ import SwiftTools
     /// Saves a frame view as the default for a screen, then re-frames the current screenshots with it.
     ///
     /// A view is another look of a screen, such as the iPhone Duo's outer screen open instead of closed or its inner
-    /// screen folded like a book.
+    /// screen partially open.
     /// - Parameter viewKey: `DeviceInfo.viewPreferenceKey` of the screen.
     public func didSelectView(_ view: String, forViewKey viewKey: String) async {
         guard imageResults.devices.contains(where: { $0.viewPreferenceKey == viewKey && $0.hasViewOptions && $0.viewName != view }) else { return }

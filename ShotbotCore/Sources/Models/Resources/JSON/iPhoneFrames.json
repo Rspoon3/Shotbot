@@ -165,7 +165,7 @@
                     { "orientation": "Landscape", "frame": "iPhone Duo - {color} - Inner Open Landscape" }
                 ],
                 "alternateViews": [
-                    { "name": "Partially Open", "fold": { "angle": 145 } }
+                    { "name": "Partially Open", "partiallyOpen": { "angle": 145 } }
                 ]
             },
             {

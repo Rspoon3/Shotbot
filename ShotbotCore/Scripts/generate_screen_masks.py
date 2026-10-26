@@ -173,7 +173,7 @@ def collect_frames(device):
 
         # Alternate views, like the Duo's outer screen open, have their own frames in the orientations they have art for.
         for alternate in display.get("alternateViews") or []:
-            # A fold bends the display's own frames, so it needs no mask of its own.
+            # A partially open view bends the display's own frames, so it needs no mask of its own.
             for index, orientation in enumerate(alternate.get("orientations") or []):
                 offset = alternate["offSet"][::-1] if index > 0 else alternate["offSet"]
                 add(orientation["frame"], screens[orientation["orientation"]], orientation.get("offSet") or offset, None, index)

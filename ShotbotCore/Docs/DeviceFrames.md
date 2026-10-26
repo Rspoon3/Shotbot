@@ -99,7 +99,7 @@ screen's "Open" and the outer screen's "Open" are different views. Apple only dr
 outer screenshot has no view to pick. Every view needs its own screen mask, which the generator makes. A view uses the
 device's colors, and the choice is saved per device like the color.
 
-### Folded views
+### Partially open views
 
 A view can also bend the display's own frame instead of using other art. The iPhone Duo's inner screen has a "Partially Open"
 view, which draws the phone opened part of the way, like a book (landscape) or a laptop (portrait):
@@ -107,13 +107,13 @@ view, which draws the phone opened part of the way, like a book (landscape) or a
 ```json
 "viewName": "Open",
 "alternateViews": [
-    { "name": "Partially Open", "fold": { "angle": 145 } }
+    { "name": "Partially Open", "partiallyOpen": { "angle": 145 } }
 ]
 ```
 
-`angle` is the angle between the two sides in degrees, from 90 (most closed) to 180 (flat). A fold needs no frames, offset
+`angle` is the angle between the two sides in degrees, from 90 (most closed) to 180 (flat). A partially open view needs no frames, offset
 or mask of its own. It uses the display's own, so it exists in every orientation. The image is framed flat first, then
-`UIImage.folded(openingAngle:)` bends it as one continuous surface. Away from the crease each side is a flat panel tilted
+`UIImage.partiallyOpened(openingAngle:)` bends it as one continuous surface. Away from the crease each side is a flat panel tilted
 back with a perspective transform. Near the crease the surface curves smoothly from one tilt to the other, so there is no hard
 edge, and it is cut into thin strips so the curve and the shading change gradually. The brightness follows the surface's
 slope, darker toward the right or top side. A soft shadow is added, and the result is on a transparent canvas that is larger

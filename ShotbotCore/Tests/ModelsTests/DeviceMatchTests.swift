@@ -210,23 +210,23 @@ struct DeviceMatchTests {
         }
     }
 
-    @Test("The iPhone Duo's inner screen can be folded in both orientations")
-    func duoInnerScreenHasAFoldedView() throws {
+    @Test("The iPhone Duo's inner screen can be partially open in both orientations")
+    func duoInnerScreenHasAPartiallyOpenView() throws {
         for orientation in [DeviceOrientation.portrait, .landscape] {
             let flat = try #require(DeviceInfo.all().first {
                 $0.name == "iPhone Duo" && $0.screenName == "Inner" && $0.orientation == orientation
             })
-            let folded = flat.withView("Partially Open")
+            let partiallyOpen = flat.withView("Partially Open")
 
-            #expect(!flat.isFolded)
-            #expect(folded.isFolded)
-            #expect(folded.viewName == "Partially Open")
+            #expect(!flat.isPartiallyOpen)
+            #expect(partiallyOpen.isPartiallyOpen)
+            #expect(partiallyOpen.viewName == "Partially Open")
 
             // Partially Open bends the flat frame, so it uses the same frame, offset and mask.
-            #expect(folded.deviceFrame == flat.deviceFrame)
-            #expect(folded.offSet == flat.offSet)
-            #expect(folded.screenMask?.width == flat.screenMask?.width)
-            #expect(folded.withColor("Night Sky").deviceFrame == flat.withColor("Night Sky").deviceFrame)
+            #expect(partiallyOpen.deviceFrame == flat.deviceFrame)
+            #expect(partiallyOpen.offSet == flat.offSet)
+            #expect(partiallyOpen.screenMask?.width == flat.screenMask?.width)
+            #expect(partiallyOpen.withColor("Night Sky").deviceFrame == flat.withColor("Night Sky").deviceFrame)
         }
     }
 

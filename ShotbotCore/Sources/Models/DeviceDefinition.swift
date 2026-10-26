@@ -34,15 +34,15 @@ struct DeviceDefinition: Decodable, Sendable {
         let offSet: CGPoint?
     }
 
-    /// How a flat framed image is folded, for a view that is drawn by bending the display's own frame.
-    struct Fold: Decodable, Sendable {
+    /// How far a view is opened, for a view that is drawn by bending the display's own frame.
+    struct PartiallyOpen: Decodable, Sendable {
         /// The angle between the two halves in degrees, from 90 (most closed) to 180 (flat).
         let angle: Double
     }
 
     /// Another look of a screen, such as the iPhone Duo's outer screen open instead of closed.
     ///
-    /// A view either has its own frame art (`orientations`) or bends the display's own frames (`fold`).
+    /// A view either has its own frame art (`orientations`) or bends the display's own frames (`partiallyOpen`).
     struct AlternateView: Decodable, Sendable {
         /// The view's name, such as "Open" or "Partially Open".
         let name: String
@@ -51,8 +51,8 @@ struct DeviceDefinition: Decodable, Sendable {
         let offSet: CGPoint?
         /// The view's own frames. A view only has frames for the orientations it has art for.
         let orientations: [Orientation]?
-        /// Fold the display's own frames instead of using other art.
-        let fold: Fold?
+        /// Open the display's own frames part of the way instead of using other art.
+        let partiallyOpen: PartiallyOpen?
     }
 
     /// One screen of a device.

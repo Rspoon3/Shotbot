@@ -24,8 +24,8 @@ public struct DeviceInfo: Sendable {
         let colorOffsets: [String: CGPoint]
         /// The asset name the screen mask is stored under, which is always the default color's frame.
         let maskName: String
-        /// The angle to fold the framed screenshot to, for a view that bends the display's own frame. `nil` for flat.
-        let foldAngle: Double?
+        /// The angle to open the framed screenshot to, for a view that bends the display's own frame. `nil` for flat.
+        let openingAngle: Double?
     }
 
     /// The display name of the device model, such as "iPhone 16 Pro".
@@ -175,15 +175,15 @@ public struct DeviceInfo: Sendable {
 
         let flat = frameImage.overlaying(screen, at: offSet, clippedTo: screenMask)
 
-        guard let foldAngle = viewFrame.foldAngle else { return flat }
+        guard let openingAngle = viewFrame.openingAngle else { return flat }
 
-        return flat.folded(openingAngle: foldAngle)
+        return flat.partiallyOpened(openingAngle: openingAngle)
     }
 
-    /// Whether the selected view bends the frame, like the iPhone Duo's folded view. A folded image is larger than the
+    /// Whether the selected view bends the frame, like the iPhone Duo's Partially Open view. A partially open image is larger than the
     /// frame, to make room for its shadow.
-    public var isFolded: Bool {
-        viewFrame.foldAngle != nil
+    public var isPartiallyOpen: Bool {
+        viewFrame.openingAngle != nil
     }
 
     // MARK: - Data
@@ -249,20 +249,20 @@ public struct DeviceInfo: Sendable {
                         offSet: offSet,
                         colorOffsets: colorOffsets,
                         maskName: resolve(orientation.frame, color: colors.first),
-                        foldAngle: nil
+                        openingAngle: nil
                     )
                 ]
                 var views = [String]()
 
                 for alternate in display.alternateViews ?? [] {
-                    if let fold = alternate.fold {
-                        // A fold bends the display's own frame, so it exists in every orientation.
+                    if let partiallyOpen = alternate.partiallyOpen {
+                        // A partially open view bends the display's own frame, so it exists in every orientation.
                         viewFrames[alternate.name] = ViewFrame(
                             frameTemplate: orientation.frame,
                             offSet: offSet,
                             colorOffsets: colorOffsets,
                             maskName: resolve(orientation.frame, color: colors.first),
-                            foldAngle: fold.angle
+                            openingAngle: partiallyOpen.angle
                         )
                         views.append(alternate.name)
                     } else if
@@ -276,7 +276,7 @@ public struct DeviceInfo: Sendable {
                             offSet: alternateOffSet,
                             colorOffsets: [:],
                             maskName: resolve(alternateFrame.frame, color: colors.first),
-                            foldAngle: nil
+                            openingAngle: nil
                         )
                         views.append(alternate.name)
                     }

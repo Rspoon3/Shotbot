@@ -1,5 +1,5 @@
 //
-//  UIImage+Folded.swift
+//  UIImage+PartiallyOpen.swift
 //  Shotbot
 //
 //  Created by Richard Witherspoon on 10/26/26.
@@ -9,22 +9,22 @@ import CoreImage
 import UIKit
 
 public extension UIImage {
-    /// Folds a flat image of an unfolded device around its center crease, like a book opened part of the way.
+    /// Opens a flat image of an unfolded device part of the way around its center crease, like a book.
     ///
     /// The image is bent as one continuous surface. Away from the crease each side is a flat panel tilted back so its
     /// outer edge comes toward the viewer. Near the crease the surface curves smoothly from one tilt to the other, so
     /// there is no hard edge where the sides meet. The brightness follows the slope of the surface, darker toward the
     /// right (or top) side, and changes gradually across the bend. A soft shadow falls beneath the result. Landscape
-    /// images fold around a vertical crease and portrait images around a horizontal one.
+    /// images bend around a vertical crease and portrait images around a horizontal one.
     ///
     /// - Parameter openingAngle: The angle between the two sides in degrees, from 90 (most closed) to 180 (flat).
-    /// - Returns: The folded image on a transparent background, larger than the original to make room for the shadow.
-    func folded(openingAngle: Double) -> UIImage? {
+    /// - Returns: The partially open image on a transparent background, larger than the original to make room for the shadow.
+    func partiallyOpened(openingAngle: Double) -> UIImage? {
         guard let source = CIImage(image: self) else { return nil }
 
         let isLandscape = size.width >= size.height
 
-        // The fold math works on a vertical crease, so a portrait image is turned a quarter turn first.
+        // The bending math works on a vertical crease, so a portrait image is turned a quarter turn first.
         let flat = isLandscape ? source : Self.normalized(source.oriented(.right))
         let width = flat.extent.width
         let height = flat.extent.height
@@ -120,22 +120,22 @@ public extension UIImage {
             end > start ? piece(from: start, to: end) : nil
         }
 
-        guard var folded = pieces.first else { return nil }
+        guard var opened = pieces.first else { return nil }
 
         // Left to right, so each piece covers the overlap of the one before it.
         for next in pieces.dropFirst() {
-            folded = next.composited(over: folded)
+            opened = next.composited(over: opened)
         }
 
         if !isLandscape {
-            folded = Self.normalized(folded.oriented(.left))
+            opened = Self.normalized(opened.oriented(.left))
         }
 
-        // A soft shadow below the folded device, on a canvas with room for it. Pad with transparent pixels instead of
+        // A soft shadow below the partially open device, on a canvas with room for it. Pad with transparent pixels instead of
         // repeating the edge pixels, which would smear the shadow outward from wherever the device touches the edge.
-        let canvas = folded.extent.insetBy(dx: -folded.extent.width * 0.08, dy: -folded.extent.height * 0.08)
+        let canvas = opened.extent.insetBy(dx: -opened.extent.width * 0.08, dy: -opened.extent.height * 0.08)
         let transparent = CIImage(color: .clear).cropped(to: canvas)
-        let shadow = folded
+        let shadow = opened
             .composited(over: transparent)
             .applyingFilter("CIColorMatrix", parameters: [
                 "inputRVector": CIVector(x: 0, y: 0, z: 0, w: 0),
@@ -143,11 +143,11 @@ public extension UIImage {
                 "inputBVector": CIVector(x: 0, y: 0, z: 0, w: 0),
                 "inputAVector": CIVector(x: 0, y: 0, z: 0, w: 0.35)
             ])
-            .applyingGaussianBlur(sigma: folded.extent.width * 0.012)
-            .transformed(by: CGAffineTransform(translationX: 0, y: -folded.extent.height * 0.016))
+            .applyingGaussianBlur(sigma: opened.extent.width * 0.012)
+            .transformed(by: CGAffineTransform(translationX: 0, y: -opened.extent.height * 0.016))
             .cropped(to: canvas)
 
-        let result = folded.composited(over: shadow)
+        let result = opened.composited(over: shadow)
 
         guard let cgImage = CIContext().createCGImage(result, from: canvas) else { return nil }
 

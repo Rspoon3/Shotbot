@@ -156,8 +156,14 @@ public struct HomeView: View {
                 PurchaseView()
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Dismiss") {
-                                viewModel.showPurchaseView = false
+                            if #available(iOS 26.0, *) {
+                                Button(role: .close) {
+                                    viewModel.showPurchaseView = false
+                                }
+                            } else {
+                                Button("Dismiss") {
+                                    viewModel.showPurchaseView = false
+                                }
                             }
                         }
                     }

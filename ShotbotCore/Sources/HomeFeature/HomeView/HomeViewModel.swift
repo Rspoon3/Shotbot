@@ -57,8 +57,8 @@ import SwiftTools
             isLoading = false
         }
     }
-    /// The devices in the current screenshots that have more than one frame color, for the color picker.
-    @Published public private(set) var colorOptions: [DeviceColorOption] = []
+    /// The devices in the current screenshots whose frame comes in more than one color or view, for the toolbar menu.
+    @Published public private(set) var styleOptions: [DeviceStyleOption] = []
     @Published public var showDeviceDisambiguation = false
     @Published public var ambiguousDeviceOptions: [DeviceInfo] = []
     @Published public var disambiguationScreenshot: UIImage?
@@ -220,7 +220,7 @@ import SwiftTools
         logger.debug("Setting imageResults.individual with \(shareableImages.count, privacy: .public) items.")
         imageResults.individual = shareableImages
         imageResults.devices = devices
-        refreshColorOptions()
+        refreshStyleOptions()
         showGridView = persistenceManager.defaultHomeView == .grid && imageResults.hasMultipleImages
     }
     
@@ -425,7 +425,7 @@ import SwiftTools
             throw SBError.unsupportedImage
         }
         
-        let device = persistenceManager.applyingPreferredColor(to: resolved)
+        let device = persistenceManager.applyingPreferredStyle(to: resolved)
         
         return (try makeShareableImage(from: screenshot, device: device, count: count), device)
     }
@@ -450,14 +450,29 @@ import SwiftTools
         )
     }
     
-    /// Rebuilds `colorOptions` from the devices in the current screenshots.
-    private func refreshColorOptions() {
-        var seen = Set<String>()
+    /// Rebuilds `styleOptions` from the devices in the current screenshots.
+    private func refreshStyleOptions() {
+        var names = [String]()
+        var groups = [String: [DeviceInfo]]()
         
-        colorOptions = imageResults.devices.compactMap { device in
-            guard device.hasColorOptions, let color = device.colorName, seen.insert(device.name).inserted else { return nil }
+        for device in imageResults.devices where device.hasColorOptions || device.hasViewOptions {
+            if groups[device.name] == nil { names.append(device.name) }
+            groups[device.name, default: []].append(device)
+        }
+        
+        // A device with several screens, like the iPhone Duo, is one option. Its views belong to whichever screen has them.
+        styleOptions = names.compactMap { name in
+            guard let group = groups[name] else { return nil }
+            let colored = group.first(where: \.hasColorOptions)
+            let viewed = group.first(where: \.hasViewOptions)
             
-            return DeviceColorOption(deviceName: device.name, colors: device.colors, selectedColor: color)
+            return DeviceStyleOption(
+                deviceName: name,
+                colors: colored?.colors ?? [],
+                selectedColor: colored?.colorName,
+                views: viewed?.views ?? [],
+                selectedView: viewed?.viewName
+            )
         }
     }
     
@@ -566,7 +581,7 @@ import SwiftTools
         
         stopCombinedImageTask()
         imageResults.removeAll()
-        colorOptions = []
+        styleOptions = []
         imageSelections.removeAll()
         viewState = .individualPlaceholder
         imageType = .individual
@@ -689,6 +704,24 @@ import SwiftTools
     }
     
     /// Saves a frame color as the default for a device, then re-frames the current screenshots with it.
+    public func didSelectColor(_ color: String, forDeviceNamed deviceName: String) async {
+        guard imageResults.devices.contains(where: { $0.name == deviceName && $0.hasColorOptions && $0.colorName != color }) else { return }
+        
+        persistenceManager.setPreferredColor(color, for: deviceName)
+        await reframe(deviceNamed: deviceName) { $0.withColor(color) }
+    }
+    
+    /// Saves a frame view as the default for a device, then re-frames the current screenshots with it.
+    ///
+    /// A view is another look with its own frame art, such as the iPhone Duo's outer screen open instead of closed.
+    public func didSelectView(_ view: String, forDeviceNamed deviceName: String) async {
+        guard imageResults.devices.contains(where: { $0.name == deviceName && $0.hasViewOptions && $0.viewName != view }) else { return }
+        
+        persistenceManager.setPreferredView(view, for: deviceName)
+        await reframe(deviceNamed: deviceName) { $0.withView(view) }
+    }
+    
+    /// Re-frames the current screenshots after a device's frame style changed.
     ///
     /// Rebuilds both the individual and combined images, then runs the auto save and auto copy settings on them.
     /// It reuses the devices already chosen for each screenshot, so it never asks which device to use again, and it
@@ -696,19 +729,16 @@ import SwiftTools
     ///
     /// The current images stay on screen under the loading spinner and are replaced once, like when the image quality
     /// changes or the combined images are reversed.
-    public func didSelectColor(_ color: String, forDeviceNamed deviceName: String) async {
-        guard imageResults.devices.contains(where: { $0.name == deviceName && $0.colorName != color }) else { return }
+    private func reframe(deviceNamed deviceName: String, applying change: (DeviceInfo) -> DeviceInfo) async {
+        logger.info("Re-framing screenshots with a new frame style for \(deviceName, privacy: .public).")
         
-        logger.info("Re-framing screenshots with a new color for \(deviceName, privacy: .public).")
-        
-        persistenceManager.setPreferredColor(color, for: deviceName)
         isLoading = true
         defer { isLoading = false }
         
         stopCombinedImageTask()
         
         let previousURLs = imageResults.individual.map(\.url) + [imageResults.combined?.url].compactMap { $0 }
-        imageResults.devices = imageResults.devices.map { $0.name == deviceName ? $0.withColor(color) : $0 }
+        imageResults.devices = imageResults.devices.map { $0.name == deviceName ? change($0) : $0 }
         
         do {
             var shareableImages = [ShareableImage]()
@@ -720,7 +750,7 @@ import SwiftTools
             // `viewState` still holds the previous images, so they stay visible until the new ones replace them.
             imageResults.individual = shareableImages
             imageResults.combined = nil
-            refreshColorOptions()
+            refreshStyleOptions()
             
             switch imageType {
             case .individual:

@@ -122,7 +122,7 @@ public struct CreateFramedScreenshotsIntent: AppIntent {
             throw SBError.unsupportedDevice
         }
 
-        let coloredDevice = await PersistenceManager.shared.applyingPreferredColor(to: device)
+        let coloredDevice = await PersistenceManager.shared.applyingPreferredStyle(to: device)
 
         guard let image = coloredDevice.framed(using: screenshot)?.scaled(to: imageQuality.value) else {
             logger.error("Could not frame image.")

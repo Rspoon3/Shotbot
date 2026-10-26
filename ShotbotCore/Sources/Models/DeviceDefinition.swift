@@ -34,10 +34,22 @@ struct DeviceDefinition: Decodable, Sendable {
         let offSet: CGPoint?
     }
 
+    /// Another look of a screen that has its own frame art, such as the iPhone Duo's outer screen open instead of closed.
+    struct AlternateView: Decodable, Sendable {
+        /// The view's name, such as "Open".
+        let name: String
+        /// Where the screen opening's top-left corner sits in the view's first orientation's frame.
+        let offSet: CGPoint
+        /// The view's frames. A view only has frames for the orientations it has art for.
+        let orientations: [Orientation]
+    }
+
     /// One screen of a device.
     struct Display: Decodable, Sendable {
         /// Which screen this is, such as "Inner" or "Outer". Only devices with several screens name them.
         let name: String?
+        /// What the frames written on this screen show, such as "Closed", when the screen has alternate views.
+        let viewName: String?
         /// The size of the frame's screen opening in pixels, in the first orientation.
         ///
         /// Only needed when screenshots are larger than the screen and get scaled down to fit. For example, a
@@ -50,6 +62,8 @@ struct DeviceDefinition: Decodable, Sendable {
         let resolutions: [Resolution]
         /// The screen's frames. Phones and iPads have portrait and landscape. Watches and Macs have one.
         let orientations: [Orientation]
+        /// Other looks of this screen with their own frame art, which the user can switch between.
+        let alternateViews: [AlternateView]?
     }
 
     /// The device's display name.

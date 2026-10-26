@@ -49,19 +49,28 @@ def load_frame(name):
     return ImageOps.exif_transpose(Image.open(paths[0])).convert("RGBA")
 
 
-def screen_mask(frame):
-    """Returns the full-size screen mask and its bounding box, or None if the frame has no enclosed screen."""
+def screen_mask(frame, seed):
+    """Returns the full-size screen mask and its bounding box, or None if the frame has no enclosed screen.
+
+    The fill starts at `seed`, a point inside the screen opening. It is not always the center of the frame: the
+    iPhone Duo's open outer view draws the back of the phone beside the screen.
+    """
     width, height = frame.size
     alpha = frame.getchannel("A")
-    if alpha.getpixel((width // 2, height // 2)) >= BEZEL_ALPHA:
+    if alpha.getpixel(seed) >= BEZEL_ALPHA:
         return None
     mask = alpha.point(lambda value: 255 if value < BEZEL_ALPHA else 0)
-    ImageDraw.floodfill(mask, (width // 2, height // 2), 128)
+    ImageDraw.floodfill(mask, seed, 128)
     mask = mask.point(lambda value: 255 if value == 128 else 0)
     box = mask.getbbox()
     if box == (0, 0, width, height):
         return None
     return mask, box
+
+
+def seed_for(offset, screen):
+    """A point in the middle of the expected screen opening."""
+    return (int(offset[0] + screen[0] // 2), int(offset[1] + screen[1] // 2))
 
 
 def build_mask(entry):
@@ -74,7 +83,7 @@ def build_mask(entry):
     offset = tuple(entry["offSet"])
     notes = []
 
-    result = screen_mask(load_frame(name))
+    result = screen_mask(load_frame(name), seed_for(offset, screen))
     if result is None:
         return {"name": name, "mask": None, "notes": notes}
 
@@ -94,11 +103,11 @@ def build_mask(entry):
     # leaves open and another's covers is hidden under that bezel, so including it never shows outside the device.
     undeclared = []
     for variant in entry["variants"]:
-        other = screen_mask(load_frame(variant))
+        variant_offset = tuple(entry["variantOffsets"][variant])
+        other = screen_mask(load_frame(variant), seed_for(variant_offset, screen))
         if other is None:
             return {"name": name, "error": "{}: no enclosed screen".format(variant)}
         other_mask, other_box = other
-        variant_offset = tuple(entry["variantOffsets"][variant])
 
         # The shift between this color's screen and the default color's must be the one the JSON declares.
         shift = (other_box[0] - box[0], other_box[1] - box[1])
@@ -134,8 +143,23 @@ def collect_frames(device):
     colors = device.get("colors") or [None]
     frames = []
 
+    def add(template, screen, offset, color_offsets, orientation_index):
+        # Frame names contain {color} for devices that come in several colors; the first color is the default.
+        names = [template.replace("{color}", color) if color else template for color in colors]
+
+        # A color whose frame draws the screen somewhere else lists its own offset under colorOffsets.
+        variant_offsets = {}
+        for color, name in zip(colors[1:], names[1:]):
+            color_offset = (color_offsets or {}).get(color)
+            variant_offsets[name] = (color_offset[::-1] if orientation_index > 0 else color_offset) if color_offset else offset
+
+        frames.append({"deviceFrame": names[0], "variants": names[1:], "variantOffsets": variant_offsets,
+                       "screenSize": screen, "offSet": offset})
+
     # A device with several screens lists them under "displays"; otherwise the device is its one screen.
     for display in device.get("displays") or [device]:
+        screens = {}
+
         for index, orientation in enumerate(display["orientations"]):
             # The first orientation is written as authored; later ones swap width and height.
             # The screen is the first resolution unless the display says screenshots are scaled to a smaller one.
@@ -144,18 +168,14 @@ def collect_frames(device):
             if index > 0:
                 screen, offset = screen[::-1], offset[::-1]
             offset = orientation.get("offSet") or offset
+            screens[orientation["orientation"]] = screen
+            add(orientation["frame"], screen, offset, device.get("colorOffsets"), index)
 
-            # Frame names contain {color} for devices that come in several colors; the first color is the default.
-            names = [orientation["frame"].replace("{color}", color) if color else orientation["frame"] for color in colors]
-
-            # A color whose frame draws the screen somewhere else lists its own offset under colorOffsets.
-            variant_offsets = {}
-            for color, name in zip(colors[1:], names[1:]):
-                color_offset = (device.get("colorOffsets") or {}).get(color)
-                variant_offsets[name] = (color_offset[::-1] if index > 0 else color_offset) if color_offset else offset
-
-            frames.append({"deviceFrame": names[0], "variants": names[1:], "variantOffsets": variant_offsets,
-                           "screenSize": screen, "offSet": offset})
+        # Alternate views, like the Duo's outer screen open, have their own frames in the orientations they have art for.
+        for alternate in display.get("alternateViews") or []:
+            for index, orientation in enumerate(alternate["orientations"]):
+                offset = alternate["offSet"][::-1] if index > 0 else alternate["offSet"]
+                add(orientation["frame"], screens[orientation["orientation"]], orientation.get("offSet") or offset, None, index)
 
     return frames
 

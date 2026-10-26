@@ -47,6 +47,8 @@ orientations after it, so a phone's landscape numbers are never repeated.
 | `colors` | Optional. The colors the frame comes in, with the default first. `{color}` in a frame name is replaced with each one. |
 | `colorOffsets` | Optional. For a color whose artwork draws the screen somewhere else than the default color's, its own `offSet`. |
 | `orientations` | One frame per orientation, with the first one being the orientation everything else is written in. A later orientation may set its own `offSet` when its art is not an exact transpose of the first, as the iPad Air 2020's is. |
+| `viewName` | Optional, on a display with `alternateViews`. What the frames written on the display show, such as "Closed". |
+| `alternateViews` | Optional, on a display. Other looks of the screen with their own frame art, as `{ name, offSet, orientations }`. A view only has frames for the orientations it has art for. |
 | `displays` | Optional. For a device with several screens (the iPhone Duo), a list of `{ name, offSet, resolutions, orientations }` that replaces writing those keys on the device. The screens share the device's name and colors. |
 
 "Apple Spec" is the iPhone Duo inner display size from Apple's specifications, 1878 × 2670. A mockup built to that size
@@ -71,6 +73,30 @@ screen. It does not count as a new framed screenshot and does not auto save agai
 
 Devices that share a name share a saved color. The iPhone Duo's inner and outer screens are one device, so one choice
 covers both.
+
+## Views
+
+A view is another look of a screen that has its own frame art, which the user switches between. The iPhone Duo's outer
+screen has two: "Closed" is the phone folded with only the outer screen showing, and "Open" shows the phone unfolded
+with its back and cameras beside the outer screen. Both use the same 1398 × 2034 screenshot, so the choice can't be
+detected from its size. It is a choice in the toolbar menu, next to the color.
+
+```json
+"viewName": "Closed",
+"alternateViews": [
+    {
+        "name": "Open",
+        "offSet": [1570, 80],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone Duo - {color} - Outer Open" }
+        ]
+    }
+]
+```
+
+The first view is the one written on the display, and the default. Apple only draws "Open" in portrait, so a landscape
+outer screenshot has no view to pick. Every view needs its own screen mask, which the generator makes. A view uses the
+device's colors, and the choice is saved per device like the color.
 
 ## Why `screenSize` is sometimes needed
 
@@ -109,7 +135,7 @@ After adding or changing a frame, regenerate the masks from `ShotbotCore`:
 python3 Scripts/generate_screen_masks.py
 ```
 
-It flood-fills outward from the frame's center across every pixel that is not bezel and crops the result to `offSet`
+It flood-fills outward from the middle of the expected screen across every pixel that is not bezel and crops the result to `offSet`
 and `screenSize`. A pixel counts as bezel when its alpha is at least 250, not only 255, because some frames use 250 to
 254 for their bezel. The script stops with an error when:
 
@@ -132,7 +158,7 @@ the suite.
    are larger than the screen opening. The screenshot rectangle must cover the whole transparent screen. It may overhang
    under the bezel, but it must not leave a gap.
 3. Run `python3 Scripts/generate_screen_masks.py`.
-4. Run the Models tests. They check masks, composites, orientations, colors and size matching.
+4. Run the Models tests. They check masks, composites, orientations, colors, views and size matching.
 
 ## Notes
 

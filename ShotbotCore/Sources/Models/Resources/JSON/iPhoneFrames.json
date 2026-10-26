@@ -155,4 +155,32 @@
         "inputSize": [2736, 1260],
         "displayZoomInputSize": [2436, 1125]
     },
+    {
+        "deviceFrame": "iPhone Duo - Star White - Inner Open Portrait",
+        "mergeMethod": "doubleOverlay",
+        "cornerRadius": 100,
+        "inputSize": [2007, 2853],
+        "offSet": [120, 120]
+    },
+    {
+        "deviceFrame": "iPhone Duo - Star White - Inner Open Landscape",
+        "mergeMethod": "doubleOverlay",
+        "cornerRadius": 100,
+        "inputSize": [2853, 2007],
+        "offSet": [120, 120]
+    },
+    {
+        "deviceFrame": "iPhone Duo - Star White - Outer Closed Portrait",
+        "mergeMethod": "doubleOverlay",
+        "cornerRadius": 60,
+        "inputSize": [1398, 2034],
+        "offSet": [88, 80]
+    },
+    {
+        "deviceFrame": "iPhone Duo - Star White - Outer Closed Landscape",
+        "mergeMethod": "doubleOverlay",
+        "cornerRadius": 60,
+        "inputSize": [2034, 1398],
+        "offSet": [80, 88]
+    },
 ]

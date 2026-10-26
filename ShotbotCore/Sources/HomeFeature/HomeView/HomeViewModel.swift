@@ -218,6 +218,57 @@ import SwiftTools
         showGridView = persistenceManager.defaultHomeView == .grid && imageResults.hasMultipleImages
     }
     
+    /// Copies images to the pasteboard based on `autoCopyOption`, independent of the view type.
+    private func copyAutomatically() {
+        switch persistenceManager.autoCopyOption {
+        case .none:
+            break
+        case .individual:
+            let images = imageResults.individual.map(\.framedScreenshot)
+            copy(images)
+        case .combined:
+            if let combined = imageResults.combined {
+                copy(combined.framedScreenshot)
+            }
+        case .all:
+            // Copy all available images (combined + individual)
+            var allImages: [UIFramedScreenshot] = []
+            if let combined = imageResults.combined {
+                allImages.append(combined.framedScreenshot)
+            }
+            allImages.append(contentsOf: imageResults.individual.map(\.framedScreenshot))
+            copy(allImages)
+        }
+    }
+    
+    /// Runs the user's auto save and auto copy settings on the current images.
+    ///
+    /// - Parameter savingIndividualImages: Pass `false` when only the combined image changed, such as after swapping
+    ///   places, so the unchanged individual images are not saved a second time.
+    private func runAutoActions(savingIndividualImages: Bool = true) async {
+        try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
+        copyAutomatically()
+        
+        if savingIndividualImages {
+            try? await autoCRUDManager.autoSaveIndividualImagesIfNeeded(using: imageResults.individual) { [weak self] in
+                DispatchQueue.main.async {
+                    self?.showAutoSaveToast = true
+                }
+            }
+        } else if savesCombinedImage {
+            showAutoSaveToast = true
+        }
+    }
+    
+    /// Whether the user's auto save settings save the combined image to files or photos.
+    private var savesCombinedImage: Bool {
+        guard imageResults.combined != nil else { return false }
+        
+        let options: [AutoActionOption] = [persistenceManager.autoSaveFilesOption, persistenceManager.autoSavePhotosOption]
+        
+        return options.contains { $0 == .combined || $0 == .all }
+    }
+    
     /// Starts the image pipeline using the passed in screenshots
     private func processSelectedPhotos(source: PhotoSource) async throws {
         // Subscription Check
@@ -281,26 +332,7 @@ import SwiftTools
             await combineDeviceFrames()
             try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
             
-            // Auto copy based on autoCopyOption (independent of view type)
-            switch persistenceManager.autoCopyOption {
-            case .none:
-                break
-            case .individual:
-                let images = imageResults.individual.map(\.framedScreenshot)
-                copy(images)
-            case .combined:
-                if let combined = imageResults.combined {
-                    copy(combined.framedScreenshot)
-                }
-            case .all:
-                // Copy all available images (combined + individual)
-                var allImages: [UIFramedScreenshot] = []
-                if let combined = imageResults.combined {
-                    allImages.append(combined.framedScreenshot)
-                }
-                allImages.append(contentsOf: imageResults.individual.map(\.framedScreenshot))
-                copy(allImages)
-            }
+            copyAutomatically()
 
             switch imageType {
             case .combined:
@@ -615,7 +647,6 @@ import SwiftTools
         await combinedImageTask?.value
         imageResults.reverseImages()
         await combineDeviceFrames()
-        try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
         
         guard let combined = imageResults.combined else {
             logger.fault("Processing selected photos returning early because combined image results has no image.")
@@ -625,5 +656,9 @@ import SwiftTools
         
         logger.fault("Setting viewState to combinedImages")
         viewState = .combinedImages(combined)
+        isLoading = false
+        
+        // Only the combined image changed. The individual images are the same, just in a new order.
+        await runAutoActions(savingIndividualImages: false)
     }
 }

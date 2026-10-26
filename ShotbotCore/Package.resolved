@@ -1,5 +1,5 @@
 {
-  "originHash" : "2228cc4e85f0ebb33bbf7e3c7660ef9509b2fa7855c2e2625ef9860d47bb109c",
+  "originHash" : "47af83a982797570f2780aca229d95093f69796e031b32efc4287130aabee940",
   "pins" : [
     {
       "identity" : "alerttoast",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/RevenueCat/purchases-ios.git",
       "state" : {
-        "revision" : "56f136a1385a2fe17998d0b34b3db26debeb8ec4",
-        "version" : "5.2.2"
+        "revision" : "a7ef4d7d3b065a5f428065b94e81224a6ab913f3",
+        "version" : "5.98.0"
       }
     },
     {
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rspoon3/ReferralService-iOS.git",
       "state" : {
-        "revision" : "1f1178effbb46b01e5b406870349edb234cdd8f2",
-        "version" : "1.0.0"
+        "revision" : "f6ae9cf74472374e194d7ef58dbe584350e01bfc",
+        "version" : "1.0.1"
       }
     },
     {
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rspoon3/SFSymbols.git",
       "state" : {
-        "revision" : "b38d16aad0a9a3652ee97361a96f4c7d20ed95dc",
-        "version" : "2.8.1"
+        "revision" : "67bc0f61f6fbafbf7212b6fde2886a29c958daa2",
+        "version" : "3.2.1"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/fetch-rewards/swift-mocking.git",
       "state" : {
-        "revision" : "27a14fa05caa5a65ada603b2fd7e17db055bf2e2",
-        "version" : "0.2.1"
+        "revision" : "dcab218e90c9a92308c61713315d1b29d753e30c",
+        "version" : "0.2.2"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rspoon3/SwiftTools",
       "state" : {
-        "revision" : "2707786212536b112a059794bb1638258b7d2803",
-        "version" : "2.2.4"
+        "revision" : "afb8c0e06591941dd9cce54c6b7a3d85209f52f3",
+        "version" : "2.3.3"
       }
     }
   ],

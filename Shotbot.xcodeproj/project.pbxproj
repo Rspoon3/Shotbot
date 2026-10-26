@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		94016B042C4F4F03006F025B /* WidgetFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 94016B032C4F4F03006F025B /* WidgetFeature */; };
-		DA097EE02083B99E89E75EFA /* AsyncTimelineProvider in Frameworks */ = {isa = PBXBuildFile; productRef = 27194894D8C2EFC4F73A7FD1 /* AsyncTimelineProvider */; };
 		940A9E662C514AA20093893D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9482BE752C51402A00881181 /* Preview Assets.xcassets */; };
 		94453E472C4AAD7900B15690 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94453E462C4AAD7800B15690 /* WidgetKit.framework */; };
 		94453E492C4AAD7900B15690 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94453E482C4AAD7900B15690 /* SwiftUI.framework */; };
@@ -49,6 +48,7 @@
 		94CA14912B81C5C2009D956C /* ShotBotShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CA14902B81C5C2009D956C /* ShotBotShortcuts.swift */; };
 		94E20BBB2C4ADDD800C11043 /* RefreshLatestScreenshotIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E20BBA2C4ADDD800C11043 /* RefreshLatestScreenshotIntent.swift */; };
 		94E20BBD2C4ADDE000C11043 /* CGSize+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E20BBC2C4ADDE000C11043 /* CGSize+Extension.swift */; };
+		DA097EE02083B99E89E75EFA /* AsyncTimelineProvider in Frameworks */ = {isa = PBXBuildFile; productRef = 27194894D8C2EFC4F73A7FD1 /* AsyncTimelineProvider */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */

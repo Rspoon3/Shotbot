@@ -166,9 +166,15 @@ public struct HomeView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 if viewModel.canShowClearButton {
-                    Button("Clear", role: .destructive) {
-                        viewModel.clearContent()
-                    }.foregroundColor(.red)
+                    if #available(iOS 26.0, *) {
+                        Button(role: .destructive) {
+                            viewModel.clearContent()
+                        }.tint(.red)
+                    } else {
+                        Button("Clear", role: .destructive) {
+                            viewModel.clearContent()
+                        }.foregroundColor(.red)
+                    }
                 }
             }
         }

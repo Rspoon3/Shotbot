@@ -61,11 +61,15 @@ public protocol PersistenceManaging: Sendable {
 
     // MARK: - Device View Preferences
 
-    /// Returns the frame view the user last picked for a device model, such as "Open" for the iPhone Duo.
-    func preferredView(for deviceName: String) -> String?
+    /// Returns the frame view the user last picked for a screen, such as "Open" for the iPhone Duo's outer screen.
+    /// - Parameter key: `DeviceInfo.viewPreferenceKey`.
+    func preferredView(forKey key: String) -> String?
 
-    /// Stores the frame view the user picked for a device model, so it is the default the next time that device is framed.
-    func setPreferredView(_ view: String, for deviceName: String)
+    /// Stores the frame view the user picked for a screen, so it is the default the next time that screen is framed.
+    /// - Parameters:
+    ///   - view: The view's name.
+    ///   - key: `DeviceInfo.viewPreferenceKey`.
+    func setPreferredView(_ view: String, forKey key: String)
 }
 
 public extension PersistenceManaging {
@@ -78,7 +82,7 @@ public extension PersistenceManaging {
             styled = styled.withColor(color)
         }
 
-        if let view = preferredView(for: device.name) {
+        if let view = preferredView(forKey: device.viewPreferenceKey) {
             styled = styled.withView(view)
         }
 

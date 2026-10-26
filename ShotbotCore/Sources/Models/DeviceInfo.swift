@@ -24,6 +24,8 @@ public struct DeviceInfo: Sendable {
         let colorOffsets: [String: CGPoint]
         /// The asset name the screen mask is stored under, which is always the default color's frame.
         let maskName: String
+        /// The angle to fold the framed screenshot to, for a view that bends the display's own frame. `nil` for flat.
+        let foldAngle: Double?
     }
 
     /// The display name of the device model, such as "iPhone 16 Pro".
@@ -51,6 +53,12 @@ public struct DeviceInfo: Sendable {
     public let screenSize: CGSize
     /// What kind of resolution this is, such as "Default", "More Space", or "Display Zoom".
     public let resolutionName: String
+
+    /// What saved view choices are keyed by. A device with several screens keeps a choice for each, so picking the
+    /// inner screen's view doesn't replace the outer screen's.
+    public var viewPreferenceKey: String {
+        screenName.map { "\(name) \($0)" } ?? name
+    }
 
     /// The frame's asset name, for the selected view and color.
     public var deviceFrame: String {
@@ -165,7 +173,17 @@ public struct DeviceInfo: Sendable {
 
         let screen = isScaled ? screenshot.resized(to: screenSize) : screenshot
 
-        return frameImage.overlaying(screen, at: offSet, clippedTo: screenMask)
+        let flat = frameImage.overlaying(screen, at: offSet, clippedTo: screenMask)
+
+        guard let foldAngle = viewFrame.foldAngle else { return flat }
+
+        return flat.bookFolded(openingAngle: foldAngle)
+    }
+
+    /// Whether the selected view bends the frame, like the iPhone Duo's book mode. A folded image is larger than the
+    /// frame, to make room for its shadow.
+    public var isFolded: Bool {
+        viewFrame.foldAngle != nil
     }
 
     // MARK: - Data
@@ -230,31 +248,45 @@ public struct DeviceInfo: Sendable {
                         frameTemplate: orientation.frame,
                         offSet: offSet,
                         colorOffsets: colorOffsets,
-                        maskName: resolve(orientation.frame, color: colors.first)
+                        maskName: resolve(orientation.frame, color: colors.first),
+                        foldAngle: nil
                     )
                 ]
                 var views = [String]()
 
                 for alternate in display.alternateViews ?? [] {
-                    guard let alternateIndex = alternate.orientations.firstIndex(where: { $0.orientation == orientation.orientation }) else {
-                        continue
+                    if let fold = alternate.fold {
+                        // A fold bends the display's own frame, so it exists in every orientation.
+                        viewFrames[alternate.name] = ViewFrame(
+                            frameTemplate: orientation.frame,
+                            offSet: offSet,
+                            colorOffsets: colorOffsets,
+                            maskName: resolve(orientation.frame, color: colors.first),
+                            foldAngle: fold.angle
+                        )
+                        views.append(alternate.name)
+                    } else if
+                        let alternateIndex = alternate.orientations?.firstIndex(where: { $0.orientation == orientation.orientation }),
+                        let alternateFrame = alternate.orientations?[alternateIndex],
+                        let alternateOffSet = alternateFrame.offSet ?? alternate.offSet.map({
+                            alternateIndex > 0 ? CGPoint(x: $0.y, y: $0.x) : $0
+                        }) {
+                        viewFrames[alternate.name] = ViewFrame(
+                            frameTemplate: alternateFrame.frame,
+                            offSet: alternateOffSet,
+                            colorOffsets: [:],
+                            maskName: resolve(alternateFrame.frame, color: colors.first),
+                            foldAngle: nil
+                        )
+                        views.append(alternate.name)
                     }
-
-                    let alternateFrame = alternate.orientations[alternateIndex]
-                    viewFrames[alternate.name] = ViewFrame(
-                        frameTemplate: alternateFrame.frame,
-                        offSet: alternateFrame.offSet
-                            ?? (alternateIndex > 0 ? CGPoint(x: alternate.offSet.y, y: alternate.offSet.x) : alternate.offSet),
-                        colorOffsets: [:],
-                        maskName: resolve(alternateFrame.frame, color: colors.first)
-                    )
-                    views.append(alternate.name)
                 }
 
                 return display.resolutions.map { resolution in
                     DeviceInfo(
                         name: definition.name,
-                        screenName: display.name,
+                        // A single-screen device writes its own name where a screen's name would go, so only name real screens.
+                        screenName: definition.displays.count > 1 ? display.name : nil,
                         orientation: orientation.orientation,
                         colors: colors,
                         views: views.isEmpty ? [] : [defaultViewName] + views,

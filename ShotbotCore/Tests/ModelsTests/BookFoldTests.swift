@@ -1,0 +1,143 @@
+//
+//  BookFoldTests.swift
+//  Shotbot
+//
+//  Created by Richard Witherspoon on 10/26/26.
+//
+
+import Testing
+import UIKit
+import Models
+
+struct BookFoldTests {
+    @Test("Folding at 180 degrees leaves the image flat, on a larger canvas with room for the shadow")
+    func flatFoldKeepsTheImage() throws {
+        let image = solidImage(size: CGSize(width: 2000, height: 1500))
+        let folded = try #require(image.bookFolded(openingAngle: 180))
+
+        #expect(folded.size.width > image.size.width)
+        #expect(folded.size.height > image.size.height)
+
+        // The image sits in the middle of the canvas, unchanged.
+        let center = CGPoint(x: folded.size.width / 2, y: folded.size.height / 2)
+        let pixel = try #require(rgba(of: folded, at: center))
+        #expect(pixel.red == 255 && pixel.green == 255 && pixel.blue == 255 && pixel.alpha == 255)
+    }
+
+    @Test("The corners of the canvas are transparent")
+    func cornersAreTransparent() throws {
+        // A device has rounded corners, so the image does too.
+        let size = CGSize(width: 2000, height: 1500)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let rounded = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            UIColor.white.setFill()
+            UIBezierPath(roundedRect: CGRect(origin: .zero, size: size), cornerRadius: 200).fill()
+        }
+        let folded = try #require(rounded.bookFolded(openingAngle: 120))
+
+        for corner in [CGPoint(x: 0, y: 0), CGPoint(x: folded.size.width - 1, y: 0), CGPoint(x: 0, y: folded.size.height - 1)] {
+            #expect(try #require(rgba(of: folded, at: corner)).alpha == 0)
+        }
+    }
+
+    @Test("There is no see-through line where the two halves meet", arguments: [90.0, 120.0, 145.0])
+    func creaseHasNoSeam(angle: Double) throws {
+        for size in [CGSize(width: 2000, height: 1500), CGSize(width: 1500, height: 2000)] {
+            let folded = try #require(solidImage(size: size).bookFolded(openingAngle: angle))
+            let isLandscape = size.width > size.height
+
+            // Walk across the crease, near the middle of the screen where nothing else is.
+            for offset in -6...6 {
+                let point = isLandscape
+                    ? CGPoint(x: folded.size.width / 2 + CGFloat(offset), y: folded.size.height / 2)
+                    : CGPoint(x: folded.size.width / 2, y: folded.size.height / 2 + CGFloat(offset))
+
+                #expect(try #require(rgba(of: folded, at: point)).alpha == 255, "angle \(angle), \(size), offset \(offset)")
+            }
+        }
+    }
+
+    @Test("A landscape image folds around a vertical crease, and the right half is darker than the left")
+    func landscapeShadesTheRightHalf() throws {
+        let folded = try #require(solidImage(size: CGSize(width: 2000, height: 1500)).bookFolded(openingAngle: 120))
+        let middleY = folded.size.height / 2
+        let left = try #require(rgba(of: folded, at: CGPoint(x: folded.size.width * 0.35, y: middleY)))
+        let right = try #require(rgba(of: folded, at: CGPoint(x: folded.size.width * 0.65, y: middleY)))
+
+        // Both halves are darkened, the right one more.
+        #expect(left.red < 255)
+        #expect(right.red < left.red - 5, "left was \(left.red), right was \(right.red)")
+        #expect(right.red > 150)
+    }
+
+    @Test("A portrait image folds around a horizontal crease, and the top half is darker than the bottom")
+    func portraitShadesTheTopHalf() throws {
+        let folded = try #require(solidImage(size: CGSize(width: 1500, height: 2000)).bookFolded(openingAngle: 120))
+        let middleX = folded.size.width / 2
+        let top = try #require(rgba(of: folded, at: CGPoint(x: middleX, y: folded.size.height * 0.35)))
+        let bottom = try #require(rgba(of: folded, at: CGPoint(x: middleX, y: folded.size.height * 0.65)))
+
+        #expect(bottom.red < 255)
+        #expect(top.red < bottom.red - 5, "top was \(top.red), bottom was \(bottom.red)")
+        #expect(top.red > 150)
+    }
+
+    @Test("A smaller opening angle is darker and clamps at 90 degrees")
+    func closingTheFoldDarkensIt() throws {
+        let image = solidImage(size: CGSize(width: 2000, height: 1500))
+
+        func rightHalfBrightness(_ angle: Double) throws -> UInt8 {
+            let folded = try #require(image.bookFolded(openingAngle: angle))
+            return try #require(rgba(of: folded, at: CGPoint(x: folded.size.width * 0.65, y: folded.size.height / 2))).red
+        }
+
+        #expect(try rightHalfBrightness(145) > rightHalfBrightness(100))
+        #expect(try rightHalfBrightness(40) == rightHalfBrightness(90))
+    }
+
+    // MARK: - Helpers
+
+    private func solidImage(size: CGSize) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: size, format: format).image { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+        }
+    }
+
+    /// The color of one pixel, with the point measured from the top-left like UIKit.
+    private func rgba(of image: UIImage, at point: CGPoint) -> (red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8)? {
+        guard let cgImage = image.cgImage else { return nil }
+
+        var pixel = [UInt8](repeating: 0, count: 4)
+        let drawn = pixel.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(
+                data: buffer.baseAddress,
+                width: 1,
+                height: 1,
+                bitsPerComponent: 8,
+                bytesPerRow: 4,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else {
+                return false
+            }
+
+            // Move the wanted pixel under the 1 x 1 context. Core Graphics measures from the bottom-left.
+            context.draw(cgImage, in: CGRect(
+                x: -point.x,
+                y: -(CGFloat(cgImage.height) - point.y - 1),
+                width: CGFloat(cgImage.width),
+                height: CGFloat(cgImage.height)
+            ))
+            return true
+        }
+
+        guard drawn else { return nil }
+
+        // Premultiplied; undo it for opaque-enough pixels so a half-transparent edge still reads sensibly.
+        return (pixel[0], pixel[1], pixel[2], pixel[3])
+    }
+}

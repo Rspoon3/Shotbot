@@ -98,6 +98,25 @@ The first view is the one written on the display, and the default. Apple only dr
 outer screenshot has no view to pick. Every view needs its own screen mask, which the generator makes. A view uses the
 device's colors, and the choice is saved per device like the color.
 
+### Folded views
+
+A view can also bend the display's own frame instead of using other art. The iPhone Duo's inner screen has a "Book"
+view, which draws the phone opened part of the way, like a book (landscape) or a laptop (portrait):
+
+```json
+"viewName": "Flat",
+"alternateViews": [
+    { "name": "Book", "fold": { "angle": 145 } }
+]
+```
+
+`angle` is the angle between the two halves in degrees, from 90 (most closed) to 180 (flat). A fold needs no frames, offset
+or mask of its own. It uses the display's own, so it exists in every orientation. The image is framed flat first, then
+`UIImage.bookFolded(openingAngle:)` splits it at the crease, tilts each half back around it with a perspective transform,
+darkens the halves a little (the right or top one more), and adds a soft shadow. The result is on a transparent canvas
+that is larger than the frame to make room for the shadow. The left or bottom half reaches a few pixels under the other
+half, so the shadow can't show through as a dark line at the crease.
+
 ## Why `screenSize` is sometimes needed
 
 A resolution describes what the user's screenshot is. `screenSize` describes what the frame can hold. They are usually

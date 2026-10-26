@@ -154,6 +154,7 @@
         "displays": [
             {
                 "name": "Inner",
+                "viewName": "Flat",
                 "offSet": [120, 120],
                 "resolutions": [
                     { "name": "Default", "size": [2007, 2853] },
@@ -162,6 +163,9 @@
                 "orientations": [
                     { "orientation": "Portrait", "frame": "iPhone Duo - {color} - Inner Open Portrait" },
                     { "orientation": "Landscape", "frame": "iPhone Duo - {color} - Inner Open Landscape" }
+                ],
+                "alternateViews": [
+                    { "name": "Book", "fold": { "angle": 145 } }
                 ]
             },
             {

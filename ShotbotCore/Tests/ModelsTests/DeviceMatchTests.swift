@@ -195,12 +195,49 @@ struct DeviceMatchTests {
         #expect(closed.withView("Not A View").deviceFrame == closed.deviceFrame)
     }
 
-    @Test("Only the iPhone Duo's portrait outer screen has an open view")
-    func openViewIsPortraitOuterOnly() {
+    @Test("Only the iPhone Duo's screens have views")
+    func onlyTheDuoHasViews() {
         for device in DeviceInfo.all() {
-            let expected = device.name == "iPhone Duo" && device.screenName == "Outer" && device.orientation == .portrait
-            #expect(device.hasViewOptions == expected, "\(device.deviceFrame)")
+            let expected: [String]
+
+            switch (device.name == "iPhone Duo", device.screenName, device.orientation) {
+            case (true, "Inner", _): expected = ["Flat", "Book"]
+            case (true, "Outer", .portrait): expected = ["Closed", "Open"]
+            default: expected = []
+            }
+
+            #expect(device.views == expected, "\(device.deviceFrame)")
         }
+    }
+
+    @Test("The iPhone Duo's inner screen can be folded like a book in both orientations")
+    func duoInnerScreenHasABookView() throws {
+        for orientation in [DeviceOrientation.portrait, .landscape] {
+            let flat = try #require(DeviceInfo.all().first {
+                $0.name == "iPhone Duo" && $0.screenName == "Inner" && $0.orientation == orientation
+            })
+            let book = flat.withView("Book")
+
+            #expect(!flat.isFolded)
+            #expect(book.isFolded)
+            #expect(book.viewName == "Book")
+
+            // Book bends the flat frame, so it uses the same frame, offset and mask.
+            #expect(book.deviceFrame == flat.deviceFrame)
+            #expect(book.offSet == flat.offSet)
+            #expect(book.screenMask?.width == flat.screenMask?.width)
+            #expect(book.withColor("Night Sky").deviceFrame == flat.withColor("Night Sky").deviceFrame)
+        }
+    }
+
+    @Test("Each screen of a device saves its own view")
+    func screensKeepSeparateViewKeys() throws {
+        let inner = try #require(DeviceInfo.all().first { $0.screenName == "Inner" })
+        let outer = try #require(DeviceInfo.all().first { $0.screenName == "Outer" })
+
+        #expect(inner.viewPreferenceKey == "iPhone Duo Inner")
+        #expect(outer.viewPreferenceKey == "iPhone Duo Outer")
+        #expect(try #require(DeviceInfo.all().first { $0.name == "iPhone 12 Pro" }).viewPreferenceKey == "iPhone 12 Pro")
     }
 
     @Test("A size shared by several iPhones asks the user which one")

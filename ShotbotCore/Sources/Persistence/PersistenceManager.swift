@@ -20,12 +20,24 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     }
     
     private init(){
+        Self.moveToSharedDefaults(keys: ["deviceFramePreferences", "deviceColorPreferences", "deviceViewPreferences"])
+
         logger.notice("isSubscribed: \(self.isSubscribed, privacy: .public)")
         logger.notice("deviceFrameCreations: \(self.deviceFrameCreations.formatted(), privacy: .public)")
         logger.notice("numberOfLaunches: \(self.numberOfLaunches.formatted(), privacy: .public)")
         logger.notice("numberOfActivations: \(self.numberOfActivations.formatted(), privacy: .public)")
     }
     
+    /// Copies choices saved in the app's own defaults into the shared ones, so people keep what they picked now that the
+    /// share extension reads them too.
+    private static func moveToSharedDefaults(keys: [String]) {
+        for key in keys where UserDefaults.shared.object(forKey: key) == nil {
+            if let value = UserDefaults.standard.object(forKey: key) {
+                UserDefaults.shared.set(value, forKey: key)
+            }
+        }
+    }
+
     @AppStorage("isSubscribed", store: .shared)
     public var isSubscribed = false
 
@@ -103,7 +115,7 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
     @AppStorage("alwaysAskDeviceFrame")
     public var alwaysAskDeviceFrame: Bool = false
 
-    @AppStorage("deviceFramePreferences")
+    @AppStorage("deviceFramePreferences", store: .shared)
     private var deviceFramePreferencesData: Data = Data()
 
     private var deviceFramePreferencesDict: [String: String] {
@@ -150,7 +162,7 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
 
     // MARK: - Device Color Preferences
 
-    @AppStorage("deviceColorPreferences")
+    @AppStorage("deviceColorPreferences", store: .shared)
     private var deviceColorPreferencesData: Data = Data()
 
     private var deviceColorPreferencesDict: [String: String] {
@@ -175,7 +187,7 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
 
     // MARK: - Device View Preferences
 
-    @AppStorage("deviceViewPreferences")
+    @AppStorage("deviceViewPreferences", store: .shared)
     private var deviceViewPreferencesData: Data = Data()
 
     private var deviceViewPreferencesDict: [String: String] {

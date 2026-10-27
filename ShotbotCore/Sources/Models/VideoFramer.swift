@@ -79,16 +79,81 @@ public struct VideoFramer: Sendable {
     ///   - device: The device whose frame to use, in the selected color and view.
     ///   - outputURL: Where to write the framed video. An existing file is replaced.
     public func frame(videoAt sourceURL: URL, in device: DeviceInfo, to outputURL: URL) async throws {
-        guard let frameImage = device.frameImage, let frameCG = frameImage.cgImage else {
-            throw VideoFramerError.missingFrame
-        }
+        let video = try await prepare(videoAt: sourceURL, in: device)
+        try await export(video, to: outputURL)
+    }
 
+    /// The size of a framed device, which a canvas has to make room for. A partially open device is larger than its
+    /// frame, to hold its shadow.
+    public func deviceSize(in device: DeviceInfo) throws -> CGSize {
+        try Self.makeLayers(for: device).size
+    }
+
+    /// Sets up the framing of a video without rendering anything.
+    /// - Parameters:
+    ///   - sourceURL: The screen recording.
+    ///   - device: The device whose frame to use, in the selected color and view.
+    ///   - canvas: Where to put the device. `nil` puts it on a plain background of this framer's `background` color,
+    ///     sized to the device.
+    public func prepare(videoAt sourceURL: URL, in device: DeviceInfo, canvas: VideoCanvas? = nil) async throws -> PreparedVideo {
         let asset = AVURLAsset(url: sourceURL)
         guard let track = try await asset.loadTracks(withMediaType: .video).first else {
             throw VideoFramerError.noVideoTrack
         }
 
-        let formatDescriptions = try await track.load(.formatDescriptions)
+        let (formatDescriptions, preferredTransform) = try await track.load(.formatDescriptions, .preferredTransform)
+        var (layers, deviceSize) = try Self.makeLayers(for: device)
+
+        // Encoders need even dimensions, so an odd side gets one row or column of padding.
+        let outputSize = canvas?.size ?? deviceSize
+        let renderSize = CGSize(width: Self.even(outputSize.width), height: Self.even(outputSize.height))
+
+        layers.canvas = canvas
+        layers.background = CIImage(color: CIColor(color: background)).cropped(to: CGRect(origin: .zero, size: renderSize))
+
+        let composition = try await AVMutableVideoComposition.videoComposition(with: asset) { [layers] request in
+            request.finish(with: layers.render(request.sourceImage), context: nil)
+        }
+        composition.renderSize = renderSize
+        Self.applyColorSpace(to: composition, matching: formatDescriptions)
+
+        return PreparedVideo(
+            asset: asset,
+            composition: composition,
+            renderSize: renderSize,
+            preferredTransform: preferredTransform
+        ) { [layers] frame in
+            layers.render(frame)
+        }
+    }
+
+    /// Renders a prepared video to an MP4 file, keeping the audio.
+    /// - Parameters:
+    ///   - video: The video to render.
+    ///   - outputURL: Where to write it. An existing file is replaced.
+    public func export(_ video: PreparedVideo, to outputURL: URL) async throws {
+        try? FileManager.default.removeItem(at: outputURL)
+
+        guard let session = AVAssetExportSession(asset: video.asset, presetName: AVAssetExportPresetHEVCHighestQuality) else {
+            throw VideoFramerError.exportFailed("No export session is available.")
+        }
+
+        session.videoComposition = video.composition
+        session.outputURL = outputURL
+        session.outputFileType = .mp4
+
+        await session.export()
+
+        if session.status != .completed {
+            throw VideoFramerError.exportFailed(session.error?.localizedDescription ?? "")
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    /// The images every frame of a device is made from, and how large the framed device is.
+    private static func makeLayers(for device: DeviceInfo) throws -> (layers: Layers, size: CGSize) {
+        guard let frameCG = device.frameImage?.cgImage else { throw VideoFramerError.missingFrame }
 
         let frameSize = CGSize(width: frameCG.width, height: frameCG.height)
 
@@ -105,42 +170,12 @@ public struct VideoFramer: Sendable {
             )
         )
 
-        // Encoders need even dimensions, so an odd side gets one row or column of padding.
-        var outputSize = frameSize
+        guard let openingAngle = device.openingAngle else { return (layers, frameSize) }
 
-        if let openingAngle = device.openingAngle {
-            let fold = try layers.makeFold(openingAngle: openingAngle)
-            layers.fold = fold
-            outputSize = fold.canvas.size
-        }
-
-        let renderSize = CGSize(width: Self.even(outputSize.width), height: Self.even(outputSize.height))
-        layers.background = CIImage(color: CIColor(color: background)).cropped(to: CGRect(origin: .zero, size: renderSize))
-
-        let composition = try await AVMutableVideoComposition.videoComposition(with: asset) { [layers] request in
-            request.finish(with: layers.render(request.sourceImage), context: nil)
-        }
-        composition.renderSize = renderSize
-        Self.applyColorSpace(to: composition, matching: formatDescriptions)
-
-        try? FileManager.default.removeItem(at: outputURL)
-
-        guard let session = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHEVCHighestQuality) else {
-            throw VideoFramerError.exportFailed("No export session is available.")
-        }
-
-        session.videoComposition = composition
-        session.outputURL = outputURL
-        session.outputFileType = .mp4
-
-        await session.export()
-
-        if session.status != .completed {
-            throw VideoFramerError.exportFailed(session.error?.localizedDescription ?? "")
-        }
+        let fold = try layers.makeFold(openingAngle: openingAngle)
+        layers.fold = fold
+        return (layers, fold.canvas.size)
     }
-
-    // MARK: - Private Helpers
 
     /// Exports with the source's color space, so HDR recordings stay HDR. The frame and background are SDR, and
     /// Core Image places them correctly on the HDR scale.
@@ -187,6 +222,7 @@ public struct VideoFramer: Sendable {
         let screenOrigin: CGPoint
         var background = CIImage.empty()
         var fold: Fold?
+        var canvas: VideoCanvas?
 
         /// Builds the shadow and canvas for folding frames, from a solid screen the same shape as the real ones.
         func makeFold(openingAngle: Double) throws -> Fold {
@@ -236,18 +272,20 @@ public struct VideoFramer: Sendable {
         }
 
         func render(_ source: CIImage) -> CIImage {
-            let device = flat(source)
+            var picture = flat(source)
 
-            guard let fold, let opened = fold.folder.open(device) else {
-                return device.composited(over: background).cropped(to: background.extent)
+            if let fold, let opened = fold.folder.open(picture) {
+                picture = opened
+                    .transformed(by: CGAffineTransform(translationX: -fold.canvas.minX, y: -fold.canvas.minY))
+                    .composited(over: fold.shadow)
+                    .cropped(to: CGRect(origin: .zero, size: fold.canvas.size))
             }
 
-            let moved = opened.transformed(by: CGAffineTransform(translationX: -fold.canvas.minX, y: -fold.canvas.minY))
+            if let canvas {
+                return canvas.place(picture)
+            }
 
-            return moved
-                .composited(over: fold.shadow)
-                .composited(over: background)
-                .cropped(to: background.extent)
+            return picture.composited(over: background).cropped(to: background.extent)
         }
     }
 }

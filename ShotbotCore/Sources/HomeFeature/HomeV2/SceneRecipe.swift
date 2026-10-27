@@ -13,7 +13,11 @@ import Foundation
 struct SceneRecipe: Equatable, Sendable {
     /// What is drawn behind the devices.
     var background: BackgroundStyle = .sunset
-    /// The space around the devices, as a fraction of their height.
+    /// How much the photo background is blurred. Other backgrounds ignore it.
+    var blur: BackgroundBlur = .medium
+    /// The shape of the picture.
+    var aspect: CanvasAspect = .fit
+    /// The least space around the devices, as a fraction of their height.
     var padding: Double = 0.08
     /// Whether the devices cast a soft shadow on the background.
     var hasShadow = true

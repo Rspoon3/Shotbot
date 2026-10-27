@@ -95,6 +95,27 @@ final class LayerStore: @unchecked Sendable {
         return render
     }
 
+    /// Draws an image once, so it can be used many times without being worked out again.
+    func baked(_ image: CIImage) throws -> CIImage {
+        try bake(image, extent: image.extent)
+    }
+
+    /// The layers of a device with a plain screen, for its outline and shadow when the screen's content changes.
+    func silhouette(of device: DeviceInfo) throws -> DeviceRender {
+        let size = device.inputSize
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+
+        let solid = UIGraphicsImageRenderer(size: size, format: format).image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+        }
+
+        return try deviceRender(id: Self.silhouetteID, screenshot: solid, device: device)
+    }
+
+    private static let silhouetteID = UUID()
+
     /// A scene image as PNG data, at the size it was composed at.
     func pngData(of image: CIImage) throws -> Data {
         guard let data = context.pngRepresentation(of: image, format: .RGBA8, colorSpace: sRGB) else {

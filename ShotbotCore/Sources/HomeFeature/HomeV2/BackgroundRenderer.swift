@@ -6,6 +6,7 @@
 //
 
 import CoreImage
+import Models
 import UIKit
 
 /// Draws backgrounds with Core Image, so they cost almost nothing to change and look the same at every size.
@@ -15,7 +16,8 @@ enum BackgroundRenderer {
     ///   - style: Which background to draw.
     ///   - size: The size to fill.
     ///   - blurSource: The picture the blurred style is made from.
-    static func image(_ style: BackgroundStyle, size: CGSize, blurSource: CIImage? = nil) -> CIImage {
+    ///   - blur: How much to blur the photo style.
+    static func image(_ style: BackgroundStyle, size: CGSize, blurSource: CIImage? = nil, blur: BackgroundBlur = .none) -> CIImage {
         let rect = CGRect(origin: .zero, size: size)
 
         switch style {
@@ -33,6 +35,8 @@ enum BackgroundRenderer {
             return aurora(in: size)
         case .blurred:
             return blurred(blurSource, in: size)
+        case .photo:
+            return blurred(filled(photo, in: size), sigma: size.height * blur.strength)
         }
     }
 
@@ -93,29 +97,49 @@ enum BackgroundRenderer {
         return image
     }
 
-    private static func blurred(_ source: CIImage?, in size: CGSize) -> CIImage {
+    private static let photo = BackgroundImages.reputation.map { CIImage(cgImage: $0) }
+
+    /// A picture scaled to cover a rectangle, cropped evenly on the sides that overflow.
+    private static func filled(_ source: CIImage?, in size: CGSize) -> CIImage {
         let rect = CGRect(origin: .zero, size: size)
 
         guard let source, source.extent.width > 0, source.extent.height > 0 else {
             return CIImage(color: CIColor(red: 0.5, green: 0.5, blue: 0.55)).cropped(to: rect)
         }
 
-        // Fill the background with the picture, then blur it until only its colors are left.
         let fill = max(size.width / source.extent.width, size.height / source.extent.height)
-        let scaled = source
-            .transformed(by: CGAffineTransform(scaleX: fill, y: fill))
-        let centered = scaled.transformed(by: CGAffineTransform(
-            translationX: (size.width - scaled.extent.width) / 2 - scaled.extent.minX,
-            y: (size.height - scaled.extent.height) / 2 - scaled.extent.minY
-        ))
+        let scaled = source.applyingFilter("CILanczosScaleTransform", parameters: [
+            kCIInputScaleKey: fill,
+            kCIInputAspectRatioKey: 1
+        ])
 
-        return centered
-            .clampedToExtent()
-            .applyingGaussianBlur(sigma: size.height * 0.04)
+        return scaled
+            .transformed(by: CGAffineTransform(
+                translationX: (size.width - scaled.extent.width) / 2 - scaled.extent.minX,
+                y: (size.height - scaled.extent.height) / 2 - scaled.extent.minY
+            ))
+            .cropped(to: rect)
+    }
+
+    private static func blurred(_ source: CIImage?, in size: CGSize) -> CIImage {
+        let rect = CGRect(origin: .zero, size: size)
+
+        // Fill the background with the picture, then blur it until only its colors are left.
+        return blurred(filled(source, in: size), sigma: size.height * 0.04)
             .applyingFilter("CIColorControls", parameters: [
                 kCIInputSaturationKey: 1.4,
                 kCIInputBrightnessKey: -0.05
             ])
             .cropped(to: rect)
+    }
+
+    /// A Gaussian blur that keeps the picture's edges sharp instead of fading them to transparent.
+    private static func blurred(_ image: CIImage, sigma: Double) -> CIImage {
+        guard sigma > 0 else { return image }
+
+        return image
+            .clampedToExtent()
+            .applyingGaussianBlur(sigma: sigma)
+            .cropped(to: image.extent)
     }
 }

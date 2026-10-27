@@ -12,6 +12,7 @@ enum BackgroundStyle: String, CaseIterable, Identifiable, Sendable {
     case transparent
     case white
     case black
+    case photo
     case sunset
     case ocean
     case aurora
@@ -29,6 +30,7 @@ enum BackgroundStyle: String, CaseIterable, Identifiable, Sendable {
         case .ocean: "Ocean"
         case .aurora: "Aurora"
         case .blurred: "Blurred"
+        case .photo: "Photo"
         }
     }
 }

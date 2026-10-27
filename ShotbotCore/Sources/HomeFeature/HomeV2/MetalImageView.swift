@@ -24,6 +24,7 @@ struct MetalImageView: UIViewRepresentable {
 
     /// A Metal view that renders a Core Image picture whenever the picture or the view's size changes.
     final class CIMetalView: MTKView {
+        /// The picture to draw. Setting it draws it on the next screen update.
         var image: CIImage? {
             didSet { setNeedsDisplay() }
         }

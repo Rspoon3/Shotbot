@@ -53,6 +53,12 @@ public final class HomeV2ViewModel {
     private(set) var items = [Item]()
     private(set) var renders = [UUID: DeviceRender]()
     private(set) var isLoading = false
+    private(set) var loadingMessage = ""
+    /// A screen recording framed in the current scene, playing live instead of screenshots.
+    private(set) var video: PreparedVideo?
+    private(set) var videoDevice: DeviceInfo?
+    @ObservationIgnored private var videoSourceURL: URL?
+    @ObservationIgnored private var videoTask: Task<Void, Never>?
     private(set) var statusMessage: String?
     var imageType = ImageType.individual
     var recipe = SceneRecipe()
@@ -67,6 +73,11 @@ public final class HomeV2ViewModel {
 
     public init() {
         persistence = PersistenceManager.shared
+    }
+
+    /// Whether there is anything to show, screenshots or a video.
+    var hasContent: Bool {
+        !items.isEmpty || videoSourceURL != nil
     }
 
     // MARK: - Scene
@@ -104,27 +115,29 @@ public final class HomeV2ViewModel {
         var seen = Set<String>()
         var options = [StyleOption]()
 
-        for item in items where item.device.hasColorOptions || item.device.hasViewOptions {
-            guard seen.insert(item.device.name).inserted else { continue }
+        let devices = items.map(\.device) + (videoDevice.map { [$0] } ?? [])
 
-            let group = items.filter { $0.device.name == item.device.name }
+        for device in devices where device.hasColorOptions || device.hasViewOptions {
+            guard seen.insert(device.name).inserted else { continue }
+
+            let group = devices.filter { $0.name == device.name }
             var screenKeys = Set<String>()
 
             let screens = group.compactMap { member -> StyleOption.Screen? in
-                guard member.device.hasViewOptions, screenKeys.insert(member.device.viewPreferenceKey).inserted else { return nil }
+                guard member.hasViewOptions, screenKeys.insert(member.viewPreferenceKey).inserted else { return nil }
 
                 return StyleOption.Screen(
-                    viewKey: member.device.viewPreferenceKey,
-                    screenName: member.device.screenName,
-                    views: member.device.views,
-                    selectedView: member.device.viewName ?? ""
+                    viewKey: member.viewPreferenceKey,
+                    screenName: member.screenName,
+                    views: member.views,
+                    selectedView: member.viewName ?? ""
                 )
             }
 
             options.append(StyleOption(
-                deviceName: item.device.name,
-                colors: item.device.colors,
-                selectedColor: item.device.colorName,
+                deviceName: device.name,
+                colors: device.colors,
+                selectedColor: device.colorName,
                 screens: screens
             ))
         }
@@ -145,12 +158,26 @@ public final class HomeV2ViewModel {
     /// Saves a color as the default for a device and draws it on every screenshot in that device.
     func setColor(_ color: String, forDeviceNamed name: String) {
         persistence.setPreferredColor(color, for: name)
+
+        if let device = videoDevice {
+            videoDevice = device.withColor(color)
+            rebuildVideo()
+            return
+        }
+
         restyle(where: { $0.device.name == name }) { $0.withColor(color) }
     }
 
     /// Saves a view as the default for a screen and draws it on every screenshot of that screen.
     func setView(_ view: String, forViewKey key: String) {
         persistence.setPreferredView(view, forKey: key)
+
+        if let device = videoDevice {
+            videoDevice = device.withView(view)
+            rebuildVideo()
+            return
+        }
+
         restyle(where: { $0.device.viewPreferenceKey == key }) { $0.withView(view) }
     }
 
@@ -169,7 +196,19 @@ public final class HomeV2ViewModel {
     func load(_ pickerItems: [PhotosPickerItem]) async {
         guard !pickerItems.isEmpty else { return }
 
+        if let video = pickerItems.first(where: \.isVideo) {
+            do {
+                guard let url = try await video.loadVideoURL() else { throw HomeV2Error.noSupportedScreenshots }
+                await loadVideo(at: url)
+            } catch {
+                self.error = error
+            }
+
+            return
+        }
+
         isLoading = true
+        loadingMessage = ""
         defer { isLoading = false }
 
         var loaded = [Item]()
@@ -186,21 +225,115 @@ public final class HomeV2ViewModel {
             loaded.append(item)
         }
 
-        guard !loaded.isEmpty else {
-            error = HomeV2Error.noSupportedScreenshots
-            return
+        show(loaded)
+    }
+
+    /// Loads files from the Files app: screenshots, or a screen recording.
+    func load(files urls: [URL]) async {
+        guard !urls.isEmpty else { return }
+
+        let isMovie = { (url: URL) in
+            UTType(filenameExtension: url.pathExtension)?.conforms(to: .movie) == true
         }
 
-        cancelRenders()
-        items = loaded
-        renders = [:]
-        selectedItemID = loaded.first?.id
+        do {
+            if let movie = urls.first(where: isMovie) {
+                await loadVideo(at: try Self.copyToTemporaryDirectory(movie))
+                return
+            }
 
-        if loaded.count == 1 {
-            imageType = .individual
+            isLoading = true
+            loadingMessage = ""
+            defer { isLoading = false }
+
+            let loaded = try urls.compactMap { url -> Item? in
+                let copy = try Self.copyToTemporaryDirectory(url)
+                defer { try? FileManager.default.removeItem(at: copy) }
+
+                return UIImage(data: try Data(contentsOf: copy)).flatMap(makeItem)
+            }
+
+            show(loaded)
+        } catch {
+            self.error = error
         }
+    }
 
-        loaded.forEach(render)
+    /// Sets up a screen recording in the scene, matching its size to a device. The recording is kept, so the
+    /// background, shape or device color can change while it plays.
+    func loadVideo(at sourceURL: URL) async {
+        isLoading = true
+        loadingMessage = "Preparing video…"
+        defer { isLoading = false }
+
+        do {
+            let size = try await VideoFramer.size(ofVideoAt: sourceURL)
+            let device: DeviceInfo
+
+            switch DeviceInfo.match(for: size) {
+            case .none:
+                throw HomeV2Error.noSupportedScreenshots
+            case .exact(let match):
+                device = match
+            case .ambiguous(let candidates):
+                let cached = persistence.preferredDeviceFrame(for: size)
+                device = candidates.first { $0.deviceFrame == cached } ?? candidates[0]
+            }
+
+            let styled = persistence.applyingPreferredStyle(to: device)
+            let prepared = try await VideoScene.prepare(sourceURL: sourceURL, device: styled, recipe: recipe)
+
+            clear()
+            videoSourceURL = sourceURL
+            videoDevice = styled
+            video = prepared
+        } catch {
+            self.error = error
+        }
+    }
+
+    /// Prepares the current recording again after the recipe or the device changed. The old picture keeps playing
+    /// until the new one is ready.
+    func rebuildVideo() {
+        guard let sourceURL = videoSourceURL, let device = videoDevice else { return }
+
+        videoTask?.cancel()
+
+        let recipe = recipe
+
+        videoTask = Task { [weak self] in
+            do {
+                let prepared = try await VideoScene.prepare(sourceURL: sourceURL, device: device, recipe: recipe)
+
+                guard let self, !Task.isCancelled else { return }
+
+                video = prepared
+            } catch {
+                self?.error = error
+            }
+        }
+    }
+
+    /// The video as something to share or drag out, rendered only when it is asked for.
+    var exportVideo: ExportVideo? {
+        video.map(ExportVideo.init)
+    }
+
+    func saveVideoToPhotos() async {
+        guard let exportVideo else { return }
+
+        isLoading = true
+        loadingMessage = "Exporting video…"
+        defer { isLoading = false }
+
+        do {
+            let url = try await exportVideo.writeFile()
+            try await PhotoLibraryManager.live.saveVideo(url)
+            try? FileManager.default.removeItem(at: url)
+            show("Saved to Photos")
+        } catch {
+            self.error = error
+        }
     }
 
     func reverse() {
@@ -209,6 +342,10 @@ public final class HomeV2ViewModel {
 
     func clear() {
         cancelRenders()
+        videoTask?.cancel()
+        video = nil
+        videoDevice = nil
+        videoSourceURL = nil
         items = []
         renders = [:]
         selectedItemID = nil
@@ -236,6 +373,41 @@ public final class HomeV2ViewModel {
     }
 
     // MARK: - Private Helpers
+
+    /// Replaces the current content with newly loaded screenshots and starts drawing their layers.
+    private func show(_ loaded: [Item]) {
+        guard !loaded.isEmpty else {
+            error = HomeV2Error.noSupportedScreenshots
+            return
+        }
+
+        cancelRenders()
+        videoTask?.cancel()
+        video = nil
+        videoDevice = nil
+        videoSourceURL = nil
+        items = loaded
+        renders = [:]
+        selectedItemID = loaded.first?.id
+
+        if loaded.count == 1 {
+            imageType = .individual
+        }
+
+        loaded.forEach(render)
+    }
+
+    /// Copies a file picked in the Files app into the temporary directory, where the app is allowed to read it.
+    private static func copyToTemporaryDirectory(_ url: URL) throws -> URL {
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if accessing { url.stopAccessingSecurityScopedResource() }
+        }
+
+        let copy = URL.temporaryDirectory.appending(path: "Source \(UUID()).\(url.pathExtension)")
+        try FileManager.default.copyItem(at: url, to: copy)
+        return copy
+    }
 
     private func makeItem(_ screenshot: UIImage) -> Item? {
         let size = screenshot.size

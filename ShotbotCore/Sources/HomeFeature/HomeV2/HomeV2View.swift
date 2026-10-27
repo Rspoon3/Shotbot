@@ -14,6 +14,7 @@ import SwiftUI
 public struct HomeV2View: View {
     @State private var viewModel = HomeV2ViewModel()
     @State private var showPhotosPicker = false
+    @State private var showFileImporter = false
     @State private var selection = [PhotosPickerItem]()
 
     // MARK: - Initializer
@@ -40,7 +41,7 @@ public struct HomeV2View: View {
 
             preview
 
-            if !viewModel.items.isEmpty {
+            if viewModel.hasContent {
                 controls
             }
         }
@@ -48,7 +49,12 @@ public struct HomeV2View: View {
         .background(Color(.secondarySystemBackground).ignoresSafeArea())
         .navigationTitle("Shotbot V2")
         .navigationBarTitleDisplayMode(.inline)
-        .photosPicker(isPresented: $showPhotosPicker, selection: $selection, matching: .images)
+        .photosPicker(isPresented: $showPhotosPicker, selection: $selection, matching: .any(of: [.images, .videos]))
+        .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.image, .movie], allowsMultipleSelection: true) { result in
+            guard case .success(let urls) = result else { return }
+
+            Task { await viewModel.load(files: urls) }
+        }
         .onChange(of: selection) { _, newValue in
             guard !newValue.isEmpty else { return }
 
@@ -71,11 +77,21 @@ public struct HomeV2View: View {
         .animation(.default, value: viewModel.statusMessage)
         .overlay {
             if viewModel.isLoading {
-                ProgressView()
-                    .scaleEffect(1.5)
-                    .padding(20)
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .scaleEffect(1.5)
+
+                    if !viewModel.loadingMessage.isEmpty {
+                        Text(viewModel.loadingMessage)
+                            .font(.subheadline)
+                    }
+                }
+                .padding(20)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8))
             }
+        }
+        .onChange(of: viewModel.recipe) { _, _ in
+            viewModel.rebuildVideo()
         }
         .alert(error: $viewModel.error)
         .toolbar { toolbar }
@@ -85,7 +101,11 @@ public struct HomeV2View: View {
 
     @ViewBuilder
     private var preview: some View {
-        if viewModel.items.isEmpty {
+        if let video = viewModel.video {
+            VideoPreview(video: video)
+                .padding(.horizontal, 8)
+                .draggable(ExportVideo(video: video))
+        } else if viewModel.items.isEmpty {
             placeholder
         } else if viewModel.imageType == .combined, viewModel.items.count > 1 {
             image(viewModel.combinedImage)
@@ -131,6 +151,10 @@ public struct HomeV2View: View {
                     .padding(.vertical, 6)
             }
             .buttonStyle(.borderedProminent)
+
+            Button("Select From Files") {
+                showFileImporter = true
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -148,20 +172,46 @@ public struct HomeV2View: View {
                 .padding(.horizontal)
             }
 
-            HStack(spacing: 12) {
-                Image(systemName: "rectangle.dashed")
-                    .foregroundStyle(.secondary)
+            if viewModel.recipe.background == .photo {
+                HStack(spacing: 8) {
+                    Text("Blur")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
 
-                Slider(value: $viewModel.recipe.padding, in: 0...0.3)
-
-                Toggle("Shadow", isOn: $viewModel.recipe.hasShadow)
-                    .toggleStyle(.button)
-                    .buttonStyle(.bordered)
+                    ForEach(BackgroundBlur.allCases) { blur in
+                        chip(blur.title, isSelected: viewModel.recipe.blur == blur) {
+                            viewModel.recipe.blur = blur
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(CanvasAspect.allCases) { aspect in
+                        chip(aspect.title, isSelected: viewModel.recipe.aspect == aspect) {
+                            viewModel.recipe.aspect = aspect
+                        }
+                    }
+
+                    chip("Shadow", isSelected: viewModel.recipe.hasShadow) {
+                        viewModel.recipe.hasShadow.toggle()
+                    }
+                }
+                .padding(.horizontal)
+            }
         }
         .padding(.vertical, 12)
         .background(.bar)
+    }
+
+    private func chip(_ title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(title, action: action)
+            .buttonStyle(.bordered)
+            .tint(isSelected ? .accentColor : .secondary)
+            .fontWeight(isSelected ? .semibold : .regular)
     }
 
     private func swatch(_ style: BackgroundStyle) -> some View {
@@ -193,7 +243,7 @@ public struct HomeV2View: View {
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
-            if !viewModel.items.isEmpty {
+            if viewModel.hasContent {
                 Button("Clear", role: .destructive) {
                     viewModel.clear()
                 }
@@ -202,7 +252,21 @@ public struct HomeV2View: View {
         }
 
         ToolbarItemGroup(placement: .primaryAction) {
-            if !viewModel.items.isEmpty {
+            if let video = viewModel.exportVideo {
+                styleMenu
+
+                ShareLink(item: video, preview: SharePreview("Framed Video"))
+
+                Menu {
+                    Button {
+                        Task { await viewModel.saveVideoToPhotos() }
+                    } label: {
+                        Label("Save to Photos", systemImage: "photo.badge.arrow.down")
+                    }
+                } label: {
+                    Label("More", systemImage: "ellipsis.circle")
+                }
+            } else if !viewModel.items.isEmpty {
                 styleMenu
 
                 if viewModel.items.count > 1 {

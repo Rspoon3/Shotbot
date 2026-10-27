@@ -24,6 +24,15 @@ public struct AppTabNavigation: View {
     public var body: some View {
         TabView(selection: $tabManager.selectedTab) {
             NavigationStack {
+                HomeV2View()
+            }
+            .tabItem {
+                Label("Home V2", systemImage: "sparkles")
+                    .accessibility(label: Text("Home V2"))
+            }
+            .tag(Tab.homeV2)
+            
+            NavigationStack {
                 HomeView(viewModel: .init())
                     .navigationBarTitleDisplayMode(ProcessInfo.processInfo.isiOSAppOnMac ? .inline : .automatic)
             }

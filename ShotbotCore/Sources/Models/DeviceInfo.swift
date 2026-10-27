@@ -181,7 +181,7 @@ public struct DeviceInfo: Sendable {
     }
 
     /// The angle the selected view opens the frame to, or `nil` for a flat view.
-    var openingAngle: Double? {
+    public var openingAngle: Double? {
         viewFrame.openingAngle
     }
 

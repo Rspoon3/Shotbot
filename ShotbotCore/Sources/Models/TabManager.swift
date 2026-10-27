@@ -8,7 +8,7 @@
 import Foundation
 
 public final class TabManager: ObservableObject {
-    @Published public var selectedTab: Tab = .home
+    @Published public var selectedTab: Tab = .homeV2
     
     public init() {}
 }

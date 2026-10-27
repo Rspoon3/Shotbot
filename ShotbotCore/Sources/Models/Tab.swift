@@ -8,5 +8,5 @@
 import Foundation
 
 public enum Tab {
-    case home, settings
+    case homeV2, home, settings
 }

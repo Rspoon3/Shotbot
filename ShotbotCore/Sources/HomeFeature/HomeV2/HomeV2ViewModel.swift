@@ -439,9 +439,7 @@ public final class HomeV2ViewModel {
 
         renderTasks[item.id] = Task { [weak self] in
             do {
-                let render = try await Task.detached(priority: .userInitiated) {
-                    try store.deviceRender(id: item.id, screenshot: item.screenshot, device: item.device)
-                }.value
+                let render = try await store.deviceRender(id: item.id, screenshot: item.screenshot, device: item.device)
 
                 guard let self, !Task.isCancelled, items.contains(where: { $0.id == item.id }) else { return }
 

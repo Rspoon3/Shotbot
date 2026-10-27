@@ -10,7 +10,7 @@ import Metal
 import Models
 import UIKit
 
-/// Builds and remembers the expensive layers of a framed screenshot.
+/// Builds the expensive layers of a framed screenshot and keeps them in a `LayerCache`.
 ///
 /// A layer is drawn once at full size into a GPU-backed buffer and then reused, so changing something small, like the
 /// device's color, only redraws the layer that depends on it:
@@ -26,20 +26,9 @@ final class LayerStore: @unchecked Sendable {
     let metalDevice: MTLDevice?
     let commandQueue: MTLCommandQueue?
 
-    private let layers = NSCache<NSString, Layer>()
+    private let layers = LayerCache(budget: 700_000_000)
     private let displayP3 = CGColorSpace(name: CGColorSpace.displayP3)!
     private let sRGB = CGColorSpace(name: CGColorSpace.sRGB)!
-
-    /// A cached image, with its size in memory so the cache can stay within its budget.
-    private final class Layer {
-        let image: CIImage
-        let shadow: CIImage?
-
-        init(image: CIImage, shadow: CIImage? = nil) {
-            self.image = image
-            self.shadow = shadow
-        }
-    }
 
     // MARK: - Initializer
 
@@ -53,14 +42,12 @@ final class LayerStore: @unchecked Sendable {
             context = CIContext()
         }
 
-        layers.totalCostLimit = 700_000_000
-
         NotificationCenter.default.addObserver(
             forName: UIApplication.didReceiveMemoryWarningNotification,
             object: nil,
             queue: nil
         ) { [layers] _ in
-            layers.removeAllObjects()
+            Task { await layers.removeAll() }
         }
     }
 
@@ -71,28 +58,27 @@ final class LayerStore: @unchecked Sendable {
     ///   - id: Identifies the screenshot.
     ///   - screenshot: The screenshot.
     ///   - device: The device, in the color and view to draw.
-    func deviceRender(id: UUID, screenshot: UIImage, device: DeviceInfo) throws -> DeviceRender {
-        let key = "device|\(screenKey(id: id, device: device))|\(device.deviceFrame)" as NSString
+    func deviceRender(id: UUID, screenshot: UIImage, device: DeviceInfo) async throws -> DeviceRender {
+        let key = "device|\(screenKey(id: id, device: device))|\(device.deviceFrame)"
 
-        if let cached = layers.object(forKey: key) {
-            return DeviceRender(device: cached.image, shadow: cached.shadow)
+        let layer = try await layers.layer(for: key) { [self] in
+            let screen = try await screenLayer(id: id, screenshot: screenshot, device: device)
+            let frame = try await frameImage(for: device)
+            let flat = frame.composited(over: screen).cropped(to: frame.extent)
+
+            let render: DeviceRender
+
+            if device.isPartiallyOpen, let angle = device.openingAngle {
+                render = try foldedRender(of: flat, openingAngle: angle)
+            } else {
+                let baked = try bake(flat, extent: flat.extent)
+                render = DeviceRender(device: baked, shadow: try bake(shadow(of: baked), extent: shadowExtent(of: baked)))
+            }
+
+            return CachedLayer(image: render.device, shadow: render.shadow, cost: cost(of: render))
         }
 
-        let screen = try screenLayer(id: id, screenshot: screenshot, device: device)
-        let frame = try frameImage(for: device)
-        let flat = frame.composited(over: screen).cropped(to: frame.extent)
-
-        let render: DeviceRender
-
-        if device.isPartiallyOpen, let angle = device.openingAngle {
-            render = try foldedRender(of: flat, openingAngle: angle)
-        } else {
-            let baked = try bake(flat, extent: flat.extent)
-            render = DeviceRender(device: baked, shadow: try bake(shadow(of: baked), extent: shadowExtent(of: baked)))
-        }
-
-        layers.setObject(Layer(image: render.device, shadow: render.shadow), forKey: key, cost: cost(of: render))
-        return render
+        return DeviceRender(device: layer.image, shadow: layer.shadow)
     }
 
     /// Draws an image once, so it can be used many times without being worked out again.
@@ -101,7 +87,7 @@ final class LayerStore: @unchecked Sendable {
     }
 
     /// The layers of a device with a plain screen, for its outline and shadow when the screen's content changes.
-    func silhouette(of device: DeviceInfo) throws -> DeviceRender {
+    func silhouette(of device: DeviceInfo) async throws -> DeviceRender {
         let size = device.inputSize
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
@@ -111,7 +97,7 @@ final class LayerStore: @unchecked Sendable {
             context.fill(CGRect(origin: .zero, size: size))
         }
 
-        return try deviceRender(id: Self.silhouetteID, screenshot: solid, device: device)
+        return try await deviceRender(id: Self.silhouetteID, screenshot: solid, device: device)
     }
 
     private static let silhouetteID = UUID()
@@ -146,57 +132,50 @@ final class LayerStore: @unchecked Sendable {
         "\(id.uuidString)|\(device.name)|\(device.screenName ?? "")|\(device.orientation)|\(device.resolutionName)|\(device.viewName ?? "")"
     }
 
-    private func frameImage(for device: DeviceInfo) throws -> CIImage {
-        let key = "frame|\(device.deviceFrame)" as NSString
+    private func frameImage(for device: DeviceInfo) async throws -> CIImage {
+        let layer = try await layers.layer(for: "frame|\(device.deviceFrame)") {
+            guard let cgImage = device.frameImage?.cgImage else { throw LayerStoreError.missingFrame }
 
-        if let cached = layers.object(forKey: key) {
-            return cached.image
+            return CachedLayer(image: CIImage(cgImage: cgImage), cost: cgImage.bytesPerRow * cgImage.height)
         }
 
-        guard let cgImage = device.frameImage?.cgImage else { throw LayerStoreError.missingFrame }
-
-        let image = CIImage(cgImage: cgImage)
-        layers.setObject(Layer(image: image), forKey: key, cost: cgImage.bytesPerRow * cgImage.height)
-        return image
+        return layer.image
     }
 
     /// The screenshot scaled to the screen, clipped to its rounded corners, and placed where the frame has its screen.
-    private func screenLayer(id: UUID, screenshot: UIImage, device: DeviceInfo) throws -> CIImage {
-        let key = "screen|\(screenKey(id: id, device: device))" as NSString
+    private func screenLayer(id: UUID, screenshot: UIImage, device: DeviceInfo) async throws -> CIImage {
+        let layer = try await layers.layer(for: "screen|\(screenKey(id: id, device: device))") { [self] in
+            let frame = try await frameImage(for: device)
+            let frameSize = frame.extent.size
 
-        if let cached = layers.object(forKey: key) {
-            return cached.image
-        }
+            guard let source = CIImage(image: screenshot) else { throw LayerStoreError.bufferFailed }
 
-        let frame = try frameImage(for: device)
-        let frameSize = frame.extent.size
+            var screen = source
+                .transformed(by: CGAffineTransform(translationX: -source.extent.minX, y: -source.extent.minY))
+                .transformed(by: CGAffineTransform(
+                    scaleX: device.screenSize.width / source.extent.width,
+                    y: device.screenSize.height / source.extent.height
+                ))
 
-        guard let source = CIImage(image: screenshot) else { throw LayerStoreError.bufferFailed }
+            if let mask = device.screenMask {
+                // The mask is gray, so its brightness is turned into the alpha the blend reads.
+                screen = screen.applyingFilter("CIBlendWithAlphaMask", parameters: [
+                    kCIInputBackgroundImageKey: CIImage.empty(),
+                    kCIInputMaskImageKey: CIImage(cgImage: mask).applyingFilter("CIMaskToAlpha")
+                ])
+            }
 
-        var screen = source
-            .transformed(by: CGAffineTransform(translationX: -source.extent.minX, y: -source.extent.minY))
-            .transformed(by: CGAffineTransform(
-                scaleX: device.screenSize.width / source.extent.width,
-                y: device.screenSize.height / source.extent.height
+            // Core Image's origin is the bottom-left, while the offset is measured from the top-left.
+            screen = screen.transformed(by: CGAffineTransform(
+                translationX: device.offSet.x,
+                y: frameSize.height - device.offSet.y - device.screenSize.height
             ))
 
-        if let mask = device.screenMask {
-            // The mask is gray, so its brightness is turned into the alpha the blend reads.
-            screen = screen.applyingFilter("CIBlendWithAlphaMask", parameters: [
-                kCIInputBackgroundImageKey: CIImage.empty(),
-                kCIInputMaskImageKey: CIImage(cgImage: mask).applyingFilter("CIMaskToAlpha")
-            ])
+            let baked = try bake(screen.cropped(to: frame.extent), extent: frame.extent)
+            return CachedLayer(image: baked, cost: bytes(of: frame.extent))
         }
 
-        // Core Image's origin is the bottom-left, while the offset is measured from the top-left.
-        screen = screen.transformed(by: CGAffineTransform(
-            translationX: device.offSet.x,
-            y: frameSize.height - device.offSet.y - device.screenSize.height
-        ))
-
-        let baked = try bake(screen.cropped(to: frame.extent), extent: frame.extent)
-        layers.setObject(Layer(image: baked), forKey: key, cost: bytes(of: frame.extent))
-        return baked
+        return layer.image
     }
 
     /// Folds a flat device. The fold draws its own shadow, on a canvas larger than the device.

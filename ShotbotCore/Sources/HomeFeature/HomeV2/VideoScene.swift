@@ -21,7 +21,7 @@ enum VideoScene {
         let store = LayerStore.shared
 
         // The device's outline never changes, so its shadow and the background are drawn once for every frame.
-        let outline = try store.silhouette(of: device)
+        let outline = try await store.silhouette(of: device)
         let shadow = device.isPartiallyOpen ? nil : outline.shadow
         let deviceSize = try framer.deviceSize(in: device)
 

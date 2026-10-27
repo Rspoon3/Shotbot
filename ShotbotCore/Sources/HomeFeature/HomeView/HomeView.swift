@@ -156,8 +156,14 @@ public struct HomeView: View {
                 PurchaseView()
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Dismiss") {
-                                viewModel.showPurchaseView = false
+                            if #available(iOS 26.0, *) {
+                                Button(role: .close) {
+                                    viewModel.showPurchaseView = false
+                                }
+                            } else {
+                                Button("Dismiss") {
+                                    viewModel.showPurchaseView = false
+                                }
                             }
                         }
                     }
@@ -489,6 +495,73 @@ public struct HomeView: View {
         
         
         ShareLink(items: [shareableImage.url])
+        
+        imageStyleMenu(for: shareableImage)
+    }
+    
+    /// Frame color and view choices for just this screenshot, so screenshots can be mixed and matched.
+    ///
+    /// Only shown for individual images when there is more than one. A choice made here wins over the toolbar menu's choice
+    /// for this screenshot until it is cleared.
+    @ViewBuilder
+    private func imageStyleMenu(for shareableImage: ShareableImage) -> some View {
+        if let option = viewModel.styleOption(forImageWithID: shareableImage.id) {
+            Menu {
+                if option.hasColors {
+                    Section("Color") {
+                        Picker("Color", selection: imageColorSelection(for: shareableImage, option: option)) {
+                            ForEach(option.colors, id: \.self) { color in
+                                Text(color)
+                                    .tag(color)
+                            }
+                        }
+                    }
+                }
+                
+                ForEach(option.screens) { screen in
+                    Section("View") {
+                        Picker("View", selection: imageViewSelection(for: shareableImage, screen: screen)) {
+                            ForEach(screen.views, id: \.self) { view in
+                                Text(view)
+                                    .tag(view)
+                            }
+                        }
+                    }
+                }
+                
+                if option.isCustomized {
+                    Button {
+                        Task(priority: .userInitiated) {
+                            await viewModel.resetStyle(forImageWithID: shareableImage.id)
+                        }
+                    } label: {
+                        Label("Use Toolbar Choice", symbol: .arrowCounterclockwise)
+                    }
+                }
+            } label: {
+                Label("Frame Style", symbol: .paintpalette)
+            }
+        }
+    }
+    
+    private func imageColorSelection(for shareableImage: ShareableImage, option: DeviceStyleOption) -> Binding<String> {
+        Binding {
+            option.selectedColor ?? ""
+        } set: { color in
+            Task(priority: .userInitiated) {
+                await viewModel.didSelectColor(color, forImageWithID: shareableImage.id)
+            }
+        }
+    }
+    
+    private func imageViewSelection(for shareableImage: ShareableImage, screen: DeviceStyleOption.Screen) -> Binding<String> {
+        Binding {
+            screen.selectedView
+        } set: { view in
+            Task(priority: .userInitiated) {
+                await viewModel.didSelectView(view, forImageWithID: shareableImage.id)
+            }
+        }
     }
     
     private func individualImagesView(_ shareableImages: [ShareableImage]) -> some View {

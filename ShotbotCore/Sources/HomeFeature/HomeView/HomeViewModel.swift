@@ -249,14 +249,16 @@ import SwiftTools
     
     /// Runs the user's auto save and auto copy settings on the current images.
     ///
-    /// - Parameter savingIndividualImages: Pass `false` when only the combined image changed, such as after swapping
-    ///   places, so the unchanged individual images are not saved a second time.
-    private func runAutoActions(savingIndividualImages: Bool = true) async {
+    /// - Parameter images: The individual images to auto save. Defaults to all of them. Pass only the ones that changed
+    ///   after a re-frame, or none after swapping places, so unchanged images are not saved a second time.
+    private func runAutoActions(savingIndividualImages images: [ShareableImage]? = nil) async {
+        let individualImages = images ?? imageResults.individual
+        
         try? await autoCRUDManager.autoSaveCombinedIfNeeded(using: imageResults.combined?.url)
         copyAutomatically()
         
-        if savingIndividualImages {
-            try? await autoCRUDManager.autoSaveIndividualImagesIfNeeded(using: imageResults.individual) { [weak self] in
+        if !individualImages.isEmpty {
+            try? await autoCRUDManager.autoSaveIndividualImagesIfNeeded(using: individualImages) { [weak self] in
                 DispatchQueue.main.async {
                     self?.showAutoSaveToast = true
                 }
@@ -320,6 +322,13 @@ import SwiftTools
         
         // ImageResults updating
         imageResults.originalScreenshots = screenshots
+        
+        if case .existingScreenshots = source, imageResults.overrides.count == screenshots.count {
+            // The same screenshots again, such as after changing image quality, keep their own choices.
+        } else {
+            imageResults.overrides = Array(repeating: StyleOverride(), count: screenshots.count)
+        }
+        
         try await updateImageResultsIndividualImages(using: screenshots)
         
         // Reset view
@@ -425,7 +434,8 @@ import SwiftTools
             throw SBError.unsupportedImage
         }
         
-        let device = persistenceManager.applyingPreferredStyle(to: resolved)
+        let styled = persistenceManager.applyingPreferredStyle(to: resolved)
+        let device = imageResults.overrides.indices.contains(count) ? imageResults.overrides[count].applied(to: styled) : styled
         
         return (try makeShareableImage(from: screenshot, device: device, count: count), device)
     }
@@ -451,6 +461,8 @@ import SwiftTools
     }
     
     /// Rebuilds `styleOptions` from the devices in the current screenshots.
+    ///
+    /// The selections shown are the choices for all screenshots. A screenshot with a choice of its own can differ.
     private func refreshStyleOptions() {
         var names = [String]()
         var groups = [String: [DeviceInfo]]()
@@ -460,32 +472,41 @@ import SwiftTools
             groups[device.name, default: []].append(device)
         }
         
-        styleOptions = names.compactMap { name in
+        styleOptions = names.compactMap { name -> DeviceStyleOption? in
             guard let group = groups[name] else { return nil }
             let colored = group.first(where: \.hasColorOptions)
             
             // A device with several screens, like the iPhone Duo, is one option with a set of views per screen.
             var seenScreens = Set<String>()
             let screens = group.compactMap { device -> DeviceStyleOption.Screen? in
-                guard device.hasViewOptions, let view = device.viewName, seenScreens.insert(device.viewPreferenceKey).inserted else {
-                    return nil
-                }
+                guard device.hasViewOptions, seenScreens.insert(device.viewPreferenceKey).inserted else { return nil }
                 
                 return DeviceStyleOption.Screen(
                     screenName: device.screenName,
                     viewKey: device.viewPreferenceKey,
                     views: device.views,
-                    selectedView: view
+                    selectedView: currentView(for: device)
                 )
             }
             
             return DeviceStyleOption(
                 deviceName: name,
                 colors: colored?.colors ?? [],
-                selectedColor: colored?.colorName,
+                selectedColor: colored.flatMap(currentColor(for:)),
                 screens: screens
             )
         }
+    }
+    
+    /// The color chosen for all of a device's screenshots: the saved one if the device has it, otherwise its default.
+    private func currentColor(for device: DeviceInfo) -> String? {
+        persistenceManager.preferredColor(for: device.name).flatMap { device.colors.contains($0) ? $0 : nil } ?? device.colors.first
+    }
+    
+    /// The view chosen for all of a screen's screenshots: the saved one if the screen has it, otherwise its default.
+    private func currentView(for device: DeviceInfo) -> String {
+        persistenceManager.preferredView(forKey: device.viewPreferenceKey).flatMap { device.views.contains($0) ? $0 : nil }
+            ?? device.views.first ?? ""
     }
     
     private func clearTemporaryDirectory() {
@@ -712,63 +733,212 @@ import SwiftTools
         isLoading = false
         
         // Only the combined image changed. The individual images are the same, just in a new order.
-        await runAutoActions(savingIndividualImages: false)
+        await runAutoActions(savingIndividualImages: [])
     }
     
-    /// Saves a frame color as the default for a device, then re-frames the current screenshots with it.
+    /// Saves a frame color as the default for a device, then re-frames the screenshots that use it.
+    ///
+    /// A screenshot with a color of its own keeps it.
     public func didSelectColor(_ color: String, forDeviceNamed deviceName: String) async {
-        guard imageResults.devices.contains(where: { $0.name == deviceName && $0.hasColorOptions && $0.colorName != color }) else { return }
+        guard
+            let sample = imageResults.devices.first(where: { $0.name == deviceName && $0.hasColorOptions }),
+            sample.colors.contains(color),
+            currentColor(for: sample) != color
+        else {
+            return
+        }
         
         persistenceManager.setPreferredColor(color, for: deviceName)
-        await reframe(devicesMatching: { $0.name == deviceName }) { $0.withColor(color) }
+        
+        let changed = restyleDevices(
+            matching: { $0.name == deviceName },
+            ignoring: \.color,
+            apply: { $0.withColor(color) }
+        )
+        
+        refreshStyleOptions()
+        await reframe(changed)
     }
     
-    /// Saves a frame view as the default for a screen, then re-frames the current screenshots with it.
+    /// Saves a frame view as the default for a screen, then re-frames the screenshots that use it.
     ///
     /// A view is another look of a screen, such as the iPhone Duo's outer screen open instead of closed or its inner
-    /// screen partially open.
+    /// screen partially open. A screenshot with a view of its own keeps it.
     /// - Parameter viewKey: `DeviceInfo.viewPreferenceKey` of the screen.
     public func didSelectView(_ view: String, forViewKey viewKey: String) async {
-        guard imageResults.devices.contains(where: { $0.viewPreferenceKey == viewKey && $0.hasViewOptions && $0.viewName != view }) else { return }
+        guard
+            let sample = imageResults.devices.first(where: { $0.viewPreferenceKey == viewKey && $0.hasViewOptions }),
+            sample.views.contains(view),
+            currentView(for: sample) != view
+        else {
+            return
+        }
         
         persistenceManager.setPreferredView(view, forKey: viewKey)
-        await reframe(devicesMatching: { $0.viewPreferenceKey == viewKey }) { $0.withView(view) }
+        
+        let changed = restyleDevices(
+            matching: { $0.viewPreferenceKey == viewKey },
+            ignoring: \.view,
+            apply: { $0.withView(view) }
+        )
+        
+        refreshStyleOptions()
+        await reframe(changed)
     }
     
-    /// Re-frames the current screenshots after a device's frame style changed.
+    /// The frame choices for one screenshot, for its context menu. `nil` when there is nothing to choose, which is
+    /// also the case when there is only one screenshot, since the toolbar menu covers that.
+    public func styleOption(forImageWithID id: ShareableImage.ID) -> DeviceStyleOption? {
+        guard
+            imageResults.hasMultipleImages,
+            let index = imageResults.individual.firstIndex(where: { $0.id == id }),
+            index < imageResults.devices.count,
+            imageResults.devices[index].hasColorOptions || imageResults.devices[index].hasViewOptions
+        else {
+            return nil
+        }
+        
+        let device = imageResults.devices[index]
+        let screens = device.hasViewOptions
+            ? [DeviceStyleOption.Screen(
+                screenName: device.screenName,
+                viewKey: device.viewPreferenceKey,
+                views: device.views,
+                selectedView: device.viewName ?? ""
+            )]
+            : []
+        
+        var option = DeviceStyleOption(
+            deviceName: device.name,
+            colors: device.colors,
+            selectedColor: device.colorName,
+            screens: screens
+        )
+        option.isCustomized = index < imageResults.overrides.count && !imageResults.overrides[index].isEmpty
+        return option
+    }
+    
+    /// Picks a frame color for one screenshot only, then re-frames it and the combined image.
+    public func didSelectColor(_ color: String, forImageWithID id: ShareableImage.ID) async {
+        guard
+            let index = imageResults.individual.firstIndex(where: { $0.id == id }),
+            index < imageResults.devices.count,
+            imageResults.devices[index].colors.contains(color),
+            imageResults.devices[index].colorName != color
+        else {
+            return
+        }
+        
+        imageResults.overrides[index].color = color
+        imageResults.devices[index] = imageResults.devices[index].withColor(color)
+        await reframe([index])
+    }
+    
+    /// Picks a frame view for one screenshot only, then re-frames it and the combined image.
+    public func didSelectView(_ view: String, forImageWithID id: ShareableImage.ID) async {
+        guard
+            let index = imageResults.individual.firstIndex(where: { $0.id == id }),
+            index < imageResults.devices.count,
+            imageResults.devices[index].views.contains(view),
+            imageResults.devices[index].viewName != view
+        else {
+            return
+        }
+        
+        imageResults.overrides[index].view = view
+        imageResults.devices[index] = imageResults.devices[index].withView(view)
+        await reframe([index])
+    }
+    
+    /// Clears what was picked for one screenshot, so it follows the choice for all of them again.
+    public func resetStyle(forImageWithID id: ShareableImage.ID) async {
+        guard
+            let index = imageResults.individual.firstIndex(where: { $0.id == id }),
+            index < imageResults.overrides.count,
+            !imageResults.overrides[index].isEmpty
+        else {
+            return
+        }
+        
+        imageResults.overrides[index] = StyleOverride()
+        
+        // Back to the device's defaults, then the choices for all screenshots on top.
+        var device = imageResults.devices[index]
+        device = device.colors.first.map { device.withColor($0) } ?? device
+        device = device.views.first.map { device.withView($0) } ?? device
+        imageResults.devices[index] = persistenceManager.applyingPreferredStyle(to: device)
+        
+        await reframe([index])
+    }
+    
+    /// Changes the devices of the screenshots that match, except those with a choice of their own for that setting.
+    /// - Returns: The indices of the screenshots whose device changed.
+    private func restyleDevices(
+        matching isAffected: (DeviceInfo) -> Bool,
+        ignoring ownChoice: KeyPath<StyleOverride, String?>,
+        apply change: (DeviceInfo) -> DeviceInfo
+    ) -> [Int] {
+        var changed = [Int]()
+        
+        for index in imageResults.devices.indices {
+            let device = imageResults.devices[index]
+            let hasOwnChoice = index < imageResults.overrides.count && imageResults.overrides[index][keyPath: ownChoice] != nil
+            
+            guard isAffected(device), !hasOwnChoice else { continue }
+            
+            let updated = change(device)
+            guard updated.deviceFrame != device.deviceFrame || updated.viewName != device.viewName else { continue }
+            
+            imageResults.devices[index] = updated
+            changed.append(index)
+        }
+        
+        return changed
+    }
+    
+    /// Re-frames the screenshots at `indices` after their frame style changed, then rebuilds the combined image.
     ///
-    /// Rebuilds both the individual and combined images, then runs the auto save and auto copy settings on them.
     /// It reuses the devices already chosen for each screenshot, so it never asks which device to use again, and it
-    /// does not count as a new framed screenshot or delete the original screenshots.
+    /// does not count as a new framed screenshot or delete the original screenshots. Then the auto save and auto copy
+    /// settings run on the images that changed.
     ///
     /// The current images stay on screen under the loading spinner and are replaced once, like when the image quality
     /// changes or the combined images are reversed.
-    private func reframe(devicesMatching isAffected: (DeviceInfo) -> Bool, applying change: (DeviceInfo) -> DeviceInfo) async {
-        logger.info("Re-framing screenshots with a new frame style.")
+    private func reframe(_ indices: [Int]) async {
+        guard !indices.isEmpty else { return }
+        
+        logger.info("Re-framing \(indices.count, privacy: .public) screenshot(s) with a new frame style.")
         
         isLoading = true
         defer { isLoading = false }
         
         stopCombinedImageTask()
         
-        let previousURLs = imageResults.individual.map(\.url) + [imageResults.combined?.url].compactMap { $0 }
-        imageResults.devices = imageResults.devices.map { isAffected($0) ? change($0) : $0 }
+        let previousURLs = indices.map { imageResults.individual[$0].url } + [imageResults.combined?.url].compactMap { $0 }
         
         do {
-            var shareableImages = [ShareableImage]()
+            var images = imageResults.individual
+            var replaced = [ShareableImage]()
             
-            for (index, (screenshot, device)) in zip(imageResults.originalScreenshots, imageResults.devices).enumerated() {
-                shareableImages.append(try makeShareableImage(from: screenshot, device: device, count: index))
+            for index in indices {
+                let image = try makeShareableImage(
+                    from: imageResults.originalScreenshots[index],
+                    device: imageResults.devices[index],
+                    count: index
+                )
+                
+                images[index] = image
+                replaced.append(image)
             }
             
             // `viewState` still holds the previous images, so they stay visible until the new ones replace them.
-            imageResults.individual = shareableImages
+            imageResults.individual = images
             imageResults.combined = nil
             refreshStyleOptions()
             
             switch imageType {
             case .individual:
-                viewState = .individualImages(shareableImages)
+                viewState = .individualImages(images)
                 isLoading = false
                 await combineDeviceFrames()
             case .combined:
@@ -786,7 +956,7 @@ import SwiftTools
             previousURLs.forEach { try? fileManager.removeItem(at: $0) }
             
             // The images changed, so the auto save and auto copy settings apply to the new ones.
-            await runAutoActions()
+            await runAutoActions(savingIndividualImages: replaced)
         } catch {
             logger.error("Could not re-frame screenshots: \(error.localizedDescription, privacy: .public).")
             self.error = error

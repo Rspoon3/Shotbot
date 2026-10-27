@@ -203,13 +203,14 @@ public struct HomeView: View {
     
     /// A toolbar menu for choosing the frame color and view of the devices in the current screenshots.
     ///
-    /// Only devices whose frame has more than one color or view are listed. With several such devices, each section is
-    /// named after its device.
+    /// Only devices whose frame has more than one color or view are listed. A device gets a color section, and a view
+    /// section for each of its screens that has views. With several choices, each section is named after what it
+    /// changes.
     private var styleMenu: some View {
         Menu {
             ForEach(viewModel.styleOptions) { option in
                 if option.hasColors {
-                    Section(sectionTitle("Color", for: option)) {
+                    Section(sectionTitle("color", for: option)) {
                         Picker(option.deviceName, selection: colorSelection(for: option)) {
                             ForEach(option.colors, id: \.self) { color in
                                 Text(color)
@@ -219,10 +220,10 @@ public struct HomeView: View {
                     }
                 }
 
-                if option.hasViews {
-                    Section(sectionTitle("View", for: option)) {
-                        Picker(option.deviceName, selection: viewSelection(for: option)) {
-                            ForEach(option.views, id: \.self) { view in
+                ForEach(option.screens) { screen in
+                    Section(sectionTitle("view", for: option, screen: screen)) {
+                        Picker(option.deviceName, selection: viewSelection(for: screen)) {
+                            ForEach(screen.views, id: \.self) { view in
                                 Text(view)
                                     .tag(view)
                             }
@@ -235,8 +236,21 @@ public struct HomeView: View {
         }
     }
 
-    private func sectionTitle(_ title: String, for option: DeviceStyleOption) -> String {
-        viewModel.styleOptions.count > 1 ? "\(option.deviceName) \(title.lowercased())" : title
+    /// "Color" or "View", with the device and screen in front of it when there is more than one of them.
+    private func sectionTitle(_ title: String, for option: DeviceStyleOption, screen: DeviceStyleOption.Screen? = nil) -> String {
+        var parts = [String]()
+
+        if viewModel.styleOptions.count > 1 {
+            parts.append(option.deviceName)
+        }
+
+        if let screenName = screen?.screenName, option.screens.count > 1 {
+            parts.append(screenName)
+        }
+
+        guard !parts.isEmpty else { return title.capitalized }
+
+        return (parts + [title]).joined(separator: " ")
     }
 
     private func colorSelection(for option: DeviceStyleOption) -> Binding<String> {
@@ -249,12 +263,12 @@ public struct HomeView: View {
         }
     }
 
-    private func viewSelection(for option: DeviceStyleOption) -> Binding<String> {
+    private func viewSelection(for screen: DeviceStyleOption.Screen) -> Binding<String> {
         Binding {
-            option.selectedView ?? ""
+            screen.selectedView
         } set: { view in
             Task(priority: .userInitiated) {
-                await viewModel.didSelectView(view, forDeviceNamed: option.deviceName)
+                await viewModel.didSelectView(view, forViewKey: screen.viewKey)
             }
         }
     }

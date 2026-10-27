@@ -7,6 +7,8 @@
 
 import SwiftUI
 import PhotosUI
+import AVFoundation
+import UniformTypeIdentifiers
 import Models
 import Persistence
 import Purchases
@@ -44,6 +46,8 @@ import SwiftTools
     @Published public var isLoading = false
     @Published public var imageSelections: [PhotosPickerItem] = []
     @Published public var viewState: ViewState = .individualPlaceholder
+    /// The framed screen recording being shown, if the user picked a video instead of screenshots.
+    @Published public private(set) var framedVideo: FramedVideo?
     @Published public var isImportingFile = false
     @Published public var showGridView: Bool
     @Published public var imageType: ImageType = .individual {
@@ -84,11 +88,11 @@ import SwiftTools
     }
     
     var photoFilter: PHPickerFilter {
-        persistenceManager.imageSelectionType.filter
+        .any(of: [persistenceManager.imageSelectionType.filter, .videos])
     }
     
     var canShowClearButton: Bool {
-        imageResults.hasImages
+        imageResults.hasImages || framedVideo != nil
     }
     
     var viewTypeImageName: String? {
@@ -309,6 +313,7 @@ import SwiftTools
         // Prep
         clearTemporaryDirectory()
         stopCombinedImageTask()
+        framedVideo = nil
         
         let screenshots = try await screenshotImporter.screenshots(from: source)
         
@@ -383,6 +388,67 @@ import SwiftTools
                 }
             }
         }
+    }
+    
+    /// Frames a screen recording and shows it in place of any screenshots.
+    ///
+    /// The device is matched from the video's size, asking the user when more than one fits, and uses the color and
+    /// view last picked for it. The result is saved automatically when the user's auto save settings call for it.
+    /// - Parameter loadSource: Copies the video into the temporary directory and returns the copy's URL. It runs after
+    ///   the temporary directory is cleared, so the copy isn't deleted.
+    private func processVideo(loadSource: () async throws -> URL?) async throws {
+        let reason = await eligibilityUseCase.canSaveFramedScreenshot(screenshotCount: 1)
+        
+        guard reason.canSave else {
+            showPurchaseView = true
+            return
+        }
+        
+        logger.info("Starting processing a video.")
+        isLoading = true
+        defer { isLoading = false }
+        
+        clearTemporaryDirectory()
+        stopCombinedImageTask()
+        imageResults.removeAll()
+        styleOptions = []
+        framedVideo = nil
+        viewState = .individualPlaceholder
+        
+        guard let sourceURL = try await loadSource() else { throw SBError.unsupportedImage }
+        
+        let poster = try await VideoFramer.posterImage(ofVideoAt: sourceURL)
+        
+        guard let resolved = await resolveDevice(for: poster) else {
+            throw SBError.unsupportedImage
+        }
+        
+        let device = persistenceManager.applyingPreferredStyle(to: resolved)
+        let outputURL = URL.temporaryDirectory.appending(path: "Framed Video \(UUID()).mp4")
+        
+        try await VideoFramer().frame(videoAt: sourceURL, in: device, to: outputURL)
+        try? fileManager.removeItem(at: sourceURL)
+        
+        persistenceManager.deviceFrameCreations += 1
+        framedVideo = FramedVideo(url: outputURL, device: device)
+        
+        if (try? await autoCRUDManager.autoSaveVideoIfNeeded(using: outputURL)) == true {
+            showAutoSaveToast = true
+        }
+        
+        reviewManager.askForAReview()
+    }
+    
+    /// Copies a file the user picked in the Files app into the temporary directory.
+    private static func copyToTemporaryDirectory(_ url: URL) throws -> URL {
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if accessing { url.stopAccessingSecurityScopedResource() }
+        }
+        
+        let copy = URL.temporaryDirectory.appending(path: "Source Video \(UUID()).\(url.pathExtension)")
+        try FileManager.default.copyItem(at: url, to: copy)
+        return copy
     }
     
     /// Resolves the correct `DeviceInfo` for a screenshot, prompting the user when ambiguous.
@@ -572,6 +638,11 @@ import SwiftTools
     /// using `photoPicker` as the image source
     public func imageSelectionsDidChange() async {
         do {
+            if let video = imageSelections.first(where: \.isVideo) {
+                try await processVideo { try await video.loadVideoURL() }
+                return
+            }
+            
             try await processSelectedPhotos(source: .photoPicker(imageSelections))
         } catch {
             self.error = error
@@ -614,6 +685,7 @@ import SwiftTools
         
         stopCombinedImageTask()
         imageResults.removeAll()
+        framedVideo = nil
         styleOptions = []
         imageSelections.removeAll()
         viewState = .individualPlaceholder
@@ -670,6 +742,18 @@ import SwiftTools
         }
     }
     
+    /// Saves a framed video to the users photo library
+    public func saveVideoToPhotos(_ video: FramedVideo) async {
+        do {
+            try await photoLibraryManager.saveVideo(video.url)
+            showQuickSaveToast = true
+            logger.debug("Manually saving video to photo library.")
+        } catch {
+            logger.error("Error manually saving video to photo library: \(error.localizedDescription, privacy: .public).")
+            self.error = error
+        }
+    }
+    
     /// Saves a framed screenshot to iCloud using the url
     public func saveToiCloud(_ url: URL) {
         do {
@@ -696,6 +780,11 @@ import SwiftTools
         case .success(let urls):
             Task {
                 do {
+                    if let videoURL = urls.first(where: { UTType(filenameExtension: $0.pathExtension)?.conforms(to: .movie) == true }) {
+                        try await processVideo { try Self.copyToTemporaryDirectory(videoURL) }
+                        return
+                    }
+                    
                     try await processSelectedPhotos(
                         source: .filePicker(urls)
                     )

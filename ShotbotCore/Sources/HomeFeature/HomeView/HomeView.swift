@@ -192,7 +192,7 @@ public struct HomeView: View {
         }
         .fileImporter(
             isPresented: $viewModel.isImportingFile,
-            allowedContentTypes: [.image, .png, .jpeg],
+            allowedContentTypes: [.image, .png, .jpeg, .movie],
             allowsMultipleSelection: true
         ) { viewModel.fileImportCompletion(result: $0) }
         .sheet(isPresented: $viewModel.showDeviceDisambiguation) {
@@ -295,6 +295,40 @@ public struct HomeView: View {
     
     @ViewBuilder
     private var mainContent: some View {
+        if let video = viewModel.framedVideo {
+            videoView(video)
+        } else {
+            screenshotContent
+        }
+    }
+    
+    /// A framed screen recording that plays on a loop, with buttons to share and save it.
+    private func videoView(_ video: FramedVideo) -> some View {
+        LoopingVideoPlayer(url: video.url)
+            .id(video.id)
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .toolbar {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button {
+                        Task { await viewModel.saveVideoToPhotos(video) }
+                    } label: {
+                        Label("Save to Photos", systemImage: "photo.badge.arrow.down")
+                    }
+                    
+                    Button {
+                        viewModel.saveToiCloud(video.url)
+                    } label: {
+                        Label("Save to Files", systemImage: "folder.badge.plus")
+                    }
+                    
+                    ShareLink(item: video.url)
+                }
+            }
+    }
+    
+    @ViewBuilder
+    private var screenshotContent: some View {
         switch viewModel.viewState {
         case .combinedPlaceholder:
             ProgressView("Combining Images...")

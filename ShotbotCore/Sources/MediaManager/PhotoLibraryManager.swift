@@ -14,6 +14,7 @@ public struct PhotoLibraryManager: Sendable {
     public let photoAdditionStatus: PHAuthorizationStatus
     public var requestPhotoLibraryAdditionAuthorization: @Sendable () async -> Void
     public var savePhoto: @Sendable(URL) async throws -> Void
+    public var saveVideo: @Sendable(URL) async throws -> Void
     public var save: @Sendable(_ at: UIImage) async throws -> Void
     public var delete: @Sendable ([String]) async throws -> Void
     
@@ -21,12 +22,14 @@ public struct PhotoLibraryManager: Sendable {
         photoAdditionStatus: PHAuthorizationStatus,
         requestPhotoLibraryAdditionAuthorization: @escaping @Sendable () async -> Void,
         savePhoto: @escaping @Sendable (URL) async throws -> Void,
+        saveVideo: @escaping @Sendable (URL) async throws -> Void,
         save: @escaping @Sendable (UIImage) async throws -> Void,
         delete: @escaping @Sendable ([String]) async throws -> Void
     ) {
         self.photoAdditionStatus = photoAdditionStatus
         self.requestPhotoLibraryAdditionAuthorization = requestPhotoLibraryAdditionAuthorization
         self.savePhoto = savePhoto
+        self.saveVideo = saveVideo
         self.save = save
         self.delete = delete
     }
@@ -45,6 +48,15 @@ public extension PhotoLibraryManager {
                 do {
                     try await photoLibrary.performChanges {
                         PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+                    }
+                } catch {
+                    throw SBError.insufficientPhotoAuthorization
+                }
+            },
+            saveVideo: { url in
+                do {
+                    try await photoLibrary.performChanges {
+                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
                     }
                 } catch {
                     throw SBError.insufficientPhotoAuthorization
@@ -74,6 +86,7 @@ public extension PhotoLibraryManager {
             photoAdditionStatus: status,
             requestPhotoLibraryAdditionAuthorization: {},
             savePhoto: {_ in },
+            saveVideo: {_ in },
             save: {_ in },
             delete: {_ in }
         )

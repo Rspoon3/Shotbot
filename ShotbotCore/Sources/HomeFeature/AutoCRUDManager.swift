@@ -22,6 +22,7 @@ public protocol AutoCRUDManaging: Sendable {
     ) async throws
     
     func autoSaveCombinedIfNeeded(using combinedURL: URL?) async throws
+    func autoSaveVideoIfNeeded(using videoURL: URL) async throws -> Bool
     func autoDeleteScreenshotsIfNeeded(items: [PhotosPickerItem]) async
 }
 
@@ -117,6 +118,27 @@ public struct AutoCRUDManager: AutoCRUDManaging {
         }
     }
     
+    /// Autosaves a framed video to files and photos, for each destination the user has an auto save option on for.
+    ///
+    /// A video is neither individual nor combined, so any option other than none saves it.
+    /// - Returns: Whether the video was saved anywhere.
+    public func autoSaveVideoIfNeeded(using videoURL: URL) async throws -> Bool {
+        let shouldSaveToFiles = persistenceManager.autoSaveFilesOption != .none
+        let shouldSaveToPhotos = persistenceManager.autoSavePhotosOption != .none
+
+        if shouldSaveToFiles {
+            try fileManager.copyToiCloudFiles(from: videoURL)
+            logger.info("Saving video to iCloud.")
+        }
+
+        if shouldSaveToPhotos {
+            try await photoLibraryManager.saveVideo(videoURL)
+            logger.info("Saving video to Photo library.")
+        }
+
+        return shouldSaveToFiles || shouldSaveToPhotos
+    }
+
     /// Asks the user to confirm deleting the selected photos from the photo library if this
     /// setting is enabled.
     public func autoDeleteScreenshotsIfNeeded(items: [PhotosPickerItem]) async {

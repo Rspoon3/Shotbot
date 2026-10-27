@@ -10,7 +10,7 @@ import Foundation
 /// Everything that decides how framed devices are laid out and dressed, apart from the devices themselves.
 ///
 /// All sizes are fractions of the device's height, so the same recipe gives the same picture at any resolution.
-struct SceneRecipe: Equatable, Sendable {
+struct SceneRecipe: Hashable, Sendable {
     /// What is drawn behind the devices.
     var background: BackgroundStyle = .sunset
     /// How much the photo background is blurred. Other backgrounds ignore it.

@@ -5,26 +5,18 @@
 //  Created by Richard Witherspoon on 10/27/26.
 //
 
-import CoreImage
 import CoreTransferable
 import UniformTypeIdentifiers
 
-/// A finished picture that is only turned into a PNG file when something asks for it, such as a drag, a share or a copy.
-struct ExportImage: Transferable, @unchecked Sendable {
-    /// The picture, at full size.
-    let image: CIImage
+/// A finished picture that is only turned into a PNG file when something asks for it, such as a drag or a share. If the
+/// file was already made ahead of time, it is used as it is.
+struct ExportImage: Transferable, Sendable {
+    let export: PNGExport
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(exportedContentType: .png) { item in
-            SentTransferredFile(try item.writeFile())
+            SentTransferredFile(try await item.export.file(), allowAccessingOriginalFile: false)
         }
         .suggestedFileName("Framed Screenshot")
-    }
-
-    /// Writes the picture to a new PNG file in the temporary directory.
-    func writeFile() throws -> URL {
-        let url = URL.temporaryDirectory.appending(path: "Framed Screenshot \(UUID()).png")
-        try LayerStore.shared.pngData(of: image).write(to: url)
-        return url
     }
 }

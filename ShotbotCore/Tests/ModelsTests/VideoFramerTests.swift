@@ -49,6 +49,22 @@ struct VideoFramerTests {
         #expect(size.height > CGFloat(frame.height))
     }
 
+    @Test("The direct exporter writes the framed size and length without the export session")
+    func directExporterWritesFramedVideo() async throws {
+        let source = try await makeVideo(size: device.inputSize, frames: 10)
+        let output = FileManager.default.temporaryDirectory.appendingPathComponent("direct-\(UUID()).mp4")
+        defer { try? FileManager.default.removeItem(at: output) }
+
+        let video = try await VideoFramer().prepare(videoAt: source, in: device)
+        try await VideoExporter.export(video, to: output)
+
+        let framedSize = try await VideoFramer.size(ofVideoAt: output)
+        #expect(framedSize == video.renderSize)
+
+        let duration = try await AVURLAsset(url: output).load(.duration).seconds
+        #expect(abs(duration - 1) < 0.2)
+    }
+
     @Test("A file without video is rejected")
     func rejectsNonVideo() async throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).mp4")

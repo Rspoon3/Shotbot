@@ -21,19 +21,10 @@ enum SceneComposer {
     static func compose(_ renders: [DeviceRender], recipe: SceneRecipe, background drawn: CIImage? = nil) -> CIImage? {
         guard !renders.isEmpty else { return nil }
 
-        // Every device is scaled to the height of the tallest, so a phone and a tablet sit on the same line.
-        let height = renders.map(\.size.height).max() ?? 0
-        let padding = recipe.padding * height
-        let spacing = padding * 0.6
-
-        let scales = renders.map { height / $0.size.height }
-        let widths = zip(renders, scales).map { $0.size.width * $1 }
-        let content = CGSize(
-            width: widths.reduce(0, +) + spacing * Double(renders.count - 1),
-            height: height
-        )
+        let plan = layout(of: renders, recipe: recipe)
+        let (scales, widths, spacing, content) = (plan.scales, plan.widths, plan.spacing, plan.content)
         // A finished background fixes the canvas, such as one rounded to whole pixels for a video.
-        let canvas = drawn?.extent.size ?? canvasSize(around: content, margin: padding, aspect: recipe.aspect)
+        let canvas = drawn?.extent.size ?? plan.canvas
 
         // The devices sit in the middle of the canvas.
         let originY = (canvas.height - content.height) / 2
@@ -61,7 +52,43 @@ enum SceneComposer {
             .cropped(to: CGRect(origin: .zero, size: canvas))
     }
 
+    /// The size of the picture a set of devices makes, in whole pixels, so a background can be drawn for it ahead of time.
+    static func canvasSize(for renders: [DeviceRender], recipe: SceneRecipe) -> CGSize? {
+        renders.isEmpty ? nil : layout(of: renders, recipe: recipe).canvas
+    }
+
     // MARK: - Private Helpers
+
+    private struct Layout {
+        let scales: [CGFloat]
+        let widths: [CGFloat]
+        let spacing: Double
+        let content: CGSize
+        let canvas: CGSize
+    }
+
+    private static func layout(of renders: [DeviceRender], recipe: SceneRecipe) -> Layout {
+        // Every device is scaled to the height of the tallest, so a phone and a tablet sit on the same line.
+        let height = renders.map(\.size.height).max() ?? 0
+        let padding = recipe.padding * height
+        let spacing = padding * 0.6
+
+        let scales = renders.map { height / $0.size.height }
+        let widths = zip(renders, scales).map { $0.size.width * $1 }
+        let content = CGSize(
+            width: widths.reduce(0, +) + spacing * Double(renders.count - 1),
+            height: height
+        )
+        let box = canvasSize(around: content, margin: padding, aspect: recipe.aspect)
+
+        return Layout(
+            scales: scales,
+            widths: widths,
+            spacing: spacing,
+            content: content,
+            canvas: CGSize(width: box.width.rounded(.up), height: box.height.rounded(.up))
+        )
+    }
 
     /// The smallest canvas of the wanted shape that leaves a margin around the content.
     private static func canvasSize(around content: CGSize, margin: Double, aspect: CanvasAspect) -> CGSize {

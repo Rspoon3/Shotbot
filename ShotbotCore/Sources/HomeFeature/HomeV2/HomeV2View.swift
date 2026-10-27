@@ -91,7 +91,13 @@ public struct HomeV2View: View {
             }
         }
         .onChange(of: viewModel.recipe) { _, _ in
-            viewModel.rebuildVideo()
+            viewModel.recipeDidChange()
+        }
+        .onChange(of: viewModel.selectedItemID) { _, _ in
+            viewModel.scheduleExport()
+        }
+        .onChange(of: viewModel.imageType) { _, _ in
+            viewModel.scheduleExport()
         }
         .alert(error: $viewModel.error)
         .toolbar { toolbar }
@@ -108,15 +114,15 @@ public struct HomeV2View: View {
         } else if viewModel.items.isEmpty {
             placeholder
         } else if viewModel.imageType == .combined, viewModel.items.count > 1 {
-            image(viewModel.combinedImage)
+            image(viewModel.combinedImage, ids: viewModel.items.map(\.id))
         } else if viewModel.items.count == 1, let item = viewModel.items.first {
-            image(viewModel.sceneImage(for: item.id))
+            image(viewModel.sceneImage(for: item.id), ids: [item.id])
         } else {
             @Bindable var viewModel = viewModel
 
             TabView(selection: $viewModel.selectedItemID) {
                 ForEach(viewModel.items) { item in
-                    image(viewModel.sceneImage(for: item.id))
+                    image(viewModel.sceneImage(for: item.id), ids: [item.id])
                         .tag(Optional(item.id))
                 }
             }
@@ -125,11 +131,11 @@ public struct HomeV2View: View {
     }
 
     @ViewBuilder
-    private func image(_ image: CIImage?) -> some View {
-        if let image {
+    private func image(_ image: CIImage?, ids: [UUID]) -> some View {
+        if let image, let export = viewModel.exportImage(of: ids) {
             MetalImageView(image: image)
                 .padding(.horizontal, 8)
-                .draggable(ExportImage(image: image))
+                .draggable(export)
         } else {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -283,7 +289,7 @@ public struct HomeV2View: View {
 
                 Menu {
                     Button {
-                        viewModel.copy()
+                        Task { await viewModel.copy() }
                     } label: {
                         Label("Copy", systemImage: "doc.on.doc")
                     }

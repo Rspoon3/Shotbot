@@ -52,6 +52,8 @@ public final class HomeV2ViewModel {
 
     private(set) var items = [Item]()
     private(set) var renders = [UUID: DeviceRender]()
+    /// Backgrounds that are slow to draw, drawn ahead of time for the sizes the scenes need.
+    private(set) var backgrounds = [String: CIImage]()
     private(set) var isLoading = false
     private(set) var loadingMessage = ""
     /// A screen recording framed in the current scene, playing live instead of screenshots.
@@ -68,6 +70,19 @@ public final class HomeV2ViewModel {
     @ObservationIgnored private let persistence: any PersistenceManaging
     @ObservationIgnored private let store = LayerStore.shared
     @ObservationIgnored private var renderTasks = [UUID: Task<Void, Never>]()
+    @ObservationIgnored private var backgroundTasks = [String: Task<Void, Never>]()
+    @ObservationIgnored private var prewarmTask: Task<Void, Never>?
+    /// The PNG files for the pictures on screen, made once and shared by sharing, dragging, copying and saving.
+    @ObservationIgnored private var exports = [ExportKey: PNGExport]()
+    /// Changes whenever a layer or a background is replaced, so a picture made from older ones is never reused.
+    @ObservationIgnored private var revision = 0
+
+    /// What identifies one picture: which screenshots, how they are put together, and which layers it was made from.
+    private struct ExportKey: Hashable {
+        let ids: [UUID]
+        let recipe: SceneRecipe
+        let revision: Int
+    }
 
     // MARK: - Initializer
 
@@ -84,28 +99,31 @@ public final class HomeV2ViewModel {
 
     /// The picture of one screenshot, once its layers are drawn.
     func sceneImage(for id: UUID) -> CIImage? {
-        renders[id].flatMap { SceneComposer.compose([$0], recipe: recipe) }
+        scene(of: [id])
     }
 
     /// The picture of every screenshot side by side, once all their layers are drawn.
     var combinedImage: CIImage? {
-        let drawn = items.compactMap { renders[$0.id] }
-        guard drawn.count == items.count else { return nil }
-
-        return SceneComposer.compose(drawn, recipe: recipe)
+        scene(of: items.map(\.id))
     }
 
-    /// The picture that sharing, copying and saving use.
-    var currentImage: CIImage? {
+    /// The screenshots that sharing, copying and saving use.
+    private var currentIDs: [UUID] {
         if imageType == .combined, items.count > 1 {
-            return combinedImage
+            return items.map(\.id)
         }
 
-        return selectedItemID.flatMap(sceneImage(for:)) ?? items.first.flatMap { sceneImage(for: $0.id) }
+        return (selectedItem?.id).map { [$0] } ?? []
     }
 
+    /// The file for the picture that sharing, copying and saving use.
     var exportImage: ExportImage? {
-        currentImage.map(ExportImage.init)
+        exportImage(of: currentIDs)
+    }
+
+    /// The file for the picture of some screenshots, such as the page being dragged.
+    func exportImage(of ids: [UUID]) -> ExportImage? {
+        exportJob(of: ids).map(ExportImage.init)
     }
 
     // MARK: - Style
@@ -211,21 +229,26 @@ public final class HomeV2ViewModel {
         loadingMessage = ""
         defer { isLoading = false }
 
-        var loaded = [Item]()
+        // Every photo is fetched and decoded at the same time, off the main thread.
+        let screenshots = await withTaskGroup(of: (Int, UIImage?).self) { group in
+            for (index, pickerItem) in pickerItems.enumerated() {
+                group.addTask {
+                    guard let data = try? await pickerItem.loadTransferable(type: Data.self) else { return (index, nil) }
 
-        for pickerItem in pickerItems {
-            guard
-                let data = try? await pickerItem.loadTransferable(type: Data.self),
-                let screenshot = UIImage(data: data),
-                let item = makeItem(screenshot)
-            else {
-                continue
+                    return (index, await UIImage(data: data)?.byPreparingForDisplay())
+                }
             }
 
-            loaded.append(item)
+            var results = [(Int, UIImage?)]()
+
+            for await result in group {
+                results.append(result)
+            }
+
+            return results.sorted { $0.0 < $1.0 }.compactMap(\.1)
         }
 
-        show(loaded)
+        show(screenshots.compactMap(makeItem))
     }
 
     /// Loads files from the Files app: screenshots, or a screen recording.
@@ -246,14 +269,26 @@ public final class HomeV2ViewModel {
             loadingMessage = ""
             defer { isLoading = false }
 
-            let loaded = try urls.compactMap { url -> Item? in
-                let copy = try Self.copyToTemporaryDirectory(url)
-                defer { try? FileManager.default.removeItem(at: copy) }
+            let screenshots = try await withThrowingTaskGroup(of: (Int, UIImage?).self) { group in
+                for (index, url) in urls.enumerated() {
+                    group.addTask {
+                        let copy = try Self.copyToTemporaryDirectory(url)
+                        defer { try? FileManager.default.removeItem(at: copy) }
 
-                return UIImage(data: try Data(contentsOf: copy)).flatMap(makeItem)
+                        return (index, await UIImage(data: try Data(contentsOf: copy))?.byPreparingForDisplay())
+                    }
+                }
+
+                var results = [(Int, UIImage?)]()
+
+                for try await result in group {
+                    results.append(result)
+                }
+
+                return results.sorted { $0.0 < $1.0 }.compactMap(\.1)
             }
 
-            show(loaded)
+            show(screenshots.compactMap(makeItem))
         } catch {
             self.error = error
         }
@@ -336,8 +371,17 @@ public final class HomeV2ViewModel {
         }
     }
 
+    /// Brings everything that depends on the recipe up to date: the video, the slow backgrounds and the files.
+    func recipeDidChange() {
+        rebuildVideo()
+        refreshBackgrounds()
+        scheduleExport()
+    }
+
     func reverse() {
         items.reverse()
+        refreshBackgrounds()
+        scheduleExport()
     }
 
     func clear() {
@@ -348,31 +392,161 @@ public final class HomeV2ViewModel {
         videoSourceURL = nil
         items = []
         renders = [:]
+        resetBackgrounds()
         selectedItemID = nil
         imageType = .individual
     }
 
-    func copy() {
-        guard let image = currentImage, let data = try? store.pngData(of: image) else { return }
+    func copy() async {
+        guard let export = exportJob(of: currentIDs) else { return }
 
-        UIPasteboard.general.setData(data, forPasteboardType: UTType.png.identifier)
-        show("Copied")
+        do {
+            let url = try await export.file()
+            let data = try await Task.detached { try Data(contentsOf: url) }.value
+
+            UIPasteboard.general.setData(data, forPasteboardType: UTType.png.identifier)
+            show("Copied")
+        } catch {
+            self.error = error
+        }
     }
 
     func saveToPhotos() async {
-        guard let export = exportImage else { return }
+        guard let export = exportJob(of: currentIDs) else { return }
 
         do {
-            let url = try export.writeFile()
-            try await PhotoLibraryManager.live.savePhoto(url)
-            try? FileManager.default.removeItem(at: url)
+            try await PhotoLibraryManager.live.savePhoto(try await export.file())
             show("Saved to Photos")
         } catch {
             self.error = error
         }
     }
 
+    /// Starts making the file for the picture on screen once the edits have settled, so sharing it finds it ready.
+    func scheduleExport() {
+        prewarmTask?.cancel()
+
+        prewarmTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(400))
+
+            guard !Task.isCancelled, let self else { return }
+
+            exportJob(of: currentIDs)?.start()
+        }
+    }
+
     // MARK: - Private Helpers
+
+    /// The picture of some screenshots, using a background drawn ahead of time when the style needs one.
+    private func scene(of ids: [UUID]) -> CIImage? {
+        let drawn = ids.compactMap { renders[$0] }
+
+        guard !drawn.isEmpty, drawn.count == ids.count else { return nil }
+
+        let background = backgroundKey(of: ids, renders: drawn).flatMap { backgrounds[$0] }
+
+        return SceneComposer.compose(drawn, recipe: recipe, background: background)
+    }
+
+    /// The file for one picture, made the first time the picture is asked for.
+    private func exportJob(of ids: [UUID]) -> PNGExport? {
+        let key = ExportKey(ids: ids, recipe: recipe, revision: revision)
+
+        if let export = exports[key] { return export }
+
+        guard let image = scene(of: ids) else { return nil }
+
+        // Files for older pictures are no use any more.
+        exports = exports.filter { $0.key.revision == revision }
+
+        let export = PNGExport(image: image)
+        exports[key] = export
+        return export
+    }
+
+    /// What identifies the drawn background of a picture, or `nil` when its style is quick enough to draw every time.
+    private func backgroundKey(of ids: [UUID], renders drawn: [DeviceRender]) -> String? {
+        guard let size = SceneComposer.canvasSize(for: drawn, recipe: recipe) else { return nil }
+
+        // The blurred style is made from the first device, so it changes with that device's screenshot and color.
+        let first = items.first { $0.id == ids.first }
+        let source = "\(ids.first?.uuidString ?? "")|\(first?.device.deviceFrame ?? "")"
+
+        return LayerStore.backgroundKey(recipe.background, size: size, blur: recipe.blur, sourceKey: source)
+    }
+
+    /// Draws the slow backgrounds the pictures need, in the background, and forgets the ones they no longer use. A picture
+    /// shows a quickly drawn version until its background is ready.
+    private func refreshBackgrounds() {
+        var wanted = [String: (size: CGSize, source: CIImage, sourceKey: String)]()
+
+        var groups = items.map { [$0.id] }
+
+        if items.count > 1 {
+            groups.append(items.map(\.id))
+        }
+
+        for ids in groups {
+            let drawn = ids.compactMap { renders[$0] }
+
+            guard
+                drawn.count == ids.count,
+                let size = SceneComposer.canvasSize(for: drawn, recipe: recipe),
+                let key = backgroundKey(of: ids, renders: drawn)
+            else {
+                continue
+            }
+
+            let first = items.first { $0.id == ids.first }
+            wanted[key] = (size, drawn[0].device, "\(ids[0].uuidString)|\(first?.device.deviceFrame ?? "")")
+        }
+
+        let before = backgrounds.count
+        backgrounds = backgrounds.filter { wanted[$0.key] != nil }
+
+        if backgrounds.count != before {
+            revision += 1
+        }
+
+        for (key, task) in backgroundTasks where wanted[key] == nil {
+            task.cancel()
+            backgroundTasks[key] = nil
+        }
+
+        let store = store
+        let style = recipe.background
+        let blur = recipe.blur
+
+        for (key, request) in wanted where backgrounds[key] == nil && backgroundTasks[key] == nil {
+            backgroundTasks[key] = Task { [weak self] in
+                let image = try? await store.background(
+                    style,
+                    size: request.size,
+                    blur: blur,
+                    source: request.source,
+                    sourceKey: request.sourceKey
+                )
+
+                guard let self else { return }
+
+                backgroundTasks[key] = nil
+
+                guard let image, !Task.isCancelled else { return }
+
+                backgrounds[key] = image
+                revision += 1
+                scheduleExport()
+            }
+        }
+    }
+
+    private func resetBackgrounds() {
+        backgroundTasks.values.forEach { $0.cancel() }
+        backgroundTasks = [:]
+        backgrounds = [:]
+        exports = [:]
+        revision += 1
+    }
 
     /// Replaces the current content with newly loaded screenshots and starts drawing their layers.
     private func show(_ loaded: [Item]) {
@@ -388,6 +562,7 @@ public final class HomeV2ViewModel {
         videoSourceURL = nil
         items = loaded
         renders = [:]
+        resetBackgrounds()
         selectedItemID = loaded.first?.id
 
         if loaded.count == 1 {
@@ -398,7 +573,7 @@ public final class HomeV2ViewModel {
     }
 
     /// Copies a file picked in the Files app into the temporary directory, where the app is allowed to read it.
-    private static func copyToTemporaryDirectory(_ url: URL) throws -> URL {
+    private nonisolated static func copyToTemporaryDirectory(_ url: URL) throws -> URL {
         let accessing = url.startAccessingSecurityScopedResource()
         defer {
             if accessing { url.stopAccessingSecurityScopedResource() }
@@ -444,6 +619,9 @@ public final class HomeV2ViewModel {
                 guard let self, !Task.isCancelled, items.contains(where: { $0.id == item.id }) else { return }
 
                 renders[item.id] = render
+                revision += 1
+                refreshBackgrounds()
+                scheduleExport()
             } catch {
                 self?.error = error
             }

@@ -129,10 +129,23 @@ public struct VideoFramer: Sendable {
     }
 
     /// Renders a prepared video to an MP4 file, keeping the audio.
+    ///
+    /// Frames are read, framed and encoded directly, which is much faster than the system's export session. If that
+    /// can't handle a recording, the export session is used instead.
     /// - Parameters:
     ///   - video: The video to render.
     ///   - outputURL: Where to write it. An existing file is replaced.
     public func export(_ video: PreparedVideo, to outputURL: URL) async throws {
+        do {
+            try await VideoExporter.export(video, to: outputURL)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            try await exportWithSession(video, to: outputURL)
+        }
+    }
+
+    private func exportWithSession(_ video: PreparedVideo, to outputURL: URL) async throws {
         try? FileManager.default.removeItem(at: outputURL)
 
         guard let session = AVAssetExportSession(asset: video.asset, presetName: AVAssetExportPresetHEVCHighestQuality) else {

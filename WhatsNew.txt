@@ -1,3 +1,9 @@
 What's New in This Version of Shotbot
 
-• Improved support for devices using Display Zoom — if multiple frames match your screenshot, Shotbot will let you pick the right one and remember your choice
+• iPhone Duo support — frame screenshots from both of the Duo's screens, in portrait and landscape
+• Inner screen: choose Open or Partially Open, which folds the frame along the hinge with a soft shadow
+• Outer screen: choose Closed or Open
+• Pick a frame color, such as Night Sky or Star White, from the new toolbar menu. Shotbot remembers your choice for next time
+• Frame colors are now available for more devices, and your color and view choices carry over to the share extension
+• Set a different color or view for a single screenshot
+• The share extension now frames screenshots that fit several devices, such as the iPhone 16 Pro, 17 and 18 Pro, using the device you chose in the app

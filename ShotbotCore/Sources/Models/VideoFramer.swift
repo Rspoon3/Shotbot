@@ -121,6 +121,7 @@ public struct VideoFramer: Sendable {
             asset: asset,
             composition: composition,
             renderSize: renderSize,
+            hdrColorSpace: Self.hdrColorSpace(matching: formatDescriptions),
             preferredTransform: preferredTransform
         ) { [layers] frame in
             layers.render(frame)
@@ -197,6 +198,21 @@ public struct VideoFramer: Sendable {
             composition.colorTransferFunction = AVVideoTransferFunction_ITU_R_709_2
             composition.colorYCbCrMatrix = AVVideoYCbCrMatrix_ITU_R_709_2
         }
+    }
+
+    /// The recording's HDR color space, or `nil` when it is standard color.
+    private static func hdrColorSpace(matching formatDescriptions: [CMFormatDescription]) -> CGColorSpace? {
+        let transfer = formatDescriptions.first.flatMap {
+            CMFormatDescriptionGetExtension($0, extensionKey: kCMFormatDescriptionExtension_TransferFunction) as? String
+        }
+
+        if transfer == kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ as String {
+            return CGColorSpace(name: CGColorSpace.itur_2100_PQ)
+        } else if transfer == kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG as String {
+            return CGColorSpace(name: CGColorSpace.itur_2100_HLG)
+        }
+
+        return nil
     }
 
     private static func even(_ value: CGFloat) -> CGFloat {

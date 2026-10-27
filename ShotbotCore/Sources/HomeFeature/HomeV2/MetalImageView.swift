@@ -29,6 +29,22 @@ struct MetalImageView: UIViewRepresentable {
             didSet { setNeedsDisplay() }
         }
 
+        /// Whether to draw colors brighter than white, for HDR video. Standard pictures use the cheaper 8-bit surface.
+        var isHDR = false {
+            didSet {
+                guard isHDR != oldValue else { return }
+
+                colorPixelFormat = isHDR ? .rgba16Float : .bgra8Unorm
+
+                if let metalLayer = layer as? CAMetalLayer {
+                    metalLayer.wantsExtendedDynamicRangeContent = isHDR
+                    metalLayer.colorspace = isHDR ? CGColorSpace(name: CGColorSpace.extendedLinearDisplayP3) : nil
+                }
+
+                setNeedsDisplay()
+            }
+        }
+
         private let store = LayerStore.shared
 
         init() {
@@ -84,7 +100,7 @@ struct MetalImageView: UIViewRepresentable {
             ) { drawable.texture }
 
             destination.isFlipped = true
-            destination.colorSpace = CGColorSpace(name: CGColorSpace.displayP3)
+            destination.colorSpace = CGColorSpace(name: isHDR ? CGColorSpace.extendedLinearDisplayP3 : CGColorSpace.displayP3)
 
             _ = try? store.context.startTask(toRender: fitted, from: bounds, to: destination, at: .zero)
 

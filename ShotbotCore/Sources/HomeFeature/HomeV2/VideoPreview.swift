@@ -57,9 +57,15 @@ struct VideoPreview: UIViewRepresentable {
 
             sourceURL = video.asset.url
             lastFrame = nil
+            view?.isHDR = video.hdrColorSpace != nil
+
+            // HDR recordings are read as 10-bit frames, so their bright parts survive.
+            let pixelFormat = video.hdrColorSpace == nil
+                ? kCVPixelFormatType_32BGRA
+                : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
 
             let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [
-                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                kCVPixelBufferPixelFormatTypeKey as String: pixelFormat,
                 kCVPixelBufferMetalCompatibilityKey as String: true
             ])
             let item = AVPlayerItem(asset: video.asset)
@@ -101,13 +107,7 @@ struct VideoPreview: UIViewRepresentable {
         }
 
         @objc private func tick() {
-            guard
-                let output,
-                let video,
-                let item = player.currentItem
-            else {
-                return
-            }
+            guard let output, let video else { return }
 
             let time = output.itemTime(forHostTime: CACurrentMediaTime())
 
@@ -118,8 +118,9 @@ struct VideoPreview: UIViewRepresentable {
                 return
             }
 
-            _ = item
-            lastFrame = video.upright(CIImage(cvPixelBuffer: buffer))
+            // Say what color space the frame is in, so HDR highlights stay brighter than white.
+            let options: [CIImageOption: Any] = video.hdrColorSpace.map { [.colorSpace: $0] } ?? [:]
+            lastFrame = video.upright(CIImage(cvPixelBuffer: buffer, options: options))
             draw()
         }
 

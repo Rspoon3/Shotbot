@@ -20,6 +20,9 @@ public struct PreparedVideo: Identifiable, @unchecked Sendable {
     public let composition: AVVideoComposition
     /// The size of the finished video.
     public let renderSize: CGSize
+    /// The color space of the recording when it is HDR, and `nil` for standard color. A player that reads raw frames has
+    /// to tell Core Image this, so the bright parts stay brighter than white.
+    public let hdrColorSpace: CGColorSpace?
     /// The turn the recording is stored with, which players that read raw frames have to undo.
     let preferredTransform: CGAffineTransform
     private let framing: @Sendable (CIImage) -> CIImage
@@ -55,12 +58,14 @@ public struct PreparedVideo: Identifiable, @unchecked Sendable {
         asset: AVURLAsset,
         composition: AVVideoComposition,
         renderSize: CGSize,
+        hdrColorSpace: CGColorSpace?,
         preferredTransform: CGAffineTransform,
         framing: @escaping @Sendable (CIImage) -> CIImage
     ) {
         self.asset = asset
         self.composition = composition
         self.renderSize = renderSize
+        self.hdrColorSpace = hdrColorSpace
         self.preferredTransform = preferredTransform
         self.framing = framing
     }

@@ -154,6 +154,7 @@
         "displays": [
             {
                 "name": "Inner",
+                "viewName": "Open",
                 "offSet": [120, 120],
                 "resolutions": [
                     { "name": "Default", "size": [2007, 2853] },
@@ -162,10 +163,14 @@
                 "orientations": [
                     { "orientation": "Portrait", "frame": "iPhone Duo - {color} - Inner Open Portrait" },
                     { "orientation": "Landscape", "frame": "iPhone Duo - {color} - Inner Open Landscape" }
+                ],
+                "alternateViews": [
+                    { "name": "Partially Open", "partiallyOpen": { "angle": 145 } }
                 ]
             },
             {
                 "name": "Outer",
+                "viewName": "Closed",
                 "offSet": [88, 80],
                 "resolutions": [
                     { "name": "Default", "size": [1398, 2034] }
@@ -173,6 +178,15 @@
                 "orientations": [
                     { "orientation": "Portrait", "frame": "iPhone Duo - {color} - Outer Closed Portrait" },
                     { "orientation": "Landscape", "frame": "iPhone Duo - {color} - Outer Closed Landscape" }
+                ],
+                "alternateViews": [
+                    {
+                        "name": "Open",
+                        "offSet": [1570, 80],
+                        "orientations": [
+                            { "orientation": "Portrait", "frame": "iPhone Duo - {color} - Outer Open" }
+                        ]
+                    }
                 ]
             }
         ]

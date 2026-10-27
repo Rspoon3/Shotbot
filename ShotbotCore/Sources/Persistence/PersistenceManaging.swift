@@ -58,14 +58,34 @@ public protocol PersistenceManaging: Sendable {
 
     /// Stores the frame color the user picked for a device model, so it is the default the next time that device is framed.
     func setPreferredColor(_ color: String, for deviceName: String)
+
+    // MARK: - Device View Preferences
+
+    /// Returns the frame view the user last picked for a screen, such as "Open" for the iPhone Duo's outer screen.
+    /// - Parameter key: `DeviceInfo.viewPreferenceKey`.
+    func preferredView(forKey key: String) -> String?
+
+    /// Stores the frame view the user picked for a screen, so it is the default the next time that screen is framed.
+    /// - Parameters:
+    ///   - view: The view's name.
+    ///   - key: `DeviceInfo.viewPreferenceKey`.
+    func setPreferredView(_ view: String, forKey key: String)
 }
 
 public extension PersistenceManaging {
-    /// Returns the device in the color the user last picked for it, or unchanged when it has no saved color.
+    /// Returns the device with the color and view the user last picked for it. A choice the device doesn't offer is ignored.
     /// - Parameter device: A device, usually straight from `DeviceInfo.match(for:)`.
-    func applyingPreferredColor(to device: DeviceInfo) -> DeviceInfo {
-        guard device.hasColorOptions, let color = preferredColor(for: device.name) else { return device }
+    func applyingPreferredStyle(to device: DeviceInfo) -> DeviceInfo {
+        var styled = device
 
-        return device.withColor(color)
+        if let color = preferredColor(for: device.name) {
+            styled = styled.withColor(color)
+        }
+
+        if let view = preferredView(forKey: device.viewPreferenceKey) {
+            styled = styled.withView(view)
+        }
+
+        return styled
     }
 }

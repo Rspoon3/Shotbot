@@ -34,10 +34,33 @@ struct DeviceDefinition: Decodable, Sendable {
         let offSet: CGPoint?
     }
 
+    /// How far a view is opened, for a view that is drawn by bending the display's own frame.
+    struct PartiallyOpen: Decodable, Sendable {
+        /// The angle between the two halves in degrees, from 90 (most closed) to 180 (flat).
+        let angle: Double
+    }
+
+    /// Another look of a screen, such as the iPhone Duo's outer screen open instead of closed.
+    ///
+    /// A view either has its own frame art (`orientations`) or bends the display's own frames (`partiallyOpen`).
+    struct AlternateView: Decodable, Sendable {
+        /// The view's name, such as "Open" or "Partially Open".
+        let name: String
+        /// Where the screen opening's top-left corner sits in the view's first orientation's frame. Not needed
+        /// when the view bends the display's own frames.
+        let offSet: CGPoint?
+        /// The view's own frames. A view only has frames for the orientations it has art for.
+        let orientations: [Orientation]?
+        /// Open the display's own frames part of the way instead of using other art.
+        let partiallyOpen: PartiallyOpen?
+    }
+
     /// One screen of a device.
     struct Display: Decodable, Sendable {
         /// Which screen this is, such as "Inner" or "Outer". Only devices with several screens name them.
         let name: String?
+        /// What the frames written on this screen show, such as "Closed", when the screen has alternate views.
+        let viewName: String?
         /// The size of the frame's screen opening in pixels, in the first orientation.
         ///
         /// Only needed when screenshots are larger than the screen and get scaled down to fit. For example, a
@@ -50,6 +73,8 @@ struct DeviceDefinition: Decodable, Sendable {
         let resolutions: [Resolution]
         /// The screen's frames. Phones and iPads have portrait and landscape. Watches and Macs have one.
         let orientations: [Orientation]
+        /// Other looks of this screen with their own frame art, which the user can switch between.
+        let alternateViews: [AlternateView]?
     }
 
     /// The device's display name.

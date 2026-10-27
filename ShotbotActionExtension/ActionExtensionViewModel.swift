@@ -159,7 +159,7 @@ import CreateCombinedImageFeature
                 case .exact(let device) = DeviceInfo.match(for: screenshot.size),
                 let framedScreenshot = try? screenshot.framedScreenshot(
                     quality: persistenceManager.imageQuality,
-                    device: persistenceManager.applyingPreferredColor(to: device)
+                    device: persistenceManager.applyingPreferredStyle(to: device)
                 ),
                 let framedImageData = framedScreenshot.pngData(),
                 let _ = try? framedImageData.write(to: temporaryURL)

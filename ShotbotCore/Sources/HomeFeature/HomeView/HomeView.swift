@@ -156,8 +156,14 @@ public struct HomeView: View {
                 PurchaseView()
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Dismiss") {
-                                viewModel.showPurchaseView = false
+                            if #available(iOS 26.0, *) {
+                                Button(role: .close) {
+                                    viewModel.showPurchaseView = false
+                                }
+                            } else {
+                                Button("Dismiss") {
+                                    viewModel.showPurchaseView = false
+                                }
                             }
                         }
                     }
@@ -165,8 +171,8 @@ public struct HomeView: View {
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                if !viewModel.colorOptions.isEmpty {
-                    colorMenu
+                if !viewModel.styleOptions.isEmpty {
+                    styleMenu
                 }
             }
 
@@ -201,40 +207,74 @@ public struct HomeView: View {
         }
     }
     
-    /// A toolbar menu for choosing the frame color of the devices in the current screenshots.
+    /// A toolbar menu for choosing the frame color and view of the devices in the current screenshots.
     ///
-    /// Only devices whose frame comes in more than one color are listed. With several such devices, each gets its own section.
-    private var colorMenu: some View {
+    /// Only devices whose frame has more than one color or view are listed. A device gets a color section, and a view
+    /// section for each of its screens that has views. With several choices, each section is named after what it
+    /// changes.
+    private var styleMenu: some View {
         Menu {
-            ForEach(viewModel.colorOptions) { option in
-                if viewModel.colorOptions.count > 1 {
-                    Section(option.deviceName) {
-                        colorPicker(for: option)
+            ForEach(viewModel.styleOptions) { option in
+                if option.hasColors {
+                    Section(sectionTitle("color", for: option)) {
+                        Picker(option.deviceName, selection: colorSelection(for: option)) {
+                            ForEach(option.colors, id: \.self) { color in
+                                Text(color)
+                                    .tag(color)
+                            }
+                        }
                     }
-                } else {
-                    colorPicker(for: option)
+                }
+
+                ForEach(option.screens) { screen in
+                    Section(sectionTitle("view", for: option, screen: screen)) {
+                        Picker(option.deviceName, selection: viewSelection(for: screen)) {
+                            ForEach(screen.views, id: \.self) { view in
+                                Text(view)
+                                    .tag(view)
+                            }
+                        }
+                    }
                 }
             }
         } label: {
-            Label("Frame Color", symbol: .paintpalette)
+            Label("Frame Style", symbol: .paintpalette)
         }
     }
 
-    private func colorPicker(for option: DeviceColorOption) -> some View {
-        Picker(option.deviceName, selection: colorSelection(for: option)) {
-            ForEach(option.colors, id: \.self) { color in
-                Text(color)
-                    .tag(color)
+    /// "Color" or "View", with the device and screen in front of it when there is more than one of them.
+    private func sectionTitle(_ title: String, for option: DeviceStyleOption, screen: DeviceStyleOption.Screen? = nil) -> String {
+        var parts = [String]()
+
+        if viewModel.styleOptions.count > 1 {
+            parts.append(option.deviceName)
+        }
+
+        if let screenName = screen?.screenName, option.screens.count > 1 {
+            parts.append(screenName)
+        }
+
+        guard !parts.isEmpty else { return title.capitalized }
+
+        return (parts + [title]).joined(separator: " ")
+    }
+
+    private func colorSelection(for option: DeviceStyleOption) -> Binding<String> {
+        Binding {
+            option.selectedColor ?? ""
+        } set: { color in
+            Task(priority: .userInitiated) {
+                await viewModel.didSelectColor(color, forDeviceNamed: option.deviceName)
             }
         }
     }
 
-    private func colorSelection(for option: DeviceColorOption) -> Binding<String> {
+    private func viewSelection(for screen: DeviceStyleOption.Screen) -> Binding<String> {
         Binding {
-            option.selectedColor
-        } set: { color in
+            screen.selectedView
+        } set: { view in
             Task(priority: .userInitiated) {
-                await viewModel.didSelectColor(color, forDeviceNamed: option.deviceName)
+                await viewModel.didSelectView(view, forViewKey: screen.viewKey)
             }
         }
     }
@@ -455,6 +495,73 @@ public struct HomeView: View {
         
         
         ShareLink(items: [shareableImage.url])
+        
+        imageStyleMenu(for: shareableImage)
+    }
+    
+    /// Frame color and view choices for just this screenshot, so screenshots can be mixed and matched.
+    ///
+    /// Only shown for individual images when there is more than one. A choice made here wins over the toolbar menu's choice
+    /// for this screenshot until it is cleared.
+    @ViewBuilder
+    private func imageStyleMenu(for shareableImage: ShareableImage) -> some View {
+        if let option = viewModel.styleOption(forImageWithID: shareableImage.id) {
+            Menu {
+                if option.hasColors {
+                    Section("Color") {
+                        Picker("Color", selection: imageColorSelection(for: shareableImage, option: option)) {
+                            ForEach(option.colors, id: \.self) { color in
+                                Text(color)
+                                    .tag(color)
+                            }
+                        }
+                    }
+                }
+                
+                ForEach(option.screens) { screen in
+                    Section("View") {
+                        Picker("View", selection: imageViewSelection(for: shareableImage, screen: screen)) {
+                            ForEach(screen.views, id: \.self) { view in
+                                Text(view)
+                                    .tag(view)
+                            }
+                        }
+                    }
+                }
+                
+                if option.isCustomized {
+                    Button {
+                        Task(priority: .userInitiated) {
+                            await viewModel.resetStyle(forImageWithID: shareableImage.id)
+                        }
+                    } label: {
+                        Label("Use Toolbar Choice", symbol: .arrowCounterclockwise)
+                    }
+                }
+            } label: {
+                Label("Frame Style", symbol: .paintpalette)
+            }
+        }
+    }
+    
+    private func imageColorSelection(for shareableImage: ShareableImage, option: DeviceStyleOption) -> Binding<String> {
+        Binding {
+            option.selectedColor ?? ""
+        } set: { color in
+            Task(priority: .userInitiated) {
+                await viewModel.didSelectColor(color, forImageWithID: shareableImage.id)
+            }
+        }
+    }
+    
+    private func imageViewSelection(for shareableImage: ShareableImage, screen: DeviceStyleOption.Screen) -> Binding<String> {
+        Binding {
+            screen.selectedView
+        } set: { view in
+            Task(priority: .userInitiated) {
+                await viewModel.didSelectView(view, forImageWithID: shareableImage.id)
+            }
+        }
     }
     
     private func individualImagesView(_ shareableImages: [ShareableImage]) -> some View {

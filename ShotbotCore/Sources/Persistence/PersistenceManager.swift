@@ -188,13 +188,13 @@ public final class PersistenceManager: ObservableObject, PersistenceManaging, @u
         }
     }
 
-    public func preferredView(for deviceName: String) -> String? {
-        deviceViewPreferencesDict[deviceName]
+    public func preferredView(forKey key: String) -> String? {
+        deviceViewPreferencesDict[key]
     }
 
-    public func setPreferredView(_ view: String, for deviceName: String) {
+    public func setPreferredView(_ view: String, forKey key: String) {
         var dict = deviceViewPreferencesDict
-        dict[deviceName] = view
+        dict[key] = view
         deviceViewPreferencesDict = dict
     }
 }
@@ -279,12 +279,12 @@ public class MockPersistenceManager: PersistenceManaging, @unchecked Sendable {
         mockDeviceColorPreferences[deviceName] = color
     }
 
-    public func preferredView(for deviceName: String) -> String? {
-        mockDeviceViewPreferences[deviceName]
+    public func preferredView(forKey key: String) -> String? {
+        mockDeviceViewPreferences[key]
     }
 
-    public func setPreferredView(_ view: String, for deviceName: String) {
-        mockDeviceViewPreferences[deviceName] = view
+    public func setPreferredView(_ view: String, forKey key: String) {
+        mockDeviceViewPreferences[key] = view
     }
 
     public func setLastReviewPromptDateToNow() {

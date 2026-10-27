@@ -427,16 +427,45 @@ import SwiftTools
         let outputURL = URL.temporaryDirectory.appending(path: "Framed Video \(UUID()).mp4")
         
         try await VideoFramer().frame(videoAt: sourceURL, in: device, to: outputURL)
-        try? fileManager.removeItem(at: sourceURL)
         
         persistenceManager.deviceFrameCreations += 1
-        framedVideo = FramedVideo(url: outputURL, device: device)
+        framedVideo = FramedVideo(url: outputURL, sourceURL: sourceURL, device: device)
+        refreshStyleOptions()
         
         if (try? await autoCRUDManager.autoSaveVideoIfNeeded(using: outputURL)) == true {
             showAutoSaveToast = true
         }
         
         reviewManager.askForAReview()
+    }
+    
+    /// Frames a video again with another color or view, keeping the current video up until the new one is ready.
+    /// - Parameters:
+    ///   - video: The framed video to replace.
+    ///   - restyle: Changes the video's device, such as to another color.
+    private func reframeVideo(_ video: FramedVideo, restyle: (DeviceInfo) -> DeviceInfo) async {
+        guard !isLoading else { return }
+        
+        isLoading = true
+        defer { isLoading = false }
+        
+        let device = restyle(video.device)
+        let outputURL = URL.temporaryDirectory.appending(path: "Framed Video \(UUID()).mp4")
+        
+        do {
+            try await VideoFramer().frame(videoAt: video.sourceURL, in: device, to: outputURL)
+        } catch {
+            self.error = error
+            return
+        }
+        
+        framedVideo = FramedVideo(url: outputURL, sourceURL: video.sourceURL, device: device)
+        try? fileManager.removeItem(at: video.url)
+        refreshStyleOptions()
+        
+        if (try? await autoCRUDManager.autoSaveVideoIfNeeded(using: outputURL)) == true {
+            showAutoSaveToast = true
+        }
     }
     
     /// Copies a file the user picked in the Files app into the temporary directory.
@@ -526,14 +555,19 @@ import SwiftTools
         )
     }
     
-    /// Rebuilds `styleOptions` from the devices in the current screenshots.
+    /// The devices whose frame style can be chosen: the framed video's, or the current screenshots'.
+    private var styleDevices: [DeviceInfo] {
+        framedVideo.map { [$0.device] } ?? imageResults.devices
+    }
+    
+    /// Rebuilds `styleOptions` from the devices in the current screenshots or video.
     ///
     /// The selections shown are the choices for all screenshots. A screenshot with a choice of its own can differ.
     private func refreshStyleOptions() {
         var names = [String]()
         var groups = [String: [DeviceInfo]]()
         
-        for device in imageResults.devices where device.hasColorOptions || device.hasViewOptions {
+        for device in styleDevices where device.hasColorOptions || device.hasViewOptions {
             if groups[device.name] == nil { names.append(device.name) }
             groups[device.name, default: []].append(device)
         }
@@ -830,7 +864,7 @@ import SwiftTools
     /// A screenshot with a color of its own keeps it.
     public func didSelectColor(_ color: String, forDeviceNamed deviceName: String) async {
         guard
-            let sample = imageResults.devices.first(where: { $0.name == deviceName && $0.hasColorOptions }),
+            let sample = styleDevices.first(where: { $0.name == deviceName && $0.hasColorOptions }),
             sample.colors.contains(color),
             currentColor(for: sample) != color
         else {
@@ -838,6 +872,11 @@ import SwiftTools
         }
         
         persistenceManager.setPreferredColor(color, for: deviceName)
+        
+        if let video = framedVideo {
+            await reframeVideo(video) { $0.withColor(color) }
+            return
+        }
         
         let changed = restyleDevices(
             matching: { $0.name == deviceName },
@@ -856,7 +895,7 @@ import SwiftTools
     /// - Parameter viewKey: `DeviceInfo.viewPreferenceKey` of the screen.
     public func didSelectView(_ view: String, forViewKey viewKey: String) async {
         guard
-            let sample = imageResults.devices.first(where: { $0.viewPreferenceKey == viewKey && $0.hasViewOptions }),
+            let sample = styleDevices.first(where: { $0.viewPreferenceKey == viewKey && $0.hasViewOptions }),
             sample.views.contains(view),
             currentView(for: sample) != view
         else {
@@ -864,6 +903,11 @@ import SwiftTools
         }
         
         persistenceManager.setPreferredView(view, forKey: viewKey)
+        
+        if let video = framedVideo {
+            await reframeVideo(video) { $0.withView(view) }
+            return
+        }
         
         let changed = restyleDevices(
             matching: { $0.viewPreferenceKey == viewKey },

@@ -61,12 +61,12 @@ struct DeviceDisambiguationView: View {
                 Text(device.displayName)
                     .font(.headline)
 
-                if let scaledSize = device.scaledSize {
-                    Text("Display Zoom")
+                if device.isScaled {
+                    Text(device.resolutionName)
                         .font(.caption2)
                         .foregroundStyle(.orange)
 
-                    Text("Native: \(Int(scaledSize.width)) × \(Int(scaledSize.height))")
+                    Text("Native: \(Int(device.screenSize.width)) × \(Int(device.screenSize.height))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {

@@ -50,4 +50,22 @@ public protocol PersistenceManaging: Sendable {
 
     /// All cached device frame preferences keyed by size string (e.g. "1170x2532") mapped to the device frame name.
     var deviceFramePreferences: [String: String] { get }
+
+    // MARK: - Device Color Preferences
+
+    /// Returns the frame color the user last picked for a device model, such as "Cosmic Orange" for "iPhone 17 Pro".
+    func preferredColor(for deviceName: String) -> String?
+
+    /// Stores the frame color the user picked for a device model, so it is the default the next time that device is framed.
+    func setPreferredColor(_ color: String, for deviceName: String)
+}
+
+public extension PersistenceManaging {
+    /// Returns the device in the color the user last picked for it, or unchanged when it has no saved color.
+    /// - Parameter device: A device, usually straight from `DeviceInfo.match(for:)`.
+    func applyingPreferredColor(to device: DeviceInfo) -> DeviceInfo {
+        guard device.hasColorOptions, let color = preferredColor(for: device.name) else { return device }
+
+        return device.withColor(color)
+    }
 }

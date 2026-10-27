@@ -164,6 +164,12 @@ public struct HomeView: View {
             }
         }
         .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                if !viewModel.colorOptions.isEmpty {
+                    colorMenu
+                }
+            }
+
             ToolbarItem(placement: .cancellationAction) {
                 if viewModel.canShowClearButton {
                     if #available(iOS 26.0, *) {
@@ -195,6 +201,44 @@ public struct HomeView: View {
         }
     }
     
+    /// A toolbar menu for choosing the frame color of the devices in the current screenshots.
+    ///
+    /// Only devices whose frame comes in more than one color are listed. With several such devices, each gets its own section.
+    private var colorMenu: some View {
+        Menu {
+            ForEach(viewModel.colorOptions) { option in
+                if viewModel.colorOptions.count > 1 {
+                    Section(option.deviceName) {
+                        colorPicker(for: option)
+                    }
+                } else {
+                    colorPicker(for: option)
+                }
+            }
+        } label: {
+            Label("Frame Color", symbol: .paintpalette)
+        }
+    }
+
+    private func colorPicker(for option: DeviceColorOption) -> some View {
+        Picker(option.deviceName, selection: colorSelection(for: option)) {
+            ForEach(option.colors, id: \.self) { color in
+                Text(color)
+                    .tag(color)
+            }
+        }
+    }
+
+    private func colorSelection(for option: DeviceColorOption) -> Binding<String> {
+        Binding {
+            option.selectedColor
+        } set: { color in
+            Task(priority: .userInitiated) {
+                await viewModel.didSelectColor(color, forDeviceNamed: option.deviceName)
+            }
+        }
+    }
+
     @ViewBuilder
     private var picker: some View {
         if viewModel.imageResults.hasMultipleImages {

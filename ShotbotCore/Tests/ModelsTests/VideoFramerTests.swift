@@ -30,6 +30,25 @@ struct VideoFramerTests {
         #expect(abs(duration - 1) < 0.2)
     }
 
+    @Test("A partially open view makes room around the device for its shadow")
+    func partiallyOpenVideoIsLarger() async throws {
+        let duo = try #require(DeviceInfo.all().first {
+            $0.name == "iPhone Duo" && $0.screenName == "Inner" && $0.orientation == .landscape
+        }).withView("Partially Open")
+        #expect(duo.isPartiallyOpen)
+
+        let source = try await makeVideo(size: duo.inputSize, frames: 5)
+        let output = FileManager.default.temporaryDirectory.appendingPathComponent("folded-\(UUID()).mp4")
+        defer { try? FileManager.default.removeItem(at: output) }
+
+        try await VideoFramer().frame(videoAt: source, in: duo, to: output)
+
+        let size = try await VideoFramer.size(ofVideoAt: output)
+        let frame = try #require(duo.frameImage?.cgImage)
+        #expect(size.width > CGFloat(frame.width))
+        #expect(size.height > CGFloat(frame.height))
+    }
+
     @Test("A file without video is rejected")
     func rejectsNonVideo() async throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).mp4")

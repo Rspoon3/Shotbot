@@ -180,6 +180,11 @@ public struct DeviceInfo: Sendable {
         return flat.partiallyOpened(openingAngle: openingAngle)
     }
 
+    /// The angle the selected view opens the frame to, or `nil` for a flat view.
+    var openingAngle: Double? {
+        viewFrame.openingAngle
+    }
+
     /// Whether the selected view bends the frame, like the iPhone Duo's Partially Open view. A partially open image is larger than the
     /// frame, to make room for its shadow.
     public var isPartiallyOpen: Bool {

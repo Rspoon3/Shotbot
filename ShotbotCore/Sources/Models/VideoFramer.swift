@@ -17,14 +17,12 @@ public struct VideoFramer: Sendable {
     /// Why a video couldn't be framed.
     public enum VideoFramerError: LocalizedError, Equatable {
         case noVideoTrack
-        case unsupportedView
         case missingFrame
         case exportFailed(String)
 
         public var errorDescription: String? {
             switch self {
             case .noVideoTrack: "The file doesn't contain a video."
-            case .unsupportedView: "Partially open frames can't be used for videos yet."
             case .missingFrame: "The device frame couldn't be loaded."
             case .exportFailed(let reason): "The video couldn't be exported. \(reason)"
             }
@@ -81,7 +79,6 @@ public struct VideoFramer: Sendable {
     ///   - device: The device whose frame to use, in the selected color and view.
     ///   - outputURL: Where to write the framed video. An existing file is replaced.
     public func frame(videoAt sourceURL: URL, in device: DeviceInfo, to outputURL: URL) async throws {
-        guard !device.isPartiallyOpen else { throw VideoFramerError.unsupportedView }
         guard let frameImage = device.frameImage, let frameCG = frameImage.cgImage else {
             throw VideoFramerError.missingFrame
         }
@@ -93,27 +90,34 @@ public struct VideoFramer: Sendable {
 
         let formatDescriptions = try await track.load(.formatDescriptions)
 
-        // Encoders need even dimensions, so a frame with an odd side gets one transparent row or column of padding.
         let frameSize = CGSize(width: frameCG.width, height: frameCG.height)
-        let renderSize = CGSize(
-            width: Self.even(frameSize.width),
-            height: Self.even(frameSize.height)
-        )
 
-        let layers = Layers(
+        var layers = Layers(
             frame: CIImage(cgImage: frameCG),
             // The mask is gray, so its brightness is turned into the alpha the blend reads.
             mask: device.screenMask.map { CIImage(cgImage: $0).applyingFilter("CIMaskToAlpha") },
-            background: CIImage(color: CIColor(color: background)).cropped(to: CGRect(origin: .zero, size: renderSize)),
+            frameSize: frameSize,
             screenSize: device.screenSize,
             // Core Image's origin is the bottom-left, while the offset is measured from the top-left.
             screenOrigin: CGPoint(
                 x: device.offSet.x,
-                y: renderSize.height - device.offSet.y - device.screenSize.height
+                y: frameSize.height - device.offSet.y - device.screenSize.height
             )
         )
 
-        let composition = try await AVMutableVideoComposition.videoComposition(with: asset) { request in
+        // Encoders need even dimensions, so an odd side gets one row or column of padding.
+        var outputSize = frameSize
+
+        if let openingAngle = device.openingAngle {
+            let fold = try layers.makeFold(openingAngle: openingAngle)
+            layers.fold = fold
+            outputSize = fold.canvas.size
+        }
+
+        let renderSize = CGSize(width: Self.even(outputSize.width), height: Self.even(outputSize.height))
+        layers.background = CIImage(color: CIColor(color: background)).cropped(to: CGRect(origin: .zero, size: renderSize))
+
+        let composition = try await AVMutableVideoComposition.videoComposition(with: asset) { [layers] request in
             request.finish(with: layers.render(request.sourceImage), context: nil)
         }
         composition.renderSize = renderSize
@@ -167,13 +171,45 @@ public struct VideoFramer: Sendable {
 
     /// The images every video frame is composed from.
     private struct Layers: @unchecked Sendable {
+        /// What a partially open view needs besides the flat frame, built once because it doesn't change between frames.
+        struct Fold {
+            let folder: PartiallyOpenFolder
+            /// The folded device's canvas, with room for its shadow.
+            let canvas: CGRect
+            /// The shadow on the canvas, moved so the canvas starts at the origin.
+            let shadow: CIImage
+        }
+
         let frame: CIImage
         let mask: CIImage?
-        let background: CIImage
+        let frameSize: CGSize
         let screenSize: CGSize
         let screenOrigin: CGPoint
+        var background = CIImage.empty()
+        var fold: Fold?
 
-        func render(_ source: CIImage) -> CIImage {
+        /// Builds the shadow and canvas for folding frames, from a solid screen the same shape as the real ones.
+        func makeFold(openingAngle: Double) throws -> Fold {
+            let folder = PartiallyOpenFolder(size: frameSize, openingAngle: openingAngle)
+            let solid = CIImage(color: .black).cropped(to: CGRect(origin: .zero, size: screenSize))
+
+            guard let sample = folder.open(flat(solid)) else { throw VideoFramerError.missingFrame }
+
+            let canvas = PartiallyOpenFolder.canvas(for: sample)
+            let shadow = PartiallyOpenFolder.shadow(of: sample, in: canvas)
+
+            // The shadow's blur is slow, so draw it once and reuse the picture for every frame.
+            guard let drawn = CIContext().createCGImage(shadow, from: canvas) else { throw VideoFramerError.missingFrame }
+
+            return Fold(
+                folder: folder,
+                canvas: canvas,
+                shadow: CIImage(cgImage: drawn)
+            )
+        }
+
+        /// One video frame inside the device, on a transparent background.
+        func flat(_ source: CIImage) -> CIImage {
             let extent = source.extent
 
             var screen = source
@@ -192,8 +228,25 @@ public struct VideoFramer: Sendable {
 
             screen = screen.transformed(by: CGAffineTransform(translationX: screenOrigin.x, y: screenOrigin.y))
 
+            let transparent = CIImage(color: .clear).cropped(to: CGRect(origin: .zero, size: frameSize))
+
             return frame
-                .composited(over: screen.composited(over: background))
+                .composited(over: screen.composited(over: transparent))
+                .cropped(to: CGRect(origin: .zero, size: frameSize))
+        }
+
+        func render(_ source: CIImage) -> CIImage {
+            let device = flat(source)
+
+            guard let fold, let opened = fold.folder.open(device) else {
+                return device.composited(over: background).cropped(to: background.extent)
+            }
+
+            let moved = opened.transformed(by: CGAffineTransform(translationX: -fold.canvas.minX, y: -fold.canvas.minY))
+
+            return moved
+                .composited(over: fold.shadow)
+                .composited(over: background)
                 .cropped(to: background.extent)
         }
     }

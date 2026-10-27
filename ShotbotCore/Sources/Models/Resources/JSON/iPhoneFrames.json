@@ -1,186 +1,286 @@
 [
     {
-        "deviceFrame": "iPhone 8 and 2020 SE Portrait",
-        "mergeMethod": "singleOverlay",
-        "inputSize": [750, 1334],
-        "offSet": [125, 334]
+        "name": "iPhone 8 and 2020 SE",
+        "offSet": [125, 334],
+        "resolutions": [
+            { "name": "Default", "size": [750, 1334] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 8 and 2020 SE Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 8 and 2020 SE Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 8 Plus Portrait",
-        "mergeMethod": "singleOverlay",
-        "inputSize": [1242, 2208],
-        "scaledSize": [1080, 1920],
-        "offSet": [100, 310]
+        "name": "iPhone 8 Plus",
+        "screenSize": [1080, 1920],
+        "offSet": [100, 310],
+        "resolutions": [
+            { "name": "Default", "size": [1242, 2208] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 8 Plus Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 8 Plus Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 8 Plus Landscape",
-        "mergeMethod": "singleOverlay",
-        "inputSize": [2208, 1242],
-        "scaledSize": [1920, 1080],
-        "offSet": [310, 100]
+        "name": "iPhone 11",
+        "offSet": [86, 104],
+        "resolutions": [
+            { "name": "Default", "size": [828, 1792] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 11 Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 11 Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 11 Portrait",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [828, 1792],
-        "offSet": [86, 104]
+        "name": "iPhone 11 Pro",
+        "offSet": [238, 182],
+        "resolutions": [
+            { "name": "Default", "size": [1125, 2436] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 11 Pro Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 11 Pro Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 11 Landscape",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [1792, 828],
-        "offSet": [104, 86]
+        "name": "iPhone 11 Pro Max",
+        "offSet": [179, 155],
+        "resolutions": [
+            { "name": "Default", "size": [1242, 2688] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 11 Pro Max Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 11 Pro Max Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 11 Pro Portrait",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [1125, 2436],
-        "offSet": [238, 182]
+        "name": "iPhone 12 Mini",
+        "offSet": [80, 80],
+        "resolutions": [
+            { "name": "Default", "size": [1080, 2340] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 12 Mini Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 12 Mini Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 11 Pro Max Portrait",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [1242, 2688],
-        "offSet": [179, 155]
+        "name": "iPhone 12 Pro",
+        "offSet": [115, 84],
+        "resolutions": [
+            { "name": "Default", "size": [1170, 2532] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 12 Pro Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 12 Pro Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 11 Pro Max Landscape",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [2688, 1242],
-        "offSet": [155, 179]
-    },
-    {
-        "deviceFrame": "iPhone 12 Mini Portrait",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [1080, 2340],
-        "offSet": [80, 80]
-    },
-    {
-        "deviceFrame": "iPhone 12 Mini Landscape",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [2340, 1080],
-        "offSet": [80, 80]
-    },
-    {
-        "deviceFrame": "iPhone 12 Pro Portrait",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [1170, 2532],
-        "offSet": [115, 84]
-    },
-    {
-        "deviceFrame": "iPhone 12 Pro Landscape",
-        "mergeMethod": "doubleOverlay",
-        "inputSize": [2532, 1170],
-        "offSet": [84, 115]
-    },
-    {
-        "deviceFrame": "iPhone 12 Pro Max Portrait",
-        "mergeMethod": "doubleOverlay",
-        "clipEdgesAmount": 50,
-        "inputSize": [1284, 2778],
+        "name": "iPhone 12 Pro Max",
         "offSet": [108, 111],
+        "resolutions": [
+            { "name": "Default", "size": [1284, 2778] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 12 Pro Max Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 12 Pro Max Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 12 Pro Max Landscape",
-        "mergeMethod": "doubleOverlay",
-        "clipEdgesAmount": 50,
-        "inputSize": [2778, 1284],
-        "offSet": [111, 108],
-    },
-    {
-        "deviceFrame": "iPhone 14 Pro Portrait",
-        "mergeMethod": "islandOverlay",
-        "clipEdgesAmount": 75,
-        "inputSize": [1179, 2556],
+        "name": "iPhone 14 Pro",
         "offSet": [80, 80],
+        "resolutions": [
+            { "name": "Default", "size": [1179, 2556] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 14 Pro Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 14 Pro Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 14 Pro Landscape",
-        "mergeMethod": "islandOverlay",
-        "clipEdgesAmount": 75,
-        "inputSize": [2556, 1179],
-        "offSet": [80, 80],
-    },
-    {
-        "deviceFrame": "iPhone 14 Pro Max Portrait",
-        "mergeMethod": "islandOverlay",
-        "clipEdgesAmount": 75,
-        "inputSize": [1290, 2796],
-        "displayZoomInputSize": [1125, 2436],
+        "name": "iPhone 14 Pro Max",
         "offSet": [80, 70],
+        "resolutions": [
+            { "name": "Default", "size": [1290, 2796] },
+            { "name": "Display Zoom", "size": [1125, 2436] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 14 Pro Max Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 14 Pro Max Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 14 Pro Max Landscape",
-        "mergeMethod": "islandOverlay",
-        "clipEdgesAmount": 75,
-        "inputSize": [2796, 1290],
-        "displayZoomInputSize": [2436, 1125],
-        "offSet": [70, 80],
+        "name": "iPhone 16 Pro",
+        "offSet": [72, 69],
+        "resolutions": [
+            { "name": "Default", "size": [1206, 2622] }
+        ],
+        "colors": ["Black Titanium", "Desert Titanium", "Natural Titanium", "White Titanium"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 16 Pro - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 16 Pro - {color} - Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 16 Pro - Black Titanium - Portrait",
-        "mergeMethod": "singleOverlayV2",
-        "cornerRadius": 100,
-        "inputSize": [1206, 2622]
+        "name": "iPhone 16 Pro Max",
+        "offSet": [75, 66],
+        "resolutions": [
+            { "name": "Default", "size": [1320, 2868] }
+        ],
+        "colors": ["Black Titanium", "Desert Titanium", "Natural Titanium", "White Titanium"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 16 Pro Max - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 16 Pro Max - {color} - Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 16 Pro - Black Titanium - Landscape",
-        "mergeMethod": "singleOverlayV2",
-        "cornerRadius": 100,
-        "inputSize": [2622, 1206]
+        "name": "iPhone Air",
+        "offSet": [60, 72],
+        "resolutions": [
+            { "name": "Default", "size": [1260, 2736] },
+            { "name": "Display Zoom", "size": [1125, 2436] }
+        ],
+        "colors": ["Space Black", "Cloud White", "Light Gold", "Sky Blue"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone Air - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone Air - {color} - Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone 16 Pro Max - Black Titanium - Portrait",
-        "mergeMethod": "singleOverlayV2",
-        "cornerRadius": 100,
-        "inputSize": [1320, 2868]
+        "name": "iPhone Duo",
+        "colors": ["Star White", "Night Sky"],
+        "displays": [
+            {
+                "name": "Inner",
+                "offSet": [120, 120],
+                "resolutions": [
+                    { "name": "Default", "size": [2007, 2853] },
+                    { "name": "Apple Spec", "size": [1878, 2670] }
+                ],
+                "orientations": [
+                    { "orientation": "Portrait", "frame": "iPhone Duo - {color} - Inner Open Portrait" },
+                    { "orientation": "Landscape", "frame": "iPhone Duo - {color} - Inner Open Landscape" }
+                ]
+            },
+            {
+                "name": "Outer",
+                "offSet": [88, 80],
+                "resolutions": [
+                    { "name": "Default", "size": [1398, 2034] }
+                ],
+                "orientations": [
+                    { "orientation": "Portrait", "frame": "iPhone Duo - {color} - Outer Closed Portrait" },
+                    { "orientation": "Landscape", "frame": "iPhone Duo - {color} - Outer Closed Landscape" }
+                ]
+            }
+        ]
     },
     {
-        "deviceFrame": "iPhone 16 Pro Max - Black Titanium - Landscape",
-        "mergeMethod": "singleOverlayV2",
-        "cornerRadius": 100,
-        "inputSize": [2868, 1320]
+        "name": "iPhone 15 Pro",
+        "offSet": [120, 120],
+        "resolutions": [
+            { "name": "Default", "size": [1179, 2556] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 15 Pro Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 15 Pro Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone Air - Space Black - Portrait",
-        "mergeMethod": "singleOverlayV2",
-        "cornerRadius": 100,
-        "inputSize": [1260, 2736],
-        "displayZoomInputSize": [1125, 2436]
+        "name": "iPhone 15 Pro Max",
+        "offSet": [120, 120],
+        "resolutions": [
+            { "name": "Default", "size": [1290, 2796] }
+        ],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 15 Pro Max Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 15 Pro Max Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone Air - Space Black - Landscape",
-        "mergeMethod": "singleOverlayV2",
-        "cornerRadius": 100,
-        "inputSize": [2736, 1260],
-        "displayZoomInputSize": [2436, 1125]
+        "name": "iPhone 16",
+        "offSet": [90, 90],
+        "resolutions": [
+            { "name": "Default", "size": [1179, 2556] }
+        ],
+        "colors": ["Black", "White", "Pink", "Teal", "Ultramarine"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 16 - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 16 - {color} - Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone Duo - Star White - Inner Open Portrait",
-        "mergeMethod": "doubleOverlay",
-        "cornerRadius": 100,
-        "inputSize": [2007, 2853],
-        "offSet": [120, 120]
+        "name": "iPhone 16 Plus",
+        "offSet": [90, 87],
+        "resolutions": [
+            { "name": "Default", "size": [1290, 2796] }
+        ],
+        "colors": ["Black", "White", "Pink", "Teal", "Ultramarine"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 16 Plus - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 16 Plus - {color} - Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone Duo - Star White - Inner Open Landscape",
-        "mergeMethod": "doubleOverlay",
-        "cornerRadius": 100,
-        "inputSize": [2853, 2007],
-        "offSet": [120, 120]
+        "name": "iPhone 17",
+        "offSet": [72, 69],
+        "resolutions": [
+            { "name": "Default", "size": [1206, 2622] }
+        ],
+        "colors": ["Black", "White", "Mist Blue", "Sage", "Lavender"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 17 - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 17 - {color} - Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone Duo - Star White - Outer Closed Portrait",
-        "mergeMethod": "doubleOverlay",
-        "cornerRadius": 60,
-        "inputSize": [1398, 2034],
-        "offSet": [88, 80]
+        "name": "iPhone 17 Pro",
+        "offSet": [72, 69],
+        "resolutions": [
+            { "name": "Default", "size": [1206, 2622] }
+        ],
+        "colors": ["Silver", "Cosmic Orange", "Deep Blue"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 17 Pro - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 17 Pro - {color} - Landscape" }
+        ]
     },
     {
-        "deviceFrame": "iPhone Duo - Star White - Outer Closed Landscape",
-        "mergeMethod": "doubleOverlay",
-        "cornerRadius": 60,
-        "inputSize": [2034, 1398],
-        "offSet": [80, 88]
+        "name": "iPhone 17 Pro Max",
+        "offSet": [75, 66],
+        "resolutions": [
+            { "name": "Default", "size": [1320, 2868] }
+        ],
+        "colors": ["Silver", "Cosmic Orange", "Deep Blue"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 17 Pro Max - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 17 Pro Max - {color} - Landscape" }
+        ]
     },
+    {
+        "name": "iPhone 18 Pro",
+        "offSet": [72, 69],
+        "resolutions": [
+            { "name": "Default", "size": [1206, 2622] }
+        ],
+        "colors": ["Silver", "Black", "Glacier", "Burgundy"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 18 Pro - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 18 Pro - {color} - Landscape" }
+        ]
+    },
+    {
+        "name": "iPhone 18 Pro Max",
+        "offSet": [75, 66],
+        "resolutions": [
+            { "name": "Default", "size": [1320, 2868] }
+        ],
+        "colors": ["Silver", "Black", "Glacier", "Burgundy"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPhone 18 Pro Max - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPhone 18 Pro Max - {color} - Landscape" }
+        ]
+    }
 ]

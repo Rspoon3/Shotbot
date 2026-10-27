@@ -8,59 +8,159 @@
 import UIKit
 import SwiftTools
 
-public struct DeviceInfo: Decodable, Sendable {
+/// A device frame paired with one screenshot resolution that fits it.
+///
+/// Every frame goes through the same steps: scale the screenshot to the screen opening if its
+/// resolution differs, clip it to the frame's screen mask if one is bundled, place it at `offSet`
+/// on a transparent canvas, then draw the frame on top.
+public struct DeviceInfo: Sendable {
+    /// The display name of the device model, such as "iPhone 16 Pro".
+    public let name: String
+    /// Which screen this frame is for, such as "Inner" or "Outer", for devices with several. `nil` for one screen.
+    public let screenName: String?
+    /// Which way the device is held in this frame.
+    public let orientation: DeviceOrientation
+    /// The frame's asset name, for the selected color.
     public let deviceFrame: String
-    public let mergeMethod: MergeMethod
-    public let clipEdgesAmount: CGFloat?
-    public let cornerRadius: CGFloat?
+    /// The colors this device's frame comes in, with the default first. Empty when it has a single look.
+    public let colors: [String]
+    /// The selected color, or `nil` when the device has a single look.
+    public let colorName: String?
+    /// The frame's asset name with `{color}` where the color goes.
+    private let frameTemplate: String
+    /// The asset name the screen mask is stored under, which is always the default color's frame.
+    private let maskName: String
+    /// Where each color's frame draws the screen, for colors that differ from the default. Already swapped for landscape.
+    private let colorOffsets: [String: CGPoint]
+    /// Where the default color's frame draws the screen.
+    private let defaultOffSet: CGPoint
+    /// The screenshot size this entry matches.
     public let inputSize: CGSize
-    public let scaledSize: CGSize?
-    public let offSet: CGPoint?
+    /// The size of the frame's screen opening. Screenshots with a different `inputSize` are scaled to this.
+    public let screenSize: CGSize
+    /// Where the screen opening's top-left corner sits in the frame.
+    public let offSet: CGPoint
+    /// What kind of resolution this is, such as "Default", "More Space", or "Display Zoom".
+    public let resolutionName: String
 
-    /// The screenshot resolution produced when Display Zoom is enabled on this device.
-    /// When present, this resolution may collide with another device's native `inputSize`.
-    public let displayZoomInputSize: CGSize?
+    private static let allDevices: [DeviceInfo] = {
+        let bundle = Bundle.module
+        let fileNames = ["iPhoneFrames.json", "iPadFrames.json", "MacFrames.json", "AppleWatchFrames.json"]
+
+        return fileNames
+            .flatMap { try! bundle.decode([DeviceDefinition].self, from: $0) }
+            .flatMap { definition in
+                definition.displays.flatMap { display in
+                    display.orientations.enumerated().flatMap { index, orientation in
+                        // The first orientation is written as authored; later ones swap width and height.
+                        let swapped = index > 0
+                        let nativeScreenSize = display.screenSize ?? display.resolutions[0].size
+                        let screenSize = swapped ? nativeScreenSize.swapped : nativeScreenSize
+                        let offSet = orientation.offSet
+                            ?? (swapped ? CGPoint(x: display.offSet.y, y: display.offSet.x) : display.offSet)
+
+                        let colorOffsets = (definition.colorOffsets ?? [:]).mapValues {
+                            swapped ? CGPoint(x: $0.y, y: $0.x) : $0
+                        }
+                        let colors = definition.colors ?? []
+                        let defaultFrame = colors.first.map { orientation.frame.replacingOccurrences(of: "{color}", with: $0) }
+                            ?? orientation.frame
+
+                        return display.resolutions.map { resolution in
+                            DeviceInfo(
+                                name: definition.name,
+                                screenName: display.name,
+                                orientation: orientation.orientation,
+                                deviceFrame: defaultFrame,
+                                colors: colors,
+                                colorName: colors.first,
+                                frameTemplate: orientation.frame,
+                                maskName: defaultFrame,
+                                colorOffsets: colorOffsets,
+                                defaultOffSet: offSet,
+                                inputSize: swapped ? resolution.size.swapped : resolution.size,
+                                screenSize: screenSize,
+                                offSet: offSet,
+                                resolutionName: resolution.name
+                            )
+                        }
+                    }
+                }
+            }
+    }()
 
     // MARK: - Initializer
 
     public init(
+        name: String,
+        screenName: String? = nil,
+        orientation: DeviceOrientation,
         deviceFrame: String,
-        mergeMethod: MergeMethod,
-        clipEdgesAmount: CGFloat?,
-        cornerRadius: CGFloat?,
+        colors: [String] = [],
+        colorName: String? = nil,
+        frameTemplate: String? = nil,
+        maskName: String? = nil,
+        colorOffsets: [String: CGPoint] = [:],
+        defaultOffSet: CGPoint? = nil,
         inputSize: CGSize,
-        scaledSize: CGSize?,
-        offSet: CGPoint?,
-        displayZoomInputSize: CGSize? = nil
+        screenSize: CGSize,
+        offSet: CGPoint,
+        resolutionName: String = "Default"
     ) {
+        self.name = name
+        self.screenName = screenName
+        self.orientation = orientation
         self.deviceFrame = deviceFrame
-        self.mergeMethod = mergeMethod
-        self.clipEdgesAmount = clipEdgesAmount
+        self.colors = colors
+        self.colorName = colorName
+        self.frameTemplate = frameTemplate ?? deviceFrame
+        self.maskName = maskName ?? deviceFrame
+        self.colorOffsets = colorOffsets
+        self.defaultOffSet = defaultOffSet ?? offSet
         self.inputSize = inputSize
-        self.scaledSize = scaledSize
+        self.screenSize = screenSize
         self.offSet = offSet
-        self.cornerRadius = cornerRadius
-        self.displayZoomInputSize = displayZoomInputSize
+        self.resolutionName = resolutionName
     }
-    
-    /// A user-friendly device name extracted from the frame identifier.
-    ///
-    /// Strips orientation and color suffixes:
-    /// - "iPhone Air - Space Black - Portrait" → "iPhone Air"
-    /// - "iPhone 11 Pro Portrait" → "iPhone 11 Pro"
+
+    // MARK: - Public Helpers
+
+    /// Whether the device's frame comes in more than one color.
+    public var hasColorOptions: Bool {
+        colors.count > 1
+    }
+
+    /// The same device in another color.
+    /// - Parameter color: One of `colors`. An unknown color returns the device unchanged.
+    public func withColor(_ color: String) -> DeviceInfo {
+        guard colors.contains(color) else { return self }
+
+        return DeviceInfo(
+            name: name,
+            screenName: screenName,
+            orientation: orientation,
+            deviceFrame: frameTemplate.replacingOccurrences(of: "{color}", with: color),
+            colors: colors,
+            colorName: color,
+            frameTemplate: frameTemplate,
+            maskName: maskName,
+            colorOffsets: colorOffsets,
+            defaultOffSet: defaultOffSet,
+            inputSize: inputSize,
+            screenSize: screenSize,
+            offSet: colorOffsets[color] ?? defaultOffSet,
+            resolutionName: resolutionName
+        )
+    }
+
+    /// Whether screenshots at `inputSize` are scaled to fit the frame's screen opening.
+    public var isScaled: Bool {
+        inputSize != screenSize
+    }
+
+    /// A user-friendly device name, such as "iPhone 16 Pro".
     public var displayName: String {
-        var name = deviceFrame
-            .components(separatedBy: " - ")
-            .first?
-            .trimmingCharacters(in: .whitespaces) ?? deviceFrame
-
-        for suffix in [" Portrait", " Landscape"] {
-            if name.hasSuffix(suffix) {
-                name = String(name.dropLast(suffix.count))
-            }
-        }
-
-        return name
+        name
     }
 
     /// The device frame asset image, if available.
@@ -68,84 +168,46 @@ public struct DeviceInfo: Decodable, Sendable {
         UIImage(named: deviceFrame, in: .module, with: nil)
     }
 
-    // MARK: - Functions
-
-    public func framed(using screenshot: UIImage) -> UIImage? {
-        var screenshot = screenshot
-        let offSet = offSet ?? .zero
-        
-        guard let frameImage = UIImage(named: deviceFrame, in: .module, with: nil) else {
-            return nil
-        }
-        
-        if let clipEdgesAmount {
-            screenshot = screenshot.clipEdges(amount: clipEdgesAmount)
-        } else if let cornerRadius {
-            screenshot = screenshot.withRoundedCorners(radius: cornerRadius)
-        }
-        
-        if let scaledSize {
-            screenshot = screenshot.resized(to: scaledSize)
-        }
-        
-        switch mergeMethod {
-        case .singleOverlay:
-            return frameImage.merge(with: screenshot, offset: offSet)
-        case .singleOverlayV2:
-            return screenshot.overlayWithLargerCenteredImage(frameImage)
-        case .doubleOverlay:
-            let image = frameImage.merge(with: screenshot, offset: offSet)
-            return image.merge(with: frameImage, offset: .zero)
-        case .islandOverlay:
-            guard let noIsland = UIImage(named: "\(deviceFrame) Without Island", in: .module, with: nil) else {
-                return nil
-            }
-            
-            let noIslandFrame = noIsland.merge(with: screenshot, offset: offSet)
-            
-            return noIslandFrame.merge(with: frameImage, offset: .zero)
-        }
-    }
-    
-    // MARK: - Data
-    
-    public static func all() -> [DeviceInfo] {
-        let bundle = Bundle.module
-
-        let iPhoneFrames = try! bundle.decode([DeviceInfo].self, from: "iPhoneFrames.json")
-        let iPadFrames = try! bundle.decode([DeviceInfo].self, from: "iPadFrames.json")
-        let macFrames = try! bundle.decode([DeviceInfo].self, from: "MacFrames.json")
-        let AppleWatchFrames = try! bundle.decode([DeviceInfo].self, from: "AppleWatchFrames.json")
-
-        return iPhoneFrames + iPadFrames + macFrames + AppleWatchFrames
-    }
-
-    /// Matches a screenshot size against all known devices, accounting for Display Zoom.
+    /// The bundled screen mask for this frame, cropped to the screen opening.
     ///
-    /// Returns `.ambiguous` when the size matches both a device's native `inputSize`
-    /// and another device's `displayZoomInputSize`, requiring user disambiguation.
+    /// `nil` for frames whose bezel is never fully opaque, such as Studio Display, which have no mask.
+    public var screenMask: CGImage? {
+        ScreenMaskCache.mask(for: maskName)
+    }
+
+    /// Frames a screenshot.
+    /// - Parameter screenshot: A screenshot at `inputSize`.
+    /// - Returns: The screenshot inside the device frame on a transparent background.
+    public func framed(using screenshot: UIImage) -> UIImage? {
+        guard let frameImage else { return nil }
+
+        let screen = isScaled ? screenshot.resized(to: screenSize) : screenshot
+
+        return frameImage.overlaying(screen, at: offSet, clippedTo: screenMask)
+    }
+
+    // MARK: - Data
+
+    /// Every device resolution Shotbot can frame.
+    public static func all() -> [DeviceInfo] {
+        allDevices
+    }
+
+    /// Matches a screenshot size against all known device resolutions.
+    ///
+    /// Returns `.ambiguous` when more than one device claims the size, such as the iPhone 16 Pro, 17, 17 Pro and 18 Pro,
+    /// which all take 1206 × 2622 screenshots, or a Display Zoom resolution that equals another phone's native
+    /// resolution. The user then picks the device.
+    ///
+    /// When nothing matches exactly, sizes within a pixel of a known resolution match. A few alternate resolutions,
+    /// like a Mac's "More Space" mode, are scaled from a size whose height is rounded.
     public static func match(for screenshotSize: CGSize) -> DeviceMatchResult {
-        let devices = all()
-        var matches: [DeviceInfo] = []
+        var matches = allDevices.filter { $0.inputSize == screenshotSize }
 
-        // Check direct inputSize matches
-        if let direct = devices.first(where: { $0.inputSize == screenshotSize }) {
-            matches.append(direct)
-        }
-
-        // Check display zoom matches — create a synthetic DeviceInfo with scaledSize
-        // so the existing framed(using:) method resizes the zoomed screenshot to native
-        for device in devices where device.displayZoomInputSize == screenshotSize {
-            let zoomDevice = DeviceInfo(
-                deviceFrame: device.deviceFrame,
-                mergeMethod: device.mergeMethod,
-                clipEdgesAmount: device.clipEdgesAmount,
-                cornerRadius: device.cornerRadius,
-                inputSize: screenshotSize,
-                scaledSize: device.inputSize,
-                offSet: device.offSet
-            )
-            matches.append(zoomDevice)
+        if matches.isEmpty {
+            matches = allDevices.filter {
+                abs($0.inputSize.width - screenshotSize.width) <= 1 && abs($0.inputSize.height - screenshotSize.height) <= 1
+            }
         }
 
         switch matches.count {

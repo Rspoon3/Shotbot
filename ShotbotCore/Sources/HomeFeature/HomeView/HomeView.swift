@@ -165,8 +165,8 @@ public struct HomeView: View {
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                if !viewModel.colorOptions.isEmpty {
-                    colorMenu
+                if !viewModel.styleOptions.isEmpty {
+                    styleMenu
                 }
             }
 
@@ -201,40 +201,60 @@ public struct HomeView: View {
         }
     }
     
-    /// A toolbar menu for choosing the frame color of the devices in the current screenshots.
+    /// A toolbar menu for choosing the frame color and view of the devices in the current screenshots.
     ///
-    /// Only devices whose frame comes in more than one color are listed. With several such devices, each gets its own section.
-    private var colorMenu: some View {
+    /// Only devices whose frame has more than one color or view are listed. With several such devices, each section is
+    /// named after its device.
+    private var styleMenu: some View {
         Menu {
-            ForEach(viewModel.colorOptions) { option in
-                if viewModel.colorOptions.count > 1 {
-                    Section(option.deviceName) {
-                        colorPicker(for: option)
+            ForEach(viewModel.styleOptions) { option in
+                if option.hasColors {
+                    Section(sectionTitle("Color", for: option)) {
+                        Picker(option.deviceName, selection: colorSelection(for: option)) {
+                            ForEach(option.colors, id: \.self) { color in
+                                Text(color)
+                                    .tag(color)
+                            }
+                        }
                     }
-                } else {
-                    colorPicker(for: option)
+                }
+
+                if option.hasViews {
+                    Section(sectionTitle("View", for: option)) {
+                        Picker(option.deviceName, selection: viewSelection(for: option)) {
+                            ForEach(option.views, id: \.self) { view in
+                                Text(view)
+                                    .tag(view)
+                            }
+                        }
+                    }
                 }
             }
         } label: {
-            Label("Frame Color", symbol: .paintpalette)
+            Label("Frame Style", symbol: .paintpalette)
         }
     }
 
-    private func colorPicker(for option: DeviceColorOption) -> some View {
-        Picker(option.deviceName, selection: colorSelection(for: option)) {
-            ForEach(option.colors, id: \.self) { color in
-                Text(color)
-                    .tag(color)
+    private func sectionTitle(_ title: String, for option: DeviceStyleOption) -> String {
+        viewModel.styleOptions.count > 1 ? "\(option.deviceName) \(title.lowercased())" : title
+    }
+
+    private func colorSelection(for option: DeviceStyleOption) -> Binding<String> {
+        Binding {
+            option.selectedColor ?? ""
+        } set: { color in
+            Task(priority: .userInitiated) {
+                await viewModel.didSelectColor(color, forDeviceNamed: option.deviceName)
             }
         }
     }
 
-    private func colorSelection(for option: DeviceColorOption) -> Binding<String> {
+    private func viewSelection(for option: DeviceStyleOption) -> Binding<String> {
         Binding {
-            option.selectedColor
-        } set: { color in
+            option.selectedView ?? ""
+        } set: { view in
             Task(priority: .userInitiated) {
-                await viewModel.didSelectColor(color, forDeviceNamed: option.deviceName)
+                await viewModel.didSelectView(view, forDeviceNamed: option.deviceName)
             }
         }
     }

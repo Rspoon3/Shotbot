@@ -87,9 +87,11 @@ public struct VideoFramer: Sendable {
         }
 
         let asset = AVURLAsset(url: sourceURL)
-        guard try await !asset.loadTracks(withMediaType: .video).isEmpty else {
+        guard let track = try await asset.loadTracks(withMediaType: .video).first else {
             throw VideoFramerError.noVideoTrack
         }
+
+        let formatDescriptions = try await track.load(.formatDescriptions)
 
         // Encoders need even dimensions, so a frame with an odd side gets one transparent row or column of padding.
         let frameSize = CGSize(width: frameCG.width, height: frameCG.height)
@@ -115,14 +117,11 @@ public struct VideoFramer: Sendable {
             request.finish(with: layers.render(request.sourceImage), context: nil)
         }
         composition.renderSize = renderSize
-        // Screen recordings can be HDR. The frame and background are SDR, so the output is too.
-        composition.colorPrimaries = AVVideoColorPrimaries_ITU_R_709_2
-        composition.colorTransferFunction = AVVideoTransferFunction_ITU_R_709_2
-        composition.colorYCbCrMatrix = AVVideoYCbCrMatrix_ITU_R_709_2
+        Self.applyColorSpace(to: composition, matching: formatDescriptions)
 
         try? FileManager.default.removeItem(at: outputURL)
 
-        guard let session = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+        guard let session = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHEVCHighestQuality) else {
             throw VideoFramerError.exportFailed("No export session is available.")
         }
 
@@ -138,6 +137,28 @@ public struct VideoFramer: Sendable {
     }
 
     // MARK: - Private Helpers
+
+    /// Exports with the source's color space, so HDR recordings stay HDR. The frame and background are SDR, and
+    /// Core Image places them correctly on the HDR scale.
+    private static func applyColorSpace(to composition: AVMutableVideoComposition, matching formatDescriptions: [CMFormatDescription]) {
+        let transfer = formatDescriptions.first.flatMap {
+            CMFormatDescriptionGetExtension($0, extensionKey: kCMFormatDescriptionExtension_TransferFunction) as? String
+        }
+
+        if transfer == kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ as String {
+            composition.colorPrimaries = AVVideoColorPrimaries_ITU_R_2020
+            composition.colorTransferFunction = AVVideoTransferFunction_SMPTE_ST_2084_PQ
+            composition.colorYCbCrMatrix = AVVideoYCbCrMatrix_ITU_R_2020
+        } else if transfer == kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG as String {
+            composition.colorPrimaries = AVVideoColorPrimaries_ITU_R_2020
+            composition.colorTransferFunction = AVVideoTransferFunction_ITU_R_2100_HLG
+            composition.colorYCbCrMatrix = AVVideoYCbCrMatrix_ITU_R_2020
+        } else {
+            composition.colorPrimaries = AVVideoColorPrimaries_ITU_R_709_2
+            composition.colorTransferFunction = AVVideoTransferFunction_ITU_R_709_2
+            composition.colorYCbCrMatrix = AVVideoYCbCrMatrix_ITU_R_709_2
+        }
+    }
 
     private static func even(_ value: CGFloat) -> CGFloat {
         let rounded = value.rounded(.up)

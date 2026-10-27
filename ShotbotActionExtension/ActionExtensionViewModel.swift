@@ -156,7 +156,7 @@ import CreateCombinedImageFeature
                 attachment.hasItemConformingToTypeIdentifier(UTType.image.identifier),
                 let result = try? await attachment.loadItem(forTypeIdentifier: UTType.image.identifier),
                 let screenshot = getImage(from: result),
-                case .exact(let device) = DeviceInfo.match(for: screenshot.size),
+                let device = resolveDevice(for: screenshot.size),
                 let framedScreenshot = try? screenshot.framedScreenshot(
                     quality: persistenceManager.imageQuality,
                     device: persistenceManager.applyingPreferredStyle(to: device)
@@ -180,6 +180,22 @@ import CreateCombinedImageFeature
         shareableImages = loopedImages
     }
     
+    /// The device a screenshot of this size is framed with.
+    ///
+    /// Sizes that fit several devices, such as 1206 × 2622, use the device chosen in the app for that size, or the
+    /// first match if none was chosen. The extension has no room to ask.
+    private func resolveDevice(for size: CGSize) -> DeviceInfo? {
+        switch DeviceInfo.match(for: size) {
+        case .exact(let device):
+            return device
+        case .ambiguous(let options):
+            let cached = persistenceManager.preferredDeviceFrame(for: size)
+            return options.first { $0.deviceFrame == cached } ?? options.first
+        case .none:
+            return nil
+        }
+    }
+
     private func getImage(from result: any NSSecureCoding) -> UIImage? {
         let image: UIImage?
         

@@ -171,6 +171,38 @@ struct DeviceMatchTests {
         #expect(device.isScaled)
     }
 
+    @Test("The iPhone Duo's outer screen can be shown open as well as closed")
+    func duoOuterScreenHasAnOpenView() throws {
+        let closed = try #require(DeviceInfo.all().first { $0.deviceFrame == "iPhone Duo - Star White - Outer Closed Portrait" })
+
+        #expect(closed.views == ["Closed", "Open"])
+        #expect(closed.viewName == "Closed")
+        #expect(closed.hasViewOptions)
+
+        let open = closed.withView("Open")
+
+        #expect(open.viewName == "Open")
+        #expect(open.deviceFrame == "iPhone Duo - Star White - Outer Open")
+        #expect(open.offSet == CGPoint(x: 1570, y: 80))
+        #expect(open.screenSize == closed.screenSize)
+        #expect(open.frameImage != nil)
+        #expect(open.screenMask != nil)
+
+        // The view and the color are chosen separately.
+        #expect(open.withColor("Night Sky").deviceFrame == "iPhone Duo - Night Sky - Outer Open")
+        #expect(closed.withColor("Night Sky").withView("Open").deviceFrame == "iPhone Duo - Night Sky - Outer Open")
+        #expect(open.withView("Closed").deviceFrame == "iPhone Duo - Star White - Outer Closed Portrait")
+        #expect(closed.withView("Not A View").deviceFrame == closed.deviceFrame)
+    }
+
+    @Test("Only the iPhone Duo's portrait outer screen has an open view")
+    func openViewIsPortraitOuterOnly() {
+        for device in DeviceInfo.all() {
+            let expected = device.name == "iPhone Duo" && device.screenName == "Outer" && device.orientation == .portrait
+            #expect(device.hasViewOptions == expected, "\(device.deviceFrame)")
+        }
+    }
+
     @Test("A size shared by several iPhones asks the user which one")
     func sharedSizeIsAmbiguous() {
         guard case .ambiguous(let options) = DeviceInfo.match(for: CGSize(width: 1206, height: 2622)) else {

@@ -1,0 +1,621 @@
+{
+  "version": 2,
+  "name": "Shotbot",
+  "devices": [
+    {
+      "id": "iphone-6-7",
+      "name": "iPhone 6.7\"",
+      "canvas": {
+        "width": 1290,
+        "height": 2796
+      },
+      "screenshots": [
+        {
+          "id": "shot-76a53f",
+          "name": "Instant Framed Screenshots",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 145,
+              "y": 203.25,
+              "width": 1000,
+              "type": "text",
+              "text": "Instant Framed Screenshots",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 124,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "phone",
+              "x": 83.1,
+              "y": 743.1,
+              "width": 1126.2,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone 14/Framed/oakleyScreenshot.png",
+              "height": 2172,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-32b413",
+          "name": "Easily Combine Photos",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 145,
+              "y": 203.25,
+              "width": 1000,
+              "type": "text",
+              "text": "Easily Combine Photos",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 124,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "phone",
+              "x": 83.1,
+              "y": 743.1,
+              "width": 1126.2,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone 14/Framed/PNG image.png",
+              "height": 2172,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-d576d3",
+          "name": "Widgets",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 145,
+              "y": 280.1,
+              "width": 1000,
+              "type": "text",
+              "text": "Widgets",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 124,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "phone",
+              "x": 106.4,
+              "y": 702.3,
+              "width": 1079.6,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone 14/Framed/widget.heic",
+              "height": 2189.8,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-c8f77b",
+          "name": "Autosave",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 145,
+              "y": 280.1,
+              "width": 1000,
+              "type": "text",
+              "text": "Autosave",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 124,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "phone",
+              "x": 82.9,
+              "y": 743.9,
+              "width": 1126.2,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone 14/Framed/settings.png",
+              "height": 2172,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-0ae644",
+          "name": "Shortcut Support",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 145,
+              "y": 203.25,
+              "width": 1000,
+              "type": "text",
+              "text": "Shortcut\nSupport",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 124,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "phone",
+              "x": 83.1,
+              "y": 743.1,
+              "width": 1126.2,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone 14/Framed/shortcuts.png",
+              "height": 2172,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iphone-duo",
+      "name": "iPhone Duo",
+      "canvas": {
+        "width": 2007,
+        "height": 2853
+      },
+      "screenshots": [
+        {
+          "id": "shot-bfa8ee",
+          "name": "Instant Framed Screenshots",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 226,
+              "y": 65.971,
+              "width": 1556,
+              "type": "text",
+              "text": "Instant Framed Screenshots",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 193,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 219.7,
+              "y": 603.8,
+              "width": 1588.8,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone Duo/Framed/Pasted 2026-10-29 at 1.23.22 PM.heic",
+              "height": 2214.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-c20470",
+          "name": "Easily Combine Photos",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 226,
+              "y": 65.971,
+              "width": 1556,
+              "type": "text",
+              "text": "Easily Combine Photos",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 193,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 219.7,
+              "y": 603.8,
+              "width": 1588.8,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone Duo/Framed/Pasted 2026-10-29 at 1.22.26 PM.heic",
+              "height": 2214.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-83ff4e",
+          "name": "Widgets",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 226,
+              "y": 185.621,
+              "width": 1556,
+              "type": "text",
+              "text": "Widgets",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 193,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 219.7,
+              "y": 603.8,
+              "width": 1588.8,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone Duo/Framed/Pasted 2026-10-29 at 1.23.56 PM.heic",
+              "height": 2214.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-b1abd2",
+          "name": "Autosave",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 226,
+              "y": 185.621,
+              "width": 1556,
+              "type": "text",
+              "text": "Autosave",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 193,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 219.7,
+              "y": 603.8,
+              "width": 1588.8,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone Duo/Framed/Pasted 2026-10-29 at 1.19.34 PM.heic",
+              "height": 2214.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-3a9bde",
+          "name": "Shortcut Support",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 226,
+              "y": 65.971,
+              "width": 1556,
+              "type": "text",
+              "text": "Shortcut\nSupport",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 193,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 219.7,
+              "y": 603.8,
+              "width": 1588.8,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPhone Duo/Framed/Pasted 2026-10-29 at 12.36.08 PM.heic",
+              "height": 2214.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ipad-12-9",
+      "name": "iPad 12.9\"",
+      "canvas": {
+        "width": 2048,
+        "height": 2732
+      },
+      "screenshots": [
+        {
+          "id": "shot-1ac00d",
+          "name": "Instant Framed Screenshots",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 230,
+              "y": 129.3,
+              "width": 1588,
+              "type": "text",
+              "text": "Instant Framed Screenshots",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 177,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 187.3,
+              "y": 672.4,
+              "width": 1670.5,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPad 12.9 (6th Generation)/Framed/Framed Screenshot 1_5F98BB67-9D14-46BD-B24C-3A6F4891BA82.png",
+              "height": 2170.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-490650",
+          "name": "Easily Combine Photos",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 230,
+              "y": 129.3,
+              "width": 1588,
+              "type": "text",
+              "text": "Easily Combine Photos",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 177,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 187.3,
+              "y": 672.4,
+              "width": 1670.5,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPad 12.9 (6th Generation)/Framed/Framed Screenshot 4_C197EF5A-D01E-4243-BB92-EB672B4C4EDA.png",
+              "height": 2170.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-f7e331",
+          "name": "Widgets",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 230,
+              "y": 239.10000000000002,
+              "width": 1588,
+              "type": "text",
+              "text": "Widgets",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 177,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 186.6,
+              "y": 665.9,
+              "width": 1674.8,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPad 12.9 (6th Generation)/Framed/Framed Screenshot 7_77308018-52D7-48B7-BDA5-84BD56AAC3BC.png",
+              "height": 2184.5,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-60c9dd",
+          "name": "Autosave",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 230,
+              "y": 239.10000000000002,
+              "width": 1588,
+              "type": "text",
+              "text": "Autosave",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 177,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 187.3,
+              "y": 672.4,
+              "width": 1670.5,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPad 12.9 (6th Generation)/Framed/Framed Screenshot 5_AD0C6CEC-848B-42EC-B4E9-FBEBDDCE755B.png",
+              "height": 2170.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "shot-12443c",
+          "name": "Shortcut Support",
+          "background": {
+            "type": "linear-gradient",
+            "stops": [
+              "#19B5F9",
+              "#1D76F2"
+            ],
+            "angle": 180
+          },
+          "elements": [
+            {
+              "id": "headline",
+              "x": 230,
+              "y": 239.05,
+              "width": 1588,
+              "type": "text",
+              "text": "Shortcut Support",
+              "font": "SF Pro Rounded",
+              "weight": 700,
+              "size": 177,
+              "color": "#FFFFFF",
+              "align": "center",
+              "lineHeight": 1.24
+            },
+            {
+              "id": "device",
+              "x": 187.3,
+              "y": 672.4,
+              "width": 1670.5,
+              "type": "image",
+              "src": "/Users/richardwitherspoon/Documents/iOSDev/Shotbot/Marketing/iPad 12.9 (6th Generation)/Framed/Framed Screenshot 6_9AF4B716-8FDE-41FB-9177-582954289C5F.png",
+              "height": 2170.6,
+              "radius": 0,
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -173,7 +173,8 @@
                 "viewName": "Closed",
                 "offSet": [88, 80],
                 "resolutions": [
-                    { "name": "Default", "size": [1398, 2034] }
+                    { "name": "Default", "size": [1398, 2034] },
+                    { "name": "Shift Left to the Edge", "size": [1371, 2034], "shiftedToEdge": true }
                 ],
                 "orientations": [
                     { "orientation": "Portrait", "frame": "iPhone Duo - {color} - Outer Closed Portrait" },

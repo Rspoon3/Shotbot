@@ -53,6 +53,9 @@ public struct DeviceInfo: Sendable {
     public let screenSize: CGSize
     /// What kind of resolution this is, such as "Default", "More Space", or "Display Zoom".
     public let resolutionName: String
+    /// Whether screenshots of this size sit against the screen's left edge at their real size, like the iPhone Duo's
+    /// "Shift Left to the Edge" setting, instead of being scaled to fill the screen opening.
+    public let isShiftedToEdge: Bool
 
     /// What saved view choices are keyed by. A device with several screens keeps a choice for each, so picking the
     /// inner screen's view doesn't replace the outer screen's.
@@ -95,7 +98,8 @@ public struct DeviceInfo: Sendable {
         viewFrames: [String: ViewFrame],
         inputSize: CGSize,
         screenSize: CGSize,
-        resolutionName: String
+        resolutionName: String,
+        isShiftedToEdge: Bool = false
     ) {
         self.name = name
         self.screenName = screenName
@@ -109,6 +113,7 @@ public struct DeviceInfo: Sendable {
         self.inputSize = inputSize
         self.screenSize = screenSize
         self.resolutionName = resolutionName
+        self.isShiftedToEdge = isShiftedToEdge
     }
 
     // MARK: - Public Helpers
@@ -171,7 +176,12 @@ public struct DeviceInfo: Sendable {
     public func framed(using screenshot: UIImage) -> UIImage? {
         guard let frameImage else { return nil }
 
-        let screen = isScaled ? screenshot.resized(to: screenSize) : screenshot
+        let screen: UIImage
+        if isShiftedToEdge {
+            screen = screenshot.placedAtLeadingEdge(of: screenSize)
+        } else {
+            screen = isScaled ? screenshot.resized(to: screenSize) : screenshot
+        }
 
         let flat = frameImage.overlaying(screen, at: offSet, clippedTo: screenMask)
 
@@ -294,7 +304,8 @@ public struct DeviceInfo: Sendable {
                         viewFrames: viewFrames,
                         inputSize: swapped ? resolution.size.swapped : resolution.size,
                         screenSize: screenSize,
-                        resolutionName: resolution.name
+                        resolutionName: resolution.name,
+                        isShiftedToEdge: resolution.shiftedToEdge ?? false
                     )
                 }
             }

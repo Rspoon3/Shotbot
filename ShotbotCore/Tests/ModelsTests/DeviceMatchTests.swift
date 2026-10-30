@@ -171,6 +171,20 @@ struct DeviceMatchTests {
         #expect(device.isScaled)
     }
 
+    @Test("An outer screen screenshot with Shift Left to the Edge is drawn at its real size, not scaled")
+    func duoShiftLeftToTheEdgeIsNotScaled() throws {
+        guard case .exact(let device) = DeviceInfo.match(for: CGSize(width: 1371, height: 2034)) else {
+            Issue.record("Expected 1371 x 2034 to match one device")
+            return
+        }
+
+        #expect(device.name == "iPhone Duo")
+        #expect(device.screenName == "Outer")
+        #expect(device.resolutionName == "Shift Left to the Edge")
+        #expect(device.isShiftedToEdge)
+        #expect(device.screenSize == CGSize(width: 1398, height: 2034))
+    }
+
     @Test("The iPhone Duo's outer screen can be shown open as well as closed")
     func duoOuterScreenHasAnOpenView() throws {
         let closed = try #require(DeviceInfo.all().first { $0.deviceFrame == "iPhone Duo - Star White - Outer Closed Portrait" })

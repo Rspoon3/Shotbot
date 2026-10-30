@@ -55,6 +55,11 @@ orientations after it, so a phone's landscape numbers are never repeated.
 has no matching frame pixels, so Shotbot scales it to fit the frame, the same way the Frames CLI does. Real simulator
 captures are 2007 × 2853 and need no scaling.
 
+"Shift Left to the Edge" is the iPhone Duo outer screen's size when the case setting of the same name is on. The
+screenshot is 1371 × 2034, narrower than the 1398 × 2034 opening, with the content against the left edge. Its resolution
+sets `"shiftedToEdge": true`, so Shotbot draws it at its real size on the left of a black screen instead of stretching it,
+and the strip the case hides stays black.
+
 Rules enforced by the tests:
 
 - iPhones and iPads need both a portrait and a landscape frame. Watches and Macs have one.

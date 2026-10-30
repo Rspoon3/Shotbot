@@ -134,6 +134,32 @@
         ]
     },
     {
+        "name": "MacBook Pro PROLED 14",
+        "screenSize": [3024, 1986],
+        "offSet": [418, 277],
+        "resolutions": [
+            { "name": "Default", "size": [3024, 1964] },
+            { "name": "More Space", "size": [3600, 2338] }
+        ],
+        "colors": ["Silver", "Space Black"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Pro PROLED 14 - {color}" }
+        ]
+    },
+    {
+        "name": "MacBook Pro PROLED 16",
+        "screenSize": [3472, 2266],
+        "offSet": [394, 287],
+        "resolutions": [
+            { "name": "Default", "size": [3456, 2234] },
+            { "name": "More Space", "size": [4112, 2658] }
+        ],
+        "colors": ["Silver", "Space Black"],
+        "orientations": [
+            { "orientation": "Landscape", "frame": "MacBook Pro PROLED 16 - {color}" }
+        ]
+    },
+    {
         "name": "iMac M4",
         "offSet": [140, 150],
         "resolutions": [

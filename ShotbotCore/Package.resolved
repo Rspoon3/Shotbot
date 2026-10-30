@@ -1,5 +1,5 @@
 {
-  "originHash" : "47af83a982797570f2780aca229d95093f69796e031b32efc4287130aabee940",
+  "originHash" : "58197637cea58d3dda77c3c0e587b4efb1ac8826868bc04360262797a1ef667c",
   "pins" : [
     {
       "identity" : "alerttoast",
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rspoon3/ReferralService-iOS.git",
       "state" : {
-        "revision" : "f6ae9cf74472374e194d7ef58dbe584350e01bfc",
-        "version" : "1.0.1"
+        "revision" : "b74e670bef0213a033a110379c4a3313cefd0f21",
+        "version" : "1.0.2"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/fetch-rewards/swift-mocking.git",
       "state" : {
-        "revision" : "dcab218e90c9a92308c61713315d1b29d753e30c",
-        "version" : "0.2.2"
+        "revision" : "232b99b4c72a2fae7264745925fcc1269b4de0d4",
+        "version" : "0.4.1"
       }
     },
     {

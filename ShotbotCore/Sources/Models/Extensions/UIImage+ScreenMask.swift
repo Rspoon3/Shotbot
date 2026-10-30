@@ -53,3 +53,19 @@ public extension UIImage {
         }
     }
 }
+
+extension UIImage {
+    /// Draws the image at its real size against the left edge of a black canvas of `canvasSize`.
+    ///
+    /// The strip the image doesn't cover stays black, like the part of a screen a case hides.
+    /// - Parameter canvasSize: The size of the screen opening.
+    func placedAtLeadingEdge(of canvasSize: CGSize) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: canvasSize, format: .singleScale)
+
+        return renderer.image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(origin: .zero, size: canvasSize))
+            draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+}

@@ -22,6 +22,9 @@ struct DeviceDefinition: Decodable, Sendable {
         let name: String
         /// The screenshot size in pixels, in the first orientation.
         let size: CGSize
+        /// Whether the screenshot is narrower than the screen and sits against its left edge, like the iPhone Duo's
+        /// "Shift Left to the Edge" case setting. It is drawn at its real size instead of being scaled to fit.
+        let shiftedToEdge: Bool?
     }
 
     /// The frame for one orientation.

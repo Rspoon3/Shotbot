@@ -1,6 +1,8 @@
 What's New in This Version of Shotbot
 
 • iPhone Duo support — Shotbot now runs full screen on the Duo, and frames screenshots from both of its screens, in portrait and landscape. Choose Open or Partially Open for the inner screen, and Closed or Open for the outer screen
+• iPhone Duo "Shift Left to the Edge" — screenshots taken from the Duo's outer screen with this case setting on are now supported, and are framed at their true size
+• MacBook Pro support — the new 14 and 16 inch MacBook Pro with the PROLED XDR display, in Silver and Space Black
 • Support for a bunch of new devices — check the app's Settings for the full list of supported devices
 • Frame colors — pick a color for your device, such as Night Sky or Star White, from the new toolbar menu. Shotbot remembers your choice, uses it in the share extension, and you can set a different color or view for a single screenshot
 • Bug fixes and improvements

@@ -124,5 +124,16 @@
         "orientations": [
             { "orientation": "Portrait", "frame": "Watch Ultra 3 - {color}" }
         ]
+    },
+    {
+        "name": "Watch Ultra 4",
+        "offSet": [99, 213],
+        "resolutions": [
+            { "name": "Default", "size": [422, 514] }
+        ],
+        "colors": ["Black + Alpine Loop Burgundy", "Black + Ocean Band Translucent Black", "Black + Trail Loop Burgundy", "Natural + Alpine Loop Desert", "Natural + Ocean Band Translucent Gray", "Natural + Trail Loop Sand"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Watch Ultra 4 - {color}" }
+        ]
     }
 ]

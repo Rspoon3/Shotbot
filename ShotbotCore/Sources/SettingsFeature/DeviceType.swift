@@ -25,6 +25,7 @@ enum DeviceType: String, CaseIterable, Identifiable {
                 "iPhone 17 Pro Max",
                 "iPhone 17 Pro",
                 "iPhone 17",
+                "iPhone 17e",
                 "iPhone Air",
                 "iPhone 16 Pro Max",
                 "iPhone 16 Pro",
@@ -102,6 +103,7 @@ enum DeviceType: String, CaseIterable, Identifiable {
                 //"iPad 2", Not supported
                 //"iPad (1st generation)", Not supported
                 
+                "iPad Mini (A20 Pro)",
                 "iPad Mini (A17 Pro)",
                 "iPad Mini (6th generation)"
                 //"iPad Mini (5th generation)", Not supported
@@ -125,9 +127,11 @@ enum DeviceType: String, CaseIterable, Identifiable {
             ]
         case .appleWatch:
             return [
+                "Apple Watch Ultra 4",
                 "Apple Watch Ultra 3",
                 "Apple Watch Ultra 2",
                 "Apple Watch Ultra",
+                "Apple Watch Series 12, 42/46mm",
                 "Apple Watch Series 11, 42/46mm",
                 "Apple Watch Series 10, 42/46mm",
                 "Apple Watch Series 9, 41/45mm",
@@ -139,6 +143,7 @@ enum DeviceType: String, CaseIterable, Identifiable {
                 //"Apple Watch Series 3, 38/42mm", Not supported
                 //"Apple Watch Series 2, 38/42mm", Not supported
                 //"Apple Watch Series 1, 38/42mm", Not supported
+                "Apple Watch SE (3rd generation), 40/44mm",
                 "Apple Watch SE (2nd generation), 40/44mm",
                 "Apple Watch SE (1st generation), 40/44mm",
             ]

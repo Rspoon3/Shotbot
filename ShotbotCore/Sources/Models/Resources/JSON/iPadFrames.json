@@ -58,6 +58,18 @@
         ]
     },
     {
+        "name": "iPad Mini A20 Pro",
+        "offSet": [130, 130],
+        "resolutions": [
+            { "name": "Default", "size": [1512, 2316] }
+        ],
+        "colors": ["Midnight", "Starlight"],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "iPad Mini A20 Pro - {color} - Portrait" },
+            { "orientation": "Landscape", "frame": "iPad Mini A20 Pro - {color} - Landscape" }
+        ]
+    },
+    {
         "name": "iPad Pro 2024 11 Inch",
         "offSet": [106, 110],
         "resolutions": [

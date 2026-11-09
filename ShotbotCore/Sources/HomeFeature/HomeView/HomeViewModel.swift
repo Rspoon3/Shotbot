@@ -182,8 +182,7 @@ import SwiftTools
     /// Cancels and nils out `combinedImageTask`
     private func stopCombinedImageTask() {
         logger.debug("Stopping combined image task.")
-        combinedImageTask?.cancel()
-        combinedImageTask = nil
+        combinedImageTask.take()?.cancel()
     }
     
     /// If their are multiple image results, it will start the process of combining them horizontally
@@ -420,8 +419,7 @@ import SwiftTools
 
     /// Called by the disambiguation dialog when the user selects a device.
     public func didSelectDisambiguatedDevice(_ device: DeviceInfo) {
-        disambiguationContinuation?.resume(returning: device)
-        disambiguationContinuation = nil
+        disambiguationContinuation.take()?.resume(returning: device)
         disambiguationScreenshot = nil
         showDeviceDisambiguation = false
     }

@@ -120,12 +120,30 @@ device's colors, and the choice is saved per device like the color.
 
 ### Apple HomeView
 
-The Apple HomeView is detected by its 1088 × 1088 screenshot, which no other device uses. Its two views are "With Base"
-(the default) and "Without Base", each with its own art in Silver, Starlight and Space Gray. Apple doesn't publish frame
-resources for it, so the art is cut from Apple's newsroom photos: the screen opening is scaled to exactly 1088 × 1088 and
-every color draws it at the same spot, so switching color or view never moves the screenshot. There is no front-facing
-Rose Pink photo, so that color isn't offered. The Space Gray photo is smaller than the others and is scaled up, so its
-art is slightly softer.
+The Apple HomeView is detected by its 1088 × 1088 screenshot, which no other device uses. It comes in Silver, Starlight,
+Rose Pink and Space Gray, and has two views: "With Base" (the default) and "Without Base", the wall-mounted model. Apple
+doesn't publish frame resources for it, so the art is cut from product photos: the screen opening is scaled to exactly
+1088 × 1088 and every color draws it at the same spot, so switching color or view never moves the screenshot.
+
+Apple only sells the wall-mounted model in Silver and Space Gray, so the "Without Base" view lists those colors:
+
+```json
+"alternateViews": [
+    {
+        "name": "Without Base",
+        "colors": ["Silver", "Space Gray"],
+        "offSet": [90, 89],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Apple HomeView - {color} - No Base" }
+        ]
+    }
+]
+```
+
+A view without `colors` exists in every color. A view with `colors` is left out of `DeviceInfo.views` for any other color,
+so Starlight and Rose Pink have no view to pick, and switching to one from "Without Base" goes back to the default view.
+The list must start with the device's default color, since that frame is where the view's shared screen mask is stored.
+The Space Gray photo is smaller than the others and is scaled up, so its art is slightly softer.
 
 ### Partially open views
 

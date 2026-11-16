@@ -233,13 +233,13 @@ struct DeviceMatchTests {
         }
 
         #expect(device.name == "Apple HomeView")
-        #expect(device.colors == ["Silver", "Starlight", "Space Gray"])
+        #expect(device.colors == ["Silver", "Starlight", "Rose Pink", "Space Gray"])
         #expect(device.colorName == "Silver")
         #expect(!device.isScaled)
         #expect(device.screenSize == CGSize(width: 1088, height: 1088))
     }
 
-    @Test("The Apple HomeView can be framed with or without its base in every color")
+    @Test("The Apple HomeView can be framed without its base only in the colors it is sold wall mounted in")
     func homeViewHasBaseAndNoBaseFrames() throws {
         let withBase = try #require(DeviceInfo.all().first { $0.name == "Apple HomeView" })
 
@@ -250,13 +250,29 @@ struct DeviceMatchTests {
 
         #expect(withoutBase.deviceFrame == "Apple HomeView - Silver - No Base")
         #expect(withoutBase.withColor("Space Gray").deviceFrame == "Apple HomeView - Space Gray - No Base")
-        #expect(withBase.withColor("Starlight").withView("Without Base").deviceFrame == "Apple HomeView - Starlight - No Base")
+        #expect(withBase.withColor("Space Gray").withView("Without Base").deviceFrame == "Apple HomeView - Space Gray - No Base")
 
         // Both views draw the screen at the same spot, so a color or view switch never moves the screenshot.
         #expect(withBase.offSet == withoutBase.offSet)
 
+        // Starlight and Rose Pink are only sold with the base, so they offer no view and ignore a request for one.
+        for color in ["Starlight", "Rose Pink"] {
+            let variant = withBase.withColor(color)
+
+            #expect(variant.views.isEmpty, "\(color)")
+            #expect(!variant.hasViewOptions, "\(color)")
+            #expect(variant.withView("Without Base").deviceFrame == "Apple HomeView - \(color)", "\(color)")
+            // Switching to a color that has no such view falls back to the default one, and back again keeps it available.
+            #expect(withoutBase.withColor(color).deviceFrame == "Apple HomeView - \(color)", "\(color)")
+            #expect(withoutBase.withColor(color).withColor("Silver").views == ["With Base", "Without Base"], "\(color)")
+        }
+
+        for color in ["Silver", "Space Gray"] {
+            #expect(withBase.withColor(color).views == ["With Base", "Without Base"], "\(color)")
+        }
+
         for color in withBase.colors {
-            for view in withBase.views {
+            for view in withBase.withColor(color).views.isEmpty ? ["With Base"] : withBase.withColor(color).views {
                 let variant = withBase.withColor(color).withView(view)
                 #expect(variant.frameImage != nil, "\(variant.deviceFrame)")
                 #expect(variant.screenMask != nil, "\(variant.deviceFrame)")

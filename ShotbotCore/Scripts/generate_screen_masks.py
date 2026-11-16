@@ -143,13 +143,15 @@ def collect_frames(device):
     colors = device.get("colors") or [None]
     frames = []
 
-    def add(template, screen, offset, color_offsets, orientation_index):
+    def add(template, screen, offset, color_offsets, orientation_index, view_colors=None):
         # Frame names contain {color} for devices that come in several colors; the first color is the default.
-        names = [template.replace("{color}", color) if color else template for color in colors]
+        # A view that only exists in some colors, like the Apple HomeView without its base, lists them under "colors".
+        frame_colors = view_colors or colors
+        names = [template.replace("{color}", color) if color else template for color in frame_colors]
 
         # A color whose frame draws the screen somewhere else lists its own offset under colorOffsets.
         variant_offsets = {}
-        for color, name in zip(colors[1:], names[1:]):
+        for color, name in zip(frame_colors[1:], names[1:]):
             color_offset = (color_offsets or {}).get(color)
             variant_offsets[name] = (color_offset[::-1] if orientation_index > 0 else color_offset) if color_offset else offset
 
@@ -176,7 +178,8 @@ def collect_frames(device):
             # A partially open view bends the display's own frames, so it needs no mask of its own.
             for index, orientation in enumerate(alternate.get("orientations") or []):
                 offset = alternate["offSet"][::-1] if index > 0 else alternate["offSet"]
-                add(orientation["frame"], screens[orientation["orientation"]], orientation.get("offSet") or offset, None, index)
+                add(orientation["frame"], screens[orientation["orientation"]], orientation.get("offSet") or offset, None, index,
+                    alternate.get("colors"))
 
     return frames
 

@@ -3,7 +3,7 @@
 How Shotbot matches a screenshot to a device and wraps it in a frame.
 
 The data lives in `Sources/Models/Resources/JSON/` (`iPhoneFrames.json`, `iPadFrames.json`, `MacFrames.json`,
-`AppleWatchFrames.json`). Frame artwork lives in `Sources/Models/Resources/Frames.xcassets`, and screen masks live in
+`AppleWatchFrames.json`, `HomeViewFrames.json`). Frame artwork lives in `Sources/Models/Resources/Frames.xcassets`, and screen masks live in
 `Sources/Models/Resources/Masks`.
 
 ## How a screenshot is framed
@@ -117,6 +117,33 @@ The first view is the one written on the display, and the default. The two scree
 screen's "Open" and the outer screen's "Open" are different views. Apple only draws "Open" in portrait, so a landscape
 outer screenshot has no view to pick. Every view needs its own screen mask, which the generator makes. A view uses the
 device's colors, and the choice is saved per device like the color.
+
+### Apple HomeView
+
+The Apple HomeView is detected by its 1088 × 1088 screenshot, which no other device uses. It comes in Silver, Starlight,
+Rose Pink and Space Gray, and has two views: "With Base" (the default) and "Without Base", the wall-mounted model. Apple
+doesn't publish frame resources for it, so the art is cut from product photos: the screen opening is scaled to exactly
+1088 × 1088 and every color draws it at the same spot, so switching color or view never moves the screenshot.
+
+Apple only sells the wall-mounted model in Silver and Space Gray, so the "Without Base" view lists those colors:
+
+```json
+"alternateViews": [
+    {
+        "name": "Without Base",
+        "colors": ["Silver", "Space Gray"],
+        "offSet": [90, 89],
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Apple HomeView - {color} - No Base" }
+        ]
+    }
+]
+```
+
+A view without `colors` exists in every color. A view with `colors` is left out of `DeviceInfo.views` for any other color,
+so Starlight and Rose Pink have no view to pick, and switching to one from "Without Base" goes back to the default view.
+The list must start with the device's default color, since that frame is where the view's shared screen mask is stored.
+The Space Gray photo is smaller than the others and is scaled up, so its art is slightly softer.
 
 ### Partially open views
 

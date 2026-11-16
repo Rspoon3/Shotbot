@@ -26,6 +26,8 @@ public struct DeviceInfo: Sendable {
         let maskName: String
         /// The angle to open the framed screenshot to, for a view that bends the display's own frame. `nil` for flat.
         let openingAngle: Double?
+        /// The colors this view exists in. `nil` when every color has it.
+        let colors: [String]?
     }
 
     /// The display name of the device model, such as "iPhone 16 Pro".
@@ -38,9 +40,8 @@ public struct DeviceInfo: Sendable {
     public let colors: [String]
     /// The selected color, or `nil` when the device has a single look.
     public private(set) var colorName: String?
-    /// The views of this screen that have a frame in this orientation, with the default first, such as "Closed" and
-    /// "Open" for the iPhone Duo's outer screen. Empty when the screen has only one.
-    public let views: [String]
+    /// Every view of this screen that has a frame in this orientation, with the default first, in any color.
+    private let allViews: [String]
     /// The selected view, or `nil` when the screen has only one.
     public private(set) var viewName: String?
     /// The key of the default view in `viewFrames`.
@@ -56,6 +57,19 @@ public struct DeviceInfo: Sendable {
     /// Whether screenshots of this size sit against the screen's left edge at their real size, like the iPhone Duo's
     /// "Shift Left to the Edge" setting, instead of being scaled to fill the screen opening.
     public let isShiftedToEdge: Bool
+
+    /// The views of this screen that have a frame in this orientation and the selected color, with the default first,
+    /// such as "Closed" and "Open" for the iPhone Duo's outer screen. Empty when the screen has only one.
+    ///
+    /// A view can exist in only some colors, like the Apple HomeView without its base, so this can change with `colorName`.
+    public var views: [String] {
+        let available = allViews.filter { name in
+            guard let colors = viewFrames[name]?.colors, let colorName else { return true }
+            return colors.contains(colorName)
+        }
+
+        return available.count > 1 ? available : []
+    }
 
     /// What saved view choices are keyed by. A device with several screens keeps a choice for each, so picking the
     /// inner screen's view doesn't replace the outer screen's.
@@ -79,7 +93,7 @@ public struct DeviceInfo: Sendable {
 
     private static let allDevices: [DeviceInfo] = {
         let bundle = Bundle.module
-        let fileNames = ["iPhoneFrames.json", "iPadFrames.json", "MacFrames.json", "AppleWatchFrames.json"]
+        let fileNames = ["iPhoneFrames.json", "iPadFrames.json", "MacFrames.json", "AppleWatchFrames.json", "HomeViewFrames.json"]
 
         return fileNames
             .flatMap { try! bundle.decode([DeviceDefinition].self, from: $0) }
@@ -106,7 +120,7 @@ public struct DeviceInfo: Sendable {
         self.orientation = orientation
         self.colors = colors
         self.colorName = colors.first
-        self.views = views
+        self.allViews = views
         self.viewName = views.first
         self.defaultViewName = defaultViewName
         self.viewFrames = viewFrames
@@ -135,6 +149,12 @@ public struct DeviceInfo: Sendable {
 
         var copy = self
         copy.colorName = color
+
+        // Not every color has every view. Keep the chosen view when the new color has it, otherwise use the default.
+        if !copy.views.contains(viewName ?? "") {
+            copy.viewName = copy.views.first
+        }
+
         return copy
     }
 
@@ -259,7 +279,8 @@ public struct DeviceInfo: Sendable {
                         offSet: offSet,
                         colorOffsets: colorOffsets,
                         maskName: resolve(orientation.frame, color: colors.first),
-                        openingAngle: nil
+                        openingAngle: nil,
+                        colors: nil
                     )
                 ]
                 var views = [String]()
@@ -272,7 +293,8 @@ public struct DeviceInfo: Sendable {
                             offSet: offSet,
                             colorOffsets: colorOffsets,
                             maskName: resolve(orientation.frame, color: colors.first),
-                            openingAngle: partiallyOpen.angle
+                            openingAngle: partiallyOpen.angle,
+                            colors: nil
                         )
                         views.append(alternate.name)
                     } else if
@@ -286,7 +308,8 @@ public struct DeviceInfo: Sendable {
                             offSet: alternateOffSet,
                             colorOffsets: [:],
                             maskName: resolve(alternateFrame.frame, color: colors.first),
-                            openingAngle: nil
+                            openingAngle: nil,
+                            colors: alternate.colors
                         )
                         views.append(alternate.name)
                     }

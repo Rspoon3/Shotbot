@@ -209,18 +209,74 @@ struct DeviceMatchTests {
         #expect(closed.withView("Not A View").deviceFrame == closed.deviceFrame)
     }
 
-    @Test("Only the iPhone Duo's screens have views")
-    func onlyTheDuoHasViews() {
+    @Test("Only the iPhone Duo's screens and the Apple HomeView have views")
+    func onlyTheDuoAndHomeViewHaveViews() {
         for device in DeviceInfo.all() {
             let expected: [String]
 
-            switch (device.name == "iPhone Duo", device.screenName, device.orientation) {
-            case (true, "Inner", _): expected = ["Open", "Partially Open"]
-            case (true, "Outer", .portrait): expected = ["Closed", "Open"]
+            switch (device.name, device.screenName, device.orientation) {
+            case ("iPhone Duo", "Inner", _): expected = ["Open", "Partially Open"]
+            case ("iPhone Duo", "Outer", .portrait): expected = ["Closed", "Open"]
+            case ("Apple HomeView", _, _): expected = ["With Base", "Without Base"]
             default: expected = []
             }
 
             #expect(device.views == expected, "\(device.deviceFrame)")
+        }
+    }
+
+    @Test("A 1088 × 1088 screenshot is an Apple HomeView, which fits its frame without scaling")
+    func homeViewIsDetectedBySize() throws {
+        guard case .exact(let device) = DeviceInfo.match(for: CGSize(width: 1088, height: 1088)) else {
+            Issue.record("Expected exactly one device for 1088 × 1088")
+            return
+        }
+
+        #expect(device.name == "Apple HomeView")
+        #expect(device.colors == ["Silver", "Starlight", "Rose Pink", "Space Gray"])
+        #expect(device.colorName == "Silver")
+        #expect(!device.isScaled)
+        #expect(device.screenSize == CGSize(width: 1088, height: 1088))
+    }
+
+    @Test("The Apple HomeView can be framed without its base only in the colors it is sold wall mounted in")
+    func homeViewHasBaseAndNoBaseFrames() throws {
+        let withBase = try #require(DeviceInfo.all().first { $0.name == "Apple HomeView" })
+
+        #expect(withBase.viewName == "With Base")
+        #expect(withBase.deviceFrame == "Apple HomeView - Silver")
+
+        let withoutBase = withBase.withView("Without Base")
+
+        #expect(withoutBase.deviceFrame == "Apple HomeView - Silver - No Base")
+        #expect(withoutBase.withColor("Space Gray").deviceFrame == "Apple HomeView - Space Gray - No Base")
+        #expect(withBase.withColor("Space Gray").withView("Without Base").deviceFrame == "Apple HomeView - Space Gray - No Base")
+
+        // Both views draw the screen at the same spot, so a color or view switch never moves the screenshot.
+        #expect(withBase.offSet == withoutBase.offSet)
+
+        // Starlight and Rose Pink are only sold with the base, so they offer no view and ignore a request for one.
+        for color in ["Starlight", "Rose Pink"] {
+            let variant = withBase.withColor(color)
+
+            #expect(variant.views.isEmpty, "\(color)")
+            #expect(!variant.hasViewOptions, "\(color)")
+            #expect(variant.withView("Without Base").deviceFrame == "Apple HomeView - \(color)", "\(color)")
+            // Switching to a color that has no such view falls back to the default one, and back again keeps it available.
+            #expect(withoutBase.withColor(color).deviceFrame == "Apple HomeView - \(color)", "\(color)")
+            #expect(withoutBase.withColor(color).withColor("Silver").views == ["With Base", "Without Base"], "\(color)")
+        }
+
+        for color in ["Silver", "Space Gray"] {
+            #expect(withBase.withColor(color).views == ["With Base", "Without Base"], "\(color)")
+        }
+
+        for color in withBase.colors {
+            for view in withBase.withColor(color).views.isEmpty ? ["With Base"] : withBase.withColor(color).views {
+                let variant = withBase.withColor(color).withView(view)
+                #expect(variant.frameImage != nil, "\(variant.deviceFrame)")
+                #expect(variant.screenMask != nil, "\(variant.deviceFrame)")
+            }
         }
     }
 

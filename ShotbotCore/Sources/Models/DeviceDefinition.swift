@@ -49,6 +49,10 @@ struct DeviceDefinition: Decodable, Sendable {
     struct AlternateView: Decodable, Sendable {
         /// The view's name, such as "Open" or "Partially Open".
         let name: String
+        /// The colors this view exists in, with the device's default color first. `nil` when every color has it.
+        ///
+        /// For example, the Apple HomeView is only sold wall mounted, without its base, in Silver and Space Gray.
+        let colors: [String]?
         /// Where the screen opening's top-left corner sits in the view's first orientation's frame. Not needed
         /// when the view bends the display's own frames.
         let offSet: CGPoint?

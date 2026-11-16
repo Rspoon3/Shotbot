@@ -23,7 +23,7 @@ final class DeviceInfoTests: XCTestCase {
     }
 
     func testNumberOfDevices() {
-        XCTAssertEqual(DeviceInfo.all().count, 117)
+        XCTAssertEqual(DeviceInfo.all().count, 118)
     }
 
     func testAllDeviceFramesHaveAnAsset() {

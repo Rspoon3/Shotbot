@@ -1,0 +1,23 @@
+[
+    {
+        "name": "Apple HomeView",
+        "offSet": [90, 89],
+        "resolutions": [
+            { "name": "Default", "size": [1088, 1088] }
+        ],
+        "colors": ["Silver", "Starlight", "Space Gray"],
+        "viewName": "With Base",
+        "orientations": [
+            { "orientation": "Portrait", "frame": "Apple HomeView - {color}" }
+        ],
+        "alternateViews": [
+            {
+                "name": "Without Base",
+                "offSet": [90, 89],
+                "orientations": [
+                    { "orientation": "Portrait", "frame": "Apple HomeView - {color} - No Base" }
+                ]
+            }
+        ]
+    }
+]

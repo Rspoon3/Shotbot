@@ -16,6 +16,9 @@ Five quality levels (Original, High, Medium, Low, Poor) to optimize file size ve
 ### Device Type Selection
 Support for multiple device types with customizable frame overlays matching the latest Apple devices.
 
+### Apple HomeView Framing
+Screenshots that are 1088 × 1088 are framed as an Apple HomeView in Silver, Starlight or Space Gray, with the base or without it.
+
 ## Screenshot Import & Processing
 
 ### Photo Picker Integration

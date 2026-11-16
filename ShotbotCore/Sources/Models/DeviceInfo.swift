@@ -79,7 +79,7 @@ public struct DeviceInfo: Sendable {
 
     private static let allDevices: [DeviceInfo] = {
         let bundle = Bundle.module
-        let fileNames = ["iPhoneFrames.json", "iPadFrames.json", "MacFrames.json", "AppleWatchFrames.json"]
+        let fileNames = ["iPhoneFrames.json", "iPadFrames.json", "MacFrames.json", "AppleWatchFrames.json", "HomeViewFrames.json"]
 
         return fileNames
             .flatMap { try! bundle.decode([DeviceDefinition].self, from: $0) }
